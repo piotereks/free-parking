@@ -1,83 +1,24 @@
 [
     {
-        "id": "tab_phone_static_v2",
+        "id": "51a923a43c27b58e",
         "type": "tab",
-        "label": "Phone Parking (Static 127)",
+        "label": "Parking Assistant (Live)",
         "disabled": false,
         "info": ""
     },
     {
-        "id": "auto_init_v2",
-        "type": "inject",
-        "z": "tab_phone_static_v2",
-        "name": "Sensor Reader",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": true,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 150,
-        "y": 120,
-        "wires": [
-            [
-                "publish_value_v2"
-            ]
-        ]
+        "id": "tab_logging",
+        "type": "tab",
+        "label": "Google Sheets Logging",
+        "disabled": false,
+        "info": ""
     },
     {
-        "id": "publish_value_v2",
-        "type": "function",
-        "z": "tab_phone_static_v2",
-        "name": "Publish Reading: 127",
-        "func": "// Define current sensor reading\nmsg.payload = {\n    temperature: 127,\n    humidity: 127,\n    setpoint: 127,\n    mode: \"heat\"\n};\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 380,
-        "y": 120,
-        "wires": [
-            [
-                "nora_thermostat_v2"
-            ]
-        ]
-    },
-    {
-        "id": "nora_thermostat_v2",
-        "type": "noraf-thermostat",
-        "z": "tab_phone_static_v2",
-        "devicename": "Mój Parking",
-        "roomhint": "",
-        "name": "",
-        "modes": "",
-        "unit": "F",
-        "rangeMin": "",
-        "rangeMax": "",
-        "topic": "parking/thermostat",
-        "passthru": false,
-        "commandOnly": false,
-        "queryOnly": false,
-        "bufferRangeCelsius": "2",
-        "nora": "nora_config_unique_v2",
-        "twofactorpin": "",
-        "filter": false,
-        "x": 610,
-        "y": 120,
-        "wires": [
-            []
-        ]
+        "id": "52f17e2ca027f52c",
+        "type": "tab",
+        "label": "Google Sheets Logging",
+        "disabled": false,
+        "info": ""
     },
     {
         "id": "nora_config_unique_v2",
@@ -99,5 +40,373 @@
         "modules": {
             "node-red-contrib-smartnora": "1.25.0"
         }
+    },
+    {
+        "id": "nora_config_unique_v4",
+        "type": "noraf-config",
+        "name": "NORA config",
+        "group": "",
+        "twofactor": "off",
+        "twofactorpin": "",
+        "localexecution": true,
+        "structure": "",
+        "storeStateInContext": false,
+        "disableValidationErrors": false,
+        "sendDeviceNameAndLocation": false
+    },
+    {
+        "id": "f970b3781b889ff2",
+        "type": "inject",
+        "z": "51a923a43c27b58e",
+        "name": "Poll 5m",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "300",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 100,
+        "wires": [
+            [
+                "5a1bee3cde324ad2"
+            ]
+        ]
+    },
+    {
+        "id": "5a1bee3cde324ad2",
+        "type": "http request",
+        "z": "51a923a43c27b58e",
+        "name": "Get Green Day",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "https://gd.zaparkuj.pl/api/freegroupcountervalue.json",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 300,
+        "y": 100,
+        "wires": [
+            [
+                "4cba3b68788e2e0e"
+            ]
+        ]
+    },
+    {
+        "id": "4cba3b68788e2e0e",
+        "type": "change",
+        "z": "51a923a43c27b58e",
+        "name": "Save First Result",
+        "rules": [
+            {
+                "t": "set",
+                "p": "parking1",
+                "pt": "msg",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 450,
+        "y": 200,
+        "wires": [
+            [
+                "ab3764a1e711a078"
+            ]
+        ]
+    },
+    {
+        "id": "ab3764a1e711a078",
+        "type": "http request",
+        "z": "51a923a43c27b58e",
+        "name": "Get Uniwersystet",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "https://gd.zaparkuj.pl/api/freegroupcountervalue-green.json",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 590,
+        "y": 100,
+        "wires": [
+            [
+                "0b15dc341a1503f8"
+            ]
+        ]
+    },
+    {
+        "id": "0b15dc341a1503f8",
+        "type": "change",
+        "z": "51a923a43c27b58e",
+        "name": "Save Second Result",
+        "rules": [
+            {
+                "t": "set",
+                "p": "parking2",
+                "pt": "msg",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 740,
+        "y": 200,
+        "wires": [
+            [
+                "782c217cee42a158"
+            ]
+        ]
+    },
+    {
+        "id": "782c217cee42a158",
+        "type": "function",
+        "z": "51a923a43c27b58e",
+        "name": "Format: Temp=GreenDay, Hum=Uni",
+        "func": "// Extract data from first call (saved in msg.parking1)\nvar p1 = msg.parking1;\nvar countGreenDay = p1.CurrentFreeGroupCounterValue;\n\n// Extract data from second call (current msg.payload)\nvar p2 = msg.parking2;\nvar countUniversity = p2.CurrentFreeGroupCounterValue;\n\n// Map to Thermostat Traits\nmsg.payload = {\n    setpoint: countGreenDay,\n    temperature: countUniversity,\n    mode: \"heat\"\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 930,
+        "y": 100,
+        "wires": [
+            [
+                "61c921c854461416",
+                "f37c7857ca614302"
+            ]
+        ]
+    },
+    {
+        "id": "61c921c854461416",
+        "type": "noraf-thermostat",
+        "z": "51a923a43c27b58e",
+        "devicename": "parking",
+        "roomhint": "",
+        "name": "",
+        "modes": "heat",
+        "unit": "C",
+        "rangeMin": "",
+        "rangeMax": "",
+        "topic": "parking/thermostat",
+        "passthru": false,
+        "commandOnly": false,
+        "queryOnly": false,
+        "bufferRangeCelsius": "2",
+        "nora": "nora_config_unique_v4",
+        "twofactorpin": "",
+        "filter": false,
+        "x": 1080,
+        "y": 200,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "f37c7857ca614302",
+        "type": "link out",
+        "z": "51a923a43c27b58e",
+        "name": "Send to Logging",
+        "mode": "link",
+        "links": [],
+        "x": 1135,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "link_in_logging",
+        "type": "link in",
+        "z": "tab_logging",
+        "name": "Input from Parking Flow",
+        "links": [],
+        "x": 150,
+        "y": 100,
+        "wires": [
+            [
+                "prepare_form_data"
+            ]
+        ]
+    },
+    {
+        "id": "prepare_form_data",
+        "type": "function",
+        "z": "tab_logging",
+        "name": "Prepare Form Data",
+        "func": "// REPLACE THESE WITH YOUR FORM ENTRY IDs\nvar ENTRY_ID_GREEN = \"entry.2026993163\";\nvar ENTRY_ID_UNI = \"entry.1412144904\";\n\n// Get values from the incoming message\n// (Assuming msg.payload.temperature is GreenDay, msg.payload.humidity is Uni)\nvar valGreen = msg.payload.temperature;\nvar valUni = msg.payload.humidity;\n\n// Construct Form Payload\nmsg.payload = {};\nmsg.payload[ENTRY_ID_GREEN] = valGreen;\nmsg.payload[ENTRY_ID_UNI] = valUni;\n\n// Set Headers for Form Submission\nmsg.headers = {\n    \"Content-Type\": \"application/x-www-form-urlencoded\"\n};\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 100,
+        "wires": [
+            [
+                "post_to_form"
+            ]
+        ]
+    },
+    {
+        "id": "post_to_form",
+        "type": "http request",
+        "z": "tab_logging",
+        "name": "POST to Google Form",
+        "method": "POST",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "https://docs.google.com/forms/d/e/1FAIpQLSdeQ-rmw_VfOidGmtSNb9DLkt1RfPdduu-jH898sf3lhj17LA/formResponse",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "x": 650,
+        "y": 100,
+        "wires": [
+            [
+                "debug_log"
+            ]
+        ]
+    },
+    {
+        "id": "debug_log",
+        "type": "debug",
+        "z": "tab_logging",
+        "name": "Log Success",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 850,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "a0ddf57eaefa0be3",
+        "type": "link in",
+        "z": "52f17e2ca027f52c",
+        "name": "Input from Parking Flow",
+        "links": [],
+        "x": 150,
+        "y": 100,
+        "wires": [
+            [
+                "60df242656fbe1e6"
+            ]
+        ]
+    },
+    {
+        "id": "cd692875b48b5745",
+        "type": "inject",
+        "z": "52f17e2ca027f52c",
+        "name": "Test Data",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"temperature\": 100, \"humidity\": 50}",
+        "payloadType": "json",
+        "x": 150,
+        "y": 180,
+        "wires": [
+            [
+                "60df242656fbe1e6"
+            ]
+        ]
+    },
+    {
+        "id": "60df242656fbe1e6",
+        "type": "function",
+        "z": "52f17e2ca027f52c",
+        "name": "Prepare Form Data",
+        "func": "// REPLACE THESE WITH YOUR FORM ENTRY IDs\nvar ENTRY_ID_GREEN = \"entry.2026993163\";\nvar ENTRY_ID_UNI = \"entry.1412144904\";\n\n// Get values from the incoming message\n// (Assuming msg.payload.temperature is GreenDay, msg.payload.humidity is Uni)\nvar valGreen = msg.payload.temperature;\nvar valUni = msg.payload.humidity;\n\n// Construct Form Payload\nmsg.payload = {};\nmsg.payload[ENTRY_ID_GREEN] = valGreen;\nmsg.payload[ENTRY_ID_UNI] = valUni;\n\n// Set Headers for Form Submission\nmsg.headers = {\n    \"Content-Type\": \"application/x-www-form-urlencoded\"\n};\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 100,
+        "wires": [
+            [
+                "5ec5c482fc6551fb"
+            ]
+        ]
+    },
+    {
+        "id": "5ec5c482fc6551fb",
+        "type": "http request",
+        "z": "52f17e2ca027f52c",
+        "name": "POST to Google Form",
+        "method": "POST",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "https://docs.google.com/forms/d/e/1FAIpQLSdeQ-rmw_VfOidGmtSNb9DLkt1RfPdduu-jH898sf3lhj17LA/formResponse",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "x": 650,
+        "y": 100,
+        "wires": [
+            [
+                "845296b9837b8163"
+            ]
+        ]
+    },
+    {
+        "id": "845296b9837b8163",
+        "type": "debug",
+        "z": "52f17e2ca027f52c",
+        "name": "Log Success",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 850,
+        "y": 100,
+        "wires": []
     }
 ]
