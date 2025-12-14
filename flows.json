@@ -1,6 +1,6 @@
 [
     {
-        "id": "6832cdd13267bd50",
+        "id": "799aef484bf058a4",
         "type": "tab",
         "label": "Parking Flow (Manual)",
         "disabled": false,
@@ -35,9 +35,9 @@
         "sendDeviceNameAndLocation": false
     },
     {
-        "id": "baa5ce381ab4e24f",
+        "id": "ed3a190a8ae3ac03",
         "type": "inject",
-        "z": "6832cdd13267bd50",
+        "z": "799aef484bf058a4",
         "name": "Poll 5m",
         "props": [
             {
@@ -59,14 +59,14 @@
         "y": 100,
         "wires": [
             [
-                "c70e46e8bc645cf2"
+                "36376284208c0e30"
             ]
         ]
     },
     {
-        "id": "55bde25b0ef46e18",
+        "id": "cd6d57d3ed207fa5",
         "type": "inject",
-        "z": "6832cdd13267bd50",
+        "z": "799aef484bf058a4",
         "name": "Manual Trigger",
         "props": [
             {
@@ -84,18 +84,18 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 130,
-        "y": 160,
+        "x": 100,
+        "y": 600,
         "wires": [
             [
-                "c70e46e8bc645cf2"
+                "36376284208c0e30"
             ]
         ]
     },
     {
-        "id": "c70e46e8bc645cf2",
+        "id": "420da975fe384294",
         "type": "http request",
-        "z": "6832cdd13267bd50",
+        "z": "799aef484bf058a4",
         "name": "Get Green Day",
         "method": "GET",
         "ret": "obj",
@@ -108,18 +108,18 @@
         "authType": "",
         "senderr": false,
         "headers": [],
-        "x": 300,
-        "y": 100,
+        "x": 440,
+        "y": 540,
         "wires": [
             [
-                "62c354d9d129bff1"
+                "5708089fb9bba8b9"
             ]
         ]
     },
     {
-        "id": "62c354d9d129bff1",
+        "id": "5708089fb9bba8b9",
         "type": "change",
-        "z": "6832cdd13267bd50",
+        "z": "799aef484bf058a4",
         "name": "Save First Result",
         "rules": [
             {
@@ -135,18 +135,18 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 450,
-        "y": 200,
+        "x": 570,
+        "y": 420,
         "wires": [
             [
-                "043dc58c9e35af7a"
+                "db6122e87998f8d5"
             ]
         ]
     },
     {
-        "id": "043dc58c9e35af7a",
+        "id": "b7992f0bf09d6a34",
         "type": "http request",
-        "z": "6832cdd13267bd50",
+        "z": "799aef484bf058a4",
         "name": "Get Uniwersystet",
         "method": "GET",
         "ret": "obj",
@@ -159,18 +159,18 @@
         "authType": "",
         "senderr": false,
         "headers": [],
-        "x": 590,
-        "y": 100,
+        "x": 490,
+        "y": 120,
         "wires": [
             [
-                "06c5b2ff25d6bff4"
+                "40a59ca16629438f"
             ]
         ]
     },
     {
-        "id": "06c5b2ff25d6bff4",
+        "id": "40a59ca16629438f",
         "type": "change",
-        "z": "6832cdd13267bd50",
+        "z": "799aef484bf058a4",
         "name": "Save Second Result",
         "rules": [
             {
@@ -187,17 +187,17 @@
         "to": "",
         "reg": false,
         "x": 740,
-        "y": 200,
+        "y": 260,
         "wires": [
             [
-                "d8cdc73a584247bb"
+                "d433a04feeb184ed"
             ]
         ]
     },
     {
-        "id": "d8cdc73a584247bb",
+        "id": "d433a04feeb184ed",
         "type": "function",
-        "z": "6832cdd13267bd50",
+        "z": "799aef484bf058a4",
         "name": "Format: Temp=GreenDay, Hum=Uni",
         "func": "// Extract data from first call (saved in msg.parking1)\nvar p1 = msg.parking1;\nvar countGreenDay = p1.CurrentFreeGroupCounterValue;\nvar timestampGreenDay = p1.Timestamp;\n\n// Extract data from second call (current msg.payload)\nvar p2 = msg.parking2;\nvar countUniversity = p2.CurrentFreeGroupCounterValue;\nvar timestampUniversity = p2.Timestamp;\nnode.log(\"info\");\n\n// Map to Thermostat Traits\nmsg.payload = {\n    temperature: countUniversity,\n    timestamp1:timestampUniversity,\n    setpoint: countGreenDay,\n    timestamp2:timestampGreenDay,\n    mode: \"heat\"\n};\nreturn msg;",
         "outputs": 1,
@@ -210,16 +210,16 @@
         "y": 100,
         "wires": [
             [
-                "6b35d07d512b80d3",
-                "c40f34071186a4b1",
-                "91fe776fca606349"
+                "30977d8d55cb4335",
+                "fd403e63525f7d6e",
+                "4f4c723e4c0d76c3"
             ]
         ]
     },
     {
-        "id": "6b35d07d512b80d3",
+        "id": "30977d8d55cb4335",
         "type": "noraf-thermostat",
-        "z": "6832cdd13267bd50",
+        "z": "799aef484bf058a4",
         "devicename": "parking",
         "roomhint": "",
         "name": "",
@@ -242,9 +242,9 @@
         ]
     },
     {
-        "id": "c40f34071186a4b1",
+        "id": "fd403e63525f7d6e",
         "type": "link out",
-        "z": "6832cdd13267bd50",
+        "z": "799aef484bf058a4",
         "name": "Send to Logging",
         "mode": "link",
         "links": [
@@ -255,9 +255,9 @@
         "wires": []
     },
     {
-        "id": "91fe776fca606349",
+        "id": "4f4c723e4c0d76c3",
         "type": "debug",
-        "z": "6832cdd13267bd50",
+        "z": "799aef484bf058a4",
         "name": "debug 1",
         "active": true,
         "tosidebar": false,
@@ -270,6 +270,60 @@
         "x": 1030,
         "y": 320,
         "wires": []
+    },
+    {
+        "id": "36376284208c0e30",
+        "type": "change",
+        "z": "799aef484bf058a4",
+        "name": "Set URL 1",
+        "rules": [
+            {
+                "t": "set",
+                "p": "url",
+                "pt": "msg",
+                "to": "\"https://gd.zaparkuj.pl/api/freegroupcountervalue.json?time=\" & $millis()",
+                "tot": "jsonata"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 310,
+        "y": 440,
+        "wires": [
+            [
+                "420da975fe384294"
+            ]
+        ]
+    },
+    {
+        "id": "db6122e87998f8d5",
+        "type": "change",
+        "z": "799aef484bf058a4",
+        "name": "Set URL 2",
+        "rules": [
+            {
+                "t": "set",
+                "p": "url",
+                "pt": "msg",
+                "to": "\"https://gd.zaparkuj.pl/api/freegroupcountervalue-green.json?time=\" & $millis()",
+                "tot": "jsonata"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 390,
+        "y": 240,
+        "wires": [
+            [
+                "b7992f0bf09d6a34"
+            ]
+        ]
     },
     {
         "id": "a0ddf57eaefa0be3",
@@ -317,7 +371,7 @@
         "type": "function",
         "z": "52f17e2ca027f52c",
         "name": "Prepare Form Data",
-        "func": "// REPLACE THESE WITH YOUR FORM ENTRY IDs\nvar ENTRY_ID_GREEN = \"entry.2026993163\";\nvar ENTRY_TIME_GREEN = \"entry.51469670\";\nvar ENTRY_ID_UNI = \"entry.1412144904\";\nvar ENTRY_TIME_UNI = \"entry.364658642\";\n\n// Get values from the incoming message\n// (Assuming msg.payload.temperature is GreenDay, msg.payload.humidity is Uni)\nvar valGreen = msg.payload.temperature;\nvar timeGreen = msg.payload.timestamp1;\nvar valUni = msg.payload.setpoint;\nvar timeUni = msg.payload.timestamp2;\n\n// Construct Form Payload\nmsg.payload = {};\nmsg.payload[ENTRY_ID_GREEN] = valGreen;\nmsg.payload[ENTRY_TIME_GREEN] = timeGreen;\nmsg.payload[ENTRY_ID_UNI] = valUni;\nmsg.payload[ENTRY_TIME_UNI] = timeUni;\n\n// Set Headers for Form Submission\nmsg.headers = {\n    \"Content-Type\": \"application/x-www-form-urlencoded\"\n};\n\nreturn msg;\n",
+        "func": "// REPLACE THESE WITH YOUR FORM ENTRY IDs\nvar ENTRY_ID_GREEN = \"entry.2026993163\";\nvar ENTRY_TIME_GREEN = \"entry.51469670\";\nvar ENTRY_ID_UNI = \"entry.1412144904\";\nvar ENTRY_TIME_UNI = \"entry.364658642\";\n\n// Get values from the incoming message\n// (Assuming msg.payload.temperature is GreenDay, msg.payload.humidity is Uni)\nvar valUni = msg.payload.temperature;\nvar timeUni = msg.payload.timestamp2;\nvar valGreen = msg.payload.setpoint;\nvar timeGreen = msg.payload.timestamp1;\n\n// Construct Form Payload\nmsg.payload = {};\nmsg.payload[ENTRY_ID_GREEN] = valGreen;\nmsg.payload[ENTRY_TIME_GREEN] = timeGreen;\nmsg.payload[ENTRY_ID_UNI] = valUni;\nmsg.payload[ENTRY_TIME_UNI] = timeUni;\n\n// Set Headers for Form Submission\nmsg.headers = {\n    \"Content-Type\": \"application/x-www-form-urlencoded\"\n};\n\nreturn msg;\n",
         "outputs": 1,
         "timeout": "",
         "noerr": 0,

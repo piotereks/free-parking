@@ -31,7 +31,7 @@
         "y": 100,
         "wires": [
             [
-                "c70e46e8bc645cf2"
+                "head000000000001"
             ]
         ]
     },
@@ -60,7 +60,7 @@
         "y": 160,
         "wires": [
             [
-                "c70e46e8bc645cf2"
+                "head000000000001"
             ]
         ]
     },
@@ -72,7 +72,7 @@
         "method": "GET",
         "ret": "obj",
         "paytoqs": "ignore",
-        "url": "https://gd.zaparkuj.pl/api/freegroupcountervalue.json",
+        "url": "",
         "tls": "",
         "persist": false,
         "proxy": "",
@@ -111,7 +111,7 @@
         "y": 200,
         "wires": [
             [
-                "043dc58c9e35af7a"
+                "head000000000002"
             ]
         ]
     },
@@ -123,7 +123,7 @@
         "method": "GET",
         "ret": "obj",
         "paytoqs": "ignore",
-        "url": "https://gd.zaparkuj.pl/api/freegroupcountervalue-green.json",
+        "url": "",
         "tls": "",
         "persist": false,
         "proxy": "",
@@ -263,5 +263,59 @@
         "modules": {
             "node-red-contrib-smartnora": "1.25.0"
         }
+    },
+    {
+        "id": "head000000000001",
+        "type": "change",
+        "z": "6832cdd13267bd50",
+        "name": "Set URL 1",
+        "rules": [
+            {
+                "t": "set",
+                "p": "url",
+                "pt": "msg",
+                "to": "\"https://gd.zaparkuj.pl/api/freegroupcountervalue.json?time=\" & $millis()",
+                "tot": "jsonata"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 215,
+        "y": 100,
+        "wires": [
+            [
+                "c70e46e8bc645cf2"
+            ]
+        ]
+    },
+    {
+        "id": "head000000000002",
+        "type": "change",
+        "z": "6832cdd13267bd50",
+        "name": "Set URL 2",
+        "rules": [
+            {
+                "t": "set",
+                "p": "url",
+                "pt": "msg",
+                "to": "\"https://gd.zaparkuj.pl/api/freegroupcountervalue-green.json?time=\" & $millis()",
+                "tot": "jsonata"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 520,
+        "y": 150,
+        "wires": [
+            [
+                "043dc58c9e35af7a"
+            ]
+        ]
     }
 ]
