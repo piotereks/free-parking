@@ -11,7 +11,9 @@
         "type": "link in",
         "z": "52f17e2ca027f52c",
         "name": "Input from Parking Flow",
-        "links": [],
+        "links": [
+            "c40f34071186a4b1"
+        ],
         "x": 150,
         "y": 100,
         "wires": [
@@ -50,7 +52,7 @@
         "type": "function",
         "z": "52f17e2ca027f52c",
         "name": "Prepare Form Data",
-        "func": "// REPLACE THESE WITH YOUR FORM ENTRY IDs\nvar ENTRY_ID_GREEN = \"entry.2026993163\";\nvar ENTRY_TIME_GREEN = \"entry.51469670\";\nvar ENTRY_ID_UNI = \"entry.1412144904\";\nvar ENTRY_TIME_UNI = \"entry.364658642\";\n\n// Get values from the incoming message\n// (Assuming msg.payload.temperature is GreenDay, msg.payload.humidity is Uni)\nvar valGreen = msg.payload.temperature;\nvar timeGreen = msg.payload.timestamp1;\nvar valUni = msg.payload.humidity;\nvar timeUni = msg.payload.timestamp2;\n\n// Construct Form Payload\nmsg.payload = {};\nmsg.payload[ENTRY_ID_GREEN] = valGreen;\nmsg.payload[ENTRY_TIME_GREEN] = timeGreen;\nmsg.payload[ENTRY_ID_UNI] = valUni;\nmsg.payload[ENTRY_TIME_UNI] = timeUni;\n\n// Set Headers for Form Submission\nmsg.headers = {\n    \"Content-Type\": \"application/x-www-form-urlencoded\"\n};\n\nreturn msg;",
+        "func": "// REPLACE THESE WITH YOUR FORM ENTRY IDs\nvar ENTRY_ID_GREEN = \"entry.2026993163\";\nvar ENTRY_TIME_GREEN = \"entry.51469670\";\nvar ENTRY_ID_UNI = \"entry.1412144904\";\nvar ENTRY_TIME_UNI = \"entry.364658642\";\n\n// Get values from the incoming message\n// (Assuming msg.payload.temperature is GreenDay, msg.payload.humidity is Uni)\nvar valGreen = msg.payload.temperature;\nvar timeGreen = msg.payload.timestamp1;\nvar valUni = msg.payload.setpoint;\nvar timeUni = msg.payload.timestamp2;\n\n// Construct Form Payload\nmsg.payload = {};\nmsg.payload[ENTRY_ID_GREEN] = valGreen;\nmsg.payload[ENTRY_TIME_GREEN] = timeGreen;\nmsg.payload[ENTRY_ID_UNI] = valUni;\nmsg.payload[ENTRY_TIME_UNI] = timeUni;\n\n// Set Headers for Form Submission\nmsg.headers = {\n    \"Content-Type\": \"application/x-www-form-urlencoded\"\n};\n\nreturn msg;\n",
         "outputs": 1,
         "timeout": "",
         "noerr": 0,
@@ -61,7 +63,8 @@
         "y": 100,
         "wires": [
             [
-                "5ec5c482fc6551fb"
+                "5ec5c482fc6551fb",
+                "66baaa8d86bc9dc6"
             ]
         ]
     },
@@ -77,7 +80,10 @@
         "tls": "",
         "persist": false,
         "proxy": "",
+        "insecureHTTPParser": false,
         "authType": "",
+        "senderr": false,
+        "headers": [],
         "x": 650,
         "y": 100,
         "wires": [
@@ -101,6 +107,22 @@
         "statusType": "auto",
         "x": 850,
         "y": 100,
+        "wires": []
+    },
+    {
+        "id": "66baaa8d86bc9dc6",
+        "type": "debug",
+        "z": "52f17e2ca027f52c",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 360,
+        "y": 220,
         "wires": []
     }
 ]

@@ -1,8 +1,8 @@
 [
     {
-        "id": "51a923a43c27b58e",
+        "id": "6832cdd13267bd50",
         "type": "tab",
-        "label": "Parking Assistant (Live)",
+        "label": "Parking Flow (Manual)",
         "disabled": false,
         "info": ""
     },
@@ -35,9 +35,9 @@
         "sendDeviceNameAndLocation": false
     },
     {
-        "id": "f970b3781b889ff2",
+        "id": "baa5ce381ab4e24f",
         "type": "inject",
-        "z": "51a923a43c27b58e",
+        "z": "6832cdd13267bd50",
         "name": "Poll 5m",
         "props": [
             {
@@ -59,14 +59,43 @@
         "y": 100,
         "wires": [
             [
-                "5a1bee3cde324ad2"
+                "c70e46e8bc645cf2"
             ]
         ]
     },
     {
-        "id": "5a1bee3cde324ad2",
+        "id": "55bde25b0ef46e18",
+        "type": "inject",
+        "z": "6832cdd13267bd50",
+        "name": "Manual Trigger",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 160,
+        "wires": [
+            [
+                "c70e46e8bc645cf2"
+            ]
+        ]
+    },
+    {
+        "id": "c70e46e8bc645cf2",
         "type": "http request",
-        "z": "51a923a43c27b58e",
+        "z": "6832cdd13267bd50",
         "name": "Get Green Day",
         "method": "GET",
         "ret": "obj",
@@ -83,14 +112,14 @@
         "y": 100,
         "wires": [
             [
-                "4cba3b68788e2e0e"
+                "62c354d9d129bff1"
             ]
         ]
     },
     {
-        "id": "4cba3b68788e2e0e",
+        "id": "62c354d9d129bff1",
         "type": "change",
-        "z": "51a923a43c27b58e",
+        "z": "6832cdd13267bd50",
         "name": "Save First Result",
         "rules": [
             {
@@ -110,14 +139,14 @@
         "y": 200,
         "wires": [
             [
-                "ab3764a1e711a078"
+                "043dc58c9e35af7a"
             ]
         ]
     },
     {
-        "id": "ab3764a1e711a078",
+        "id": "043dc58c9e35af7a",
         "type": "http request",
-        "z": "51a923a43c27b58e",
+        "z": "6832cdd13267bd50",
         "name": "Get Uniwersystet",
         "method": "GET",
         "ret": "obj",
@@ -134,14 +163,14 @@
         "y": 100,
         "wires": [
             [
-                "0b15dc341a1503f8"
+                "06c5b2ff25d6bff4"
             ]
         ]
     },
     {
-        "id": "0b15dc341a1503f8",
+        "id": "06c5b2ff25d6bff4",
         "type": "change",
-        "z": "51a923a43c27b58e",
+        "z": "6832cdd13267bd50",
         "name": "Save Second Result",
         "rules": [
             {
@@ -161,16 +190,16 @@
         "y": 200,
         "wires": [
             [
-                "782c217cee42a158"
+                "d8cdc73a584247bb"
             ]
         ]
     },
     {
-        "id": "782c217cee42a158",
+        "id": "d8cdc73a584247bb",
         "type": "function",
-        "z": "51a923a43c27b58e",
+        "z": "6832cdd13267bd50",
         "name": "Format: Temp=GreenDay, Hum=Uni",
-        "func": "// Extract data from first call (saved in msg.parking1)\nvar p1 = msg.parking1;\nvar countGreenDay = p1.CurrentFreeGroupCounterValue;\nvar timestampGreenDay = p1.timestamp;\n\n// Extract data from second call (current msg.payload)\nvar p2 = msg.parking2;\nvar countUniversity = p2.CurrentFreeGroupCounterValue;\nvar timestampUniversity = p2.timestamp;\n\n// Map to Thermostat Traits\nmsg.payload = {\n    setpoint: countGreenDay,\n    timestamp1:timestampGreenDay,\n    temperature: countUniversity,\n    timestamp2:timestampUniversity,\n    mode: \"heat\"\n};\nreturn msg;",
+        "func": "// Extract data from first call (saved in msg.parking1)\nvar p1 = msg.parking1;\nvar countGreenDay = p1.CurrentFreeGroupCounterValue;\nvar timestampGreenDay = p1.Timestamp;\n\n// Extract data from second call (current msg.payload)\nvar p2 = msg.parking2;\nvar countUniversity = p2.CurrentFreeGroupCounterValue;\nvar timestampUniversity = p2.Timestamp;\nnode.log(\"info\");\n\n// Map to Thermostat Traits\nmsg.payload = {\n    setpoint: countGreenDay,\n    temperature: countUniversity,\n    timestamp1:timestampGreenDay,\n    timestamp2:timestampUniversity,\n    mode: \"heat\"\n};\nreturn msg;",
         "outputs": 1,
         "timeout": "",
         "noerr": 0,
@@ -181,15 +210,16 @@
         "y": 100,
         "wires": [
             [
-                "61c921c854461416",
-                "f37c7857ca614302"
+                "6b35d07d512b80d3",
+                "c40f34071186a4b1",
+                "91fe776fca606349"
             ]
         ]
     },
     {
-        "id": "61c921c854461416",
+        "id": "6b35d07d512b80d3",
         "type": "noraf-thermostat",
-        "z": "51a923a43c27b58e",
+        "z": "6832cdd13267bd50",
         "devicename": "parking",
         "roomhint": "",
         "name": "",
@@ -212,14 +242,33 @@
         ]
     },
     {
-        "id": "f37c7857ca614302",
+        "id": "c40f34071186a4b1",
         "type": "link out",
-        "z": "51a923a43c27b58e",
+        "z": "6832cdd13267bd50",
         "name": "Send to Logging",
         "mode": "link",
-        "links": [],
+        "links": [
+            "a0ddf57eaefa0be3"
+        ],
         "x": 1135,
         "y": 80,
+        "wires": []
+    },
+    {
+        "id": "91fe776fca606349",
+        "type": "debug",
+        "z": "6832cdd13267bd50",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": false,
+        "console": true,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1030,
+        "y": 320,
         "wires": []
     },
     {
@@ -227,7 +276,9 @@
         "type": "link in",
         "z": "52f17e2ca027f52c",
         "name": "Input from Parking Flow",
-        "links": [],
+        "links": [
+            "c40f34071186a4b1"
+        ],
         "x": 150,
         "y": 100,
         "wires": [
@@ -266,7 +317,7 @@
         "type": "function",
         "z": "52f17e2ca027f52c",
         "name": "Prepare Form Data",
-        "func": "// REPLACE THESE WITH YOUR FORM ENTRY IDs\nvar ENTRY_ID_GREEN = \"entry.2026993163\";\nvar ENTRY_TIME_GREEN = \"entry.51469670\";\nvar ENTRY_ID_UNI = \"entry.1412144904\";\nvar ENTRY_TIME_UNI = \"entry.364658642\";\n\n// Get values from the incoming message\n// (Assuming msg.payload.temperature is GreenDay, msg.payload.humidity is Uni)\nvar valGreen = msg.payload.temperature;\nvar timeGreen = msg.payload.timestamp1;\nvar valUni = msg.payload.humidity;\nvar timeUni = msg.payload.timestamp2;\n\n// Construct Form Payload\nmsg.payload = {};\nmsg.payload[ENTRY_ID_GREEN] = valGreen;\nmsg.payload[ENTRY_TIME_GREEN] = timeGreen;\nmsg.payload[ENTRY_ID_UNI] = valUni;\nmsg.payload[ENTRY_TIME_UNI] = timeUni;\n\n// Set Headers for Form Submission\nmsg.headers = {\n    \"Content-Type\": \"application/x-www-form-urlencoded\"\n};\n\nreturn msg;",
+        "func": "// REPLACE THESE WITH YOUR FORM ENTRY IDs\nvar ENTRY_ID_GREEN = \"entry.2026993163\";\nvar ENTRY_TIME_GREEN = \"entry.51469670\";\nvar ENTRY_ID_UNI = \"entry.1412144904\";\nvar ENTRY_TIME_UNI = \"entry.364658642\";\n\n// Get values from the incoming message\n// (Assuming msg.payload.temperature is GreenDay, msg.payload.humidity is Uni)\nvar valGreen = msg.payload.temperature;\nvar timeGreen = msg.payload.timestamp1;\nvar valUni = msg.payload.setpoint;\nvar timeUni = msg.payload.timestamp2;\n\n// Construct Form Payload\nmsg.payload = {};\nmsg.payload[ENTRY_ID_GREEN] = valGreen;\nmsg.payload[ENTRY_TIME_GREEN] = timeGreen;\nmsg.payload[ENTRY_ID_UNI] = valUni;\nmsg.payload[ENTRY_TIME_UNI] = timeUni;\n\n// Set Headers for Form Submission\nmsg.headers = {\n    \"Content-Type\": \"application/x-www-form-urlencoded\"\n};\n\nreturn msg;\n",
         "outputs": 1,
         "timeout": "",
         "noerr": 0,
@@ -277,7 +328,8 @@
         "y": 100,
         "wires": [
             [
-                "5ec5c482fc6551fb"
+                "5ec5c482fc6551fb",
+                "66baaa8d86bc9dc6"
             ]
         ]
     },
@@ -293,7 +345,10 @@
         "tls": "",
         "persist": false,
         "proxy": "",
+        "insecureHTTPParser": false,
         "authType": "",
+        "senderr": false,
+        "headers": [],
         "x": 650,
         "y": 100,
         "wires": [
@@ -317,6 +372,22 @@
         "statusType": "auto",
         "x": 850,
         "y": 100,
+        "wires": []
+    },
+    {
+        "id": "66baaa8d86bc9dc6",
+        "type": "debug",
+        "z": "52f17e2ca027f52c",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 360,
+        "y": 220,
         "wires": []
     }
 ]
