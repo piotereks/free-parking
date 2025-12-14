@@ -111,38 +111,11 @@
         ]
     },
     {
-        "id": "501c4bfb22eff525",
-        "type": "change",
-        "z": "c540f2014b8a365c",
-        "name": "Save Second Result",
-        "rules": [
-            {
-                "t": "set",
-                "p": "parking2",
-                "pt": "msg",
-                "to": "payload",
-                "tot": "msg"
-            }
-        ],
-        "action": "",
-        "property": "",
-        "from": "",
-        "to": "",
-        "reg": false,
-        "x": 740,
-        "y": 200,
-        "wires": [
-            [
-                "f61abc18610858f6"
-            ]
-        ]
-    },
-    {
         "id": "f61abc18610858f6",
         "type": "function",
         "z": "c540f2014b8a365c",
         "name": "Format: Temp=GreenDay, Hum=Uni",
-        "func": "// Extract data from first call (saved in msg.parking1)\nvar p1 = msg.parking1;\nvar countGreenDay = p1.CurrentFreeGroupCounterValue;\n\n// Extract data from second call (current msg.payload)\nvar p2 = msg.parking2;\nvar countUniversity = p2.CurrentFreeGroupCounterValue;\n\n// Map to Thermostat Traits\nmsg.payload = {\n    setpoint: countGreenDay,\n    temperature: countUniversity,\n    mode: \"heat\"\n};\nreturn msg;",
+        "func": "// Extract data from first call (saved in msg.parking1)\nvar p1 = msg.parking1;\nvar countGreenDay = p1.CurrentFreeGroupCounterValue;\n\n// Extract data from second call (current msg.payload)\nvar p2 = msg.parking2;\nvar countUniversity = p2.CurrentFreeGroupCounterValue;\n\n// Map to Thermostat Traits\nmsg.payload = {\n    setpoint:countGreenDay,\n    temperature: countUniversity,\n    mode: \"heat\"\n};\nreturn msg;\n\n",
         "outputs": 1,
         "timeout": "",
         "noerr": 0,
@@ -153,8 +126,7 @@
         "y": 100,
         "wires": [
             [
-                "b131db83a5eecb1f",
-                "link_out_to_log"
+                "b131db83a5eecb1f"
             ]
         ]
     },
@@ -184,17 +156,31 @@
         ]
     },
     {
-        "id": "link_out_to_log",
-        "type": "link out",
+        "id": "501c4bfb22eff525",
+        "type": "change",
         "z": "c540f2014b8a365c",
-        "name": "Send to Logging",
-        "mode": "link",
-        "links": [
-            "link_in_logging"
+        "name": "Save Second Result",
+        "rules": [
+            {
+                "t": "set",
+                "p": "parking2",
+                "pt": "msg",
+                "to": "payload",
+                "tot": "msg"
+            }
         ],
-        "x": 1080,
-        "y": 80,
-        "wires": []
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 740,
+        "y": 200,
+        "wires": [
+            [
+                "f61abc18610858f6"
+            ]
+        ]
     },
     {
         "id": "nora_config_unique_v4",
