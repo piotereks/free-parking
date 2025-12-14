@@ -1,0 +1,59 @@
+[2025-12-14 19:00:41] ==========================================
+[2025-12-14 19:00:41] Starting parking data sync
+[2025-12-14 19:00:41] ==========================================
+[2025-12-14 19:00:41] Step 1: Fetching Green Day parking data...
+[2025-12-14 19:00:41] Fetching: https://gd.zaparkuj.pl/api/freegroupcountervalue.json?time=1765738841250
+[2025-12-14 19:00:42]   Green Day: 187 spots free at 40
+[2025-12-14 19:00:42] Step 2: Fetching University parking data...
+[2025-12-14 19:00:42] Fetching: https://gd.zaparkuj.pl/api/freegroupcountervalue-green.json?time=1765738842162
+[2025-12-14 19:00:42]   University: 41 spots free at 14
+[2025-12-14 19:00:42] Step 3: Preparing form submission...
+[2025-12-14 19:00:42]   Form data prepared
+[2025-12-14 19:00:42] Step 4: Submitting to Google Form...
+[2025-12-14 19:00:42] SUCCESS: Form submitted (HTTP 200)
+[2025-12-14 19:00:42]   Green Day: 187 @ 40
+[2025-12-14 19:00:42]   University: 41 @ 14
+[2025-12-14 19:00:42] ==========================================
+[2025-12-14 19:00:42] Sync completed successfully
+[2025-12-14 19:00:42] ==========================================
+[2025-12-14 19:04:25] ==========================================
+[2025-12-14 19:04:25] Starting parking data sync
+[2025-12-14 19:04:25] ==========================================
+[2025-12-14 19:04:25] Step 1: Fetching Green Day parking data...
+[2025-12-14 19:04:25] Fetching: https://gd.zaparkuj.pl/api/freegroupcountervalue.json?time=1765739065524
+[2025-12-14 19:04:37] ==========================================
+[2025-12-14 19:04:37] Starting parking data sync
+[2025-12-14 19:04:37] ==========================================
+[2025-12-14 19:04:37] Step 1: Fetching Green Day parking data...
+[2025-12-14 19:04:37] Fetching: https://gd.zaparkuj.pl/api/freegroupcountervalue.json?time=1765739077535
+[2025-12-14 19:04:42]   Green Day: 187 spots free at 40
+[2025-12-14 19:04:42] Step 2: Fetching University parking data...
+[2025-12-14 19:04:42] Fetching: https://gd.zaparkuj.pl/api/freegroupcountervalue-green.json?time=1765739082733
+[2025-12-14 19:04:42]   University: 41 spots free at 15
+[2025-12-14 19:04:42] Step 3: Preparing form submission...
+[2025-12-14 19:04:42]   Form data prepared
+[2025-12-14 19:04:42] Step 4: Submitting to Google Form...
+[2025-12-14 19:04:43] SUCCESS: Form submitted (HTTP 200)
+[2025-12-14 19:04:43]   Green Day: 187 @ 40
+[2025-12-14 19:04:43]   University: 41 @ 15
+[2025-12-14 19:04:43] ==========================================
+[2025-12-14 19:04:43] Sync completed successfully
+[2025-12-14 19:04:43] ==========================================
+[2025-12-14 19:08:50] ==========================================
+[2025-12-14 19:08:50] Starting parking data sync
+[2025-12-14 19:08:50] ==========================================
+[2025-12-14 19:08:50] Step 1: Fetching Green Day parking data...
+[2025-12-14 19:08:50] Fetching: https://gd.zaparkuj.pl/api/freegroupcountervalue.json?time=1765739330944
+[2025-12-14 19:08:51]   Green Day: 187 spots free at 2025-12-14 17:24:40
+[2025-12-14 19:08:51] Step 2: Fetching University parking data...
+[2025-12-14 19:08:51] Fetching: https://gd.zaparkuj.pl/api/freegroupcountervalue-green.json?time=1765739331086
+[2025-12-14 19:08:51]   University: 41 spots free at 2025-12-14 20:08:47
+[2025-12-14 19:08:51] Step 3: Preparing form submission...
+[2025-12-14 19:08:51]   Form data prepared
+[2025-12-14 19:08:51] Step 4: Submitting to Google Form...
+[2025-12-14 19:08:51] SUCCESS: Form submitted (HTTP 200)
+[2025-12-14 19:08:51]   Green Day: 187 @ 2025-12-14 17:24:40
+[2025-12-14 19:08:51]   University: 41 @ 2025-12-14 20:08:47
+[2025-12-14 19:08:51] ==========================================
+[2025-12-14 19:08:51] Sync completed successfully
+[2025-12-14 19:08:51] ==========================================
