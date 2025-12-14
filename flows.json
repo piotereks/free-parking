@@ -1,15 +1,8 @@
 [
     {
-        "id": "51a923a43c27b58e",
+        "id": "parking_flow_tab",
         "type": "tab",
-        "label": "Parking Assistant (Live)",
-        "disabled": false,
-        "info": ""
-    },
-    {
-        "id": "tab_logging",
-        "type": "tab",
-        "label": "Google Sheets Logging",
+        "label": "Parking Flow (Manual)",
         "disabled": false,
         "info": ""
     },
@@ -19,19 +12,6 @@
         "label": "Google Sheets Logging",
         "disabled": false,
         "info": ""
-    },
-    {
-        "id": "nora_config_unique_v2",
-        "type": "noraf-config",
-        "name": "NORA Config (Phone)",
-        "group": "My Group",
-        "twofactor": "off",
-        "twofactorpin": "",
-        "localexecution": true,
-        "structure": "",
-        "storeStateInContext": false,
-        "disableValidationErrors": false,
-        "sendDeviceNameAndLocation": false
     },
     {
         "id": "2a47f52673ea1d8c",
@@ -57,7 +37,7 @@
     {
         "id": "f970b3781b889ff2",
         "type": "inject",
-        "z": "51a923a43c27b58e",
+        "z": "parking_flow_tab",
         "name": "Poll 5m",
         "props": [
             {
@@ -84,9 +64,38 @@
         ]
     },
     {
+        "id": "manual_trigger_node",
+        "type": "inject",
+        "z": "parking_flow_tab",
+        "name": "Manual Trigger",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 160,
+        "wires": [
+            [
+                "5a1bee3cde324ad2"
+            ]
+        ]
+    },
+    {
         "id": "5a1bee3cde324ad2",
         "type": "http request",
-        "z": "51a923a43c27b58e",
+        "z": "parking_flow_tab",
         "name": "Get Green Day",
         "method": "GET",
         "ret": "obj",
@@ -110,7 +119,7 @@
     {
         "id": "4cba3b68788e2e0e",
         "type": "change",
-        "z": "51a923a43c27b58e",
+        "z": "parking_flow_tab",
         "name": "Save First Result",
         "rules": [
             {
@@ -137,7 +146,7 @@
     {
         "id": "ab3764a1e711a078",
         "type": "http request",
-        "z": "51a923a43c27b58e",
+        "z": "parking_flow_tab",
         "name": "Get Uniwersystet",
         "method": "GET",
         "ret": "obj",
@@ -161,7 +170,7 @@
     {
         "id": "0b15dc341a1503f8",
         "type": "change",
-        "z": "51a923a43c27b58e",
+        "z": "parking_flow_tab",
         "name": "Save Second Result",
         "rules": [
             {
@@ -188,9 +197,9 @@
     {
         "id": "782c217cee42a158",
         "type": "function",
-        "z": "51a923a43c27b58e",
+        "z": "parking_flow_tab",
         "name": "Format: Temp=GreenDay, Hum=Uni",
-        "func": "// Extract data from first call (saved in msg.parking1)\nvar p1 = msg.parking1;\nvar countGreenDay = p1.CurrentFreeGroupCounterValue;\n\n// Extract data from second call (current msg.payload)\nvar p2 = msg.parking2;\nvar countUniversity = p2.CurrentFreeGroupCounterValue;\n\n// Map to Thermostat Traits\nmsg.payload = {\n    setpoint: countGreenDay,\n    temperature: countUniversity,\n    mode: \"heat\"\n};\nreturn msg;",
+        "func": "// Extract data from first call (saved in msg.parking1)\nvar p1 = msg.parking1;\nvar countGreenDay = p1.CurrentFreeGroupCounterValue;\nvar timestampGreenDay = p1.timestamp;\n\n// Extract data from second call (current msg.payload)\nvar p2 = msg.parking2;\nvar countUniversity = p2.CurrentFreeGroupCounterValue;\nvar timestampUniversity = p2.timestamp;\n\n// Map to Thermostat Traits\nmsg.payload = {\n    setpoint: countGreenDay,\n    timestamp1:timestampGreenDay,\n    temperature: countUniversity,\n    timestamp2:timestampUniversity,\n    mode: \"heat\"\n};\nreturn msg;",
         "outputs": 1,
         "timeout": "",
         "noerr": 0,
@@ -209,7 +218,7 @@
     {
         "id": "61c921c854461416",
         "type": "noraf-thermostat",
-        "z": "51a923a43c27b58e",
+        "z": "parking_flow_tab",
         "devicename": "parking",
         "roomhint": "",
         "name": "",
@@ -234,83 +243,12 @@
     {
         "id": "f37c7857ca614302",
         "type": "link out",
-        "z": "51a923a43c27b58e",
+        "z": "parking_flow_tab",
         "name": "Send to Logging",
         "mode": "link",
         "links": [],
         "x": 1135,
         "y": 80,
-        "wires": []
-    },
-    {
-        "id": "link_in_logging",
-        "type": "link in",
-        "z": "tab_logging",
-        "name": "Input from Parking Flow",
-        "links": [],
-        "x": 150,
-        "y": 100,
-        "wires": [
-            [
-                "prepare_form_data"
-            ]
-        ]
-    },
-    {
-        "id": "prepare_form_data",
-        "type": "function",
-        "z": "tab_logging",
-        "name": "Prepare Form Data",
-        "func": "// REPLACE THESE WITH YOUR FORM ENTRY IDs\nvar ENTRY_ID_GREEN = \"entry.2026993163\";\nvar ENTRY_ID_UNI = \"entry.1412144904\";\n\n// Get values from the incoming message\n// (Assuming msg.payload.temperature is GreenDay, msg.payload.humidity is Uni)\nvar valGreen = msg.payload.temperature;\nvar valUni = msg.payload.humidity;\n\n// Construct Form Payload\nmsg.payload = {};\nmsg.payload[ENTRY_ID_GREEN] = valGreen;\nmsg.payload[ENTRY_ID_UNI] = valUni;\n\n// Set Headers for Form Submission\nmsg.headers = {\n    \"Content-Type\": \"application/x-www-form-urlencoded\"\n};\n\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 400,
-        "y": 100,
-        "wires": [
-            [
-                "post_to_form"
-            ]
-        ]
-    },
-    {
-        "id": "post_to_form",
-        "type": "http request",
-        "z": "tab_logging",
-        "name": "POST to Google Form",
-        "method": "POST",
-        "ret": "txt",
-        "paytoqs": "ignore",
-        "url": "https://docs.google.com/forms/d/e/1FAIpQLSdeQ-rmw_VfOidGmtSNb9DLkt1RfPdduu-jH898sf3lhj17LA/formResponse",
-        "tls": "",
-        "persist": false,
-        "proxy": "",
-        "authType": "",
-        "x": 650,
-        "y": 100,
-        "wires": [
-            [
-                "debug_log"
-            ]
-        ]
-    },
-    {
-        "id": "debug_log",
-        "type": "debug",
-        "z": "tab_logging",
-        "name": "Log Success",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "payload",
-        "targetType": "msg",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 850,
-        "y": 100,
         "wires": []
     },
     {
@@ -342,7 +280,7 @@
         "once": false,
         "onceDelay": 0.1,
         "topic": "",
-        "payload": "{\"temperature\": 100, \"humidity\": 50}",
+        "payload": "{\"temperature\": 100, \"timestamp1\":\"11:11\", \"humidity\": 50, \"timestamp2\":\"12:12\"}",
         "payloadType": "json",
         "x": 150,
         "y": 180,
@@ -357,8 +295,9 @@
         "type": "function",
         "z": "52f17e2ca027f52c",
         "name": "Prepare Form Data",
-        "func": "// REPLACE THESE WITH YOUR FORM ENTRY IDs\nvar ENTRY_ID_GREEN = \"entry.2026993163\";\nvar ENTRY_ID_UNI = \"entry.1412144904\";\n\n// Get values from the incoming message\n// (Assuming msg.payload.temperature is GreenDay, msg.payload.humidity is Uni)\nvar valGreen = msg.payload.temperature;\nvar valUni = msg.payload.humidity;\n\n// Construct Form Payload\nmsg.payload = {};\nmsg.payload[ENTRY_ID_GREEN] = valGreen;\nmsg.payload[ENTRY_ID_UNI] = valUni;\n\n// Set Headers for Form Submission\nmsg.headers = {\n    \"Content-Type\": \"application/x-www-form-urlencoded\"\n};\n\nreturn msg;",
+        "func": "// REPLACE THESE WITH YOUR FORM ENTRY IDs\nvar ENTRY_ID_GREEN = \"entry.2026993163\";\nvar ENTRY_TIME_GREEN = \"entry.51469670\";\nvar ENTRY_ID_UNI = \"entry.1412144904\";\nvar ENTRY_TIME_UNI = \"entry.364658642\";\n\n// Get values from the incoming message\n// (Assuming msg.payload.temperature is GreenDay, msg.payload.humidity is Uni)\nvar valGreen = msg.payload.temperature;\nvar timeGreen = msg.payload.timestamp1;\nvar valUni = msg.payload.humidity;\nvar timeUni = msg.payload.timestamp2;\n\n// Construct Form Payload\nmsg.payload = {};\nmsg.payload[ENTRY_ID_GREEN] = valGreen;\nmsg.payload[ENTRY_TIME_GREEN] = timeGreen;\nmsg.payload[ENTRY_ID_UNI] = valUni;\nmsg.payload[ENTRY_TIME_UNI] = timeUni;\n\n// Set Headers for Form Submission\nmsg.headers = {\n    \"Content-Type\": \"application/x-www-form-urlencoded\"\n};\n\nreturn msg;",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",

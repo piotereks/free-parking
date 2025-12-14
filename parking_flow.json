@@ -1,15 +1,15 @@
 [
     {
-        "id": "51a923a43c27b58e",
+        "id": "parking_flow_tab",
         "type": "tab",
-        "label": "Parking Assistant (Live)",
+        "label": "Parking Flow (Manual)",
         "disabled": false,
         "info": ""
     },
     {
         "id": "f970b3781b889ff2",
         "type": "inject",
-        "z": "51a923a43c27b58e",
+        "z": "parking_flow_tab",
         "name": "Poll 5m",
         "props": [
             {
@@ -36,9 +36,38 @@
         ]
     },
     {
+        "id": "manual_trigger_node",
+        "type": "inject",
+        "z": "parking_flow_tab",
+        "name": "Manual Trigger",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 160,
+        "wires": [
+            [
+                "5a1bee3cde324ad2"
+            ]
+        ]
+    },
+    {
         "id": "5a1bee3cde324ad2",
         "type": "http request",
-        "z": "51a923a43c27b58e",
+        "z": "parking_flow_tab",
         "name": "Get Green Day",
         "method": "GET",
         "ret": "obj",
@@ -62,7 +91,7 @@
     {
         "id": "4cba3b68788e2e0e",
         "type": "change",
-        "z": "51a923a43c27b58e",
+        "z": "parking_flow_tab",
         "name": "Save First Result",
         "rules": [
             {
@@ -89,7 +118,7 @@
     {
         "id": "ab3764a1e711a078",
         "type": "http request",
-        "z": "51a923a43c27b58e",
+        "z": "parking_flow_tab",
         "name": "Get Uniwersystet",
         "method": "GET",
         "ret": "obj",
@@ -113,7 +142,7 @@
     {
         "id": "0b15dc341a1503f8",
         "type": "change",
-        "z": "51a923a43c27b58e",
+        "z": "parking_flow_tab",
         "name": "Save Second Result",
         "rules": [
             {
@@ -140,9 +169,9 @@
     {
         "id": "782c217cee42a158",
         "type": "function",
-        "z": "51a923a43c27b58e",
+        "z": "parking_flow_tab",
         "name": "Format: Temp=GreenDay, Hum=Uni",
-        "func": "// Extract data from first call (saved in msg.parking1)\nvar p1 = msg.parking1;\nvar countGreenDay = p1.CurrentFreeGroupCounterValue;\n\n// Extract data from second call (current msg.payload)\nvar p2 = msg.parking2;\nvar countUniversity = p2.CurrentFreeGroupCounterValue;\n\n// Map to Thermostat Traits\nmsg.payload = {\n    setpoint: countGreenDay,\n    temperature: countUniversity,\n    mode: \"heat\"\n};\nreturn msg;",
+        "func": "// Extract data from first call (saved in msg.parking1)\nvar p1 = msg.parking1;\nvar countGreenDay = p1.CurrentFreeGroupCounterValue;\nvar timestampGreenDay = p1.timestamp;\n\n// Extract data from second call (current msg.payload)\nvar p2 = msg.parking2;\nvar countUniversity = p2.CurrentFreeGroupCounterValue;\nvar timestampUniversity = p2.timestamp;\n\n// Map to Thermostat Traits\nmsg.payload = {\n    setpoint: countGreenDay,\n    timestamp1:timestampGreenDay,\n    temperature: countUniversity,\n    timestamp2:timestampUniversity,\n    mode: \"heat\"\n};\nreturn msg;",
         "outputs": 1,
         "timeout": "",
         "noerr": 0,
@@ -161,7 +190,7 @@
     {
         "id": "61c921c854461416",
         "type": "noraf-thermostat",
-        "z": "51a923a43c27b58e",
+        "z": "parking_flow_tab",
         "devicename": "parking",
         "roomhint": "",
         "name": "",
@@ -186,33 +215,12 @@
     {
         "id": "f37c7857ca614302",
         "type": "link out",
-        "z": "51a923a43c27b58e",
+        "z": "parking_flow_tab",
         "name": "Send to Logging",
         "mode": "link",
         "links": [],
         "x": 1135,
         "y": 80,
         "wires": []
-    },
-    {
-        "id": "nora_config_unique_v4",
-        "type": "noraf-config",
-        "name": "NORA config",
-        "group": "",
-        "twofactor": "off",
-        "twofactorpin": "",
-        "localexecution": true,
-        "structure": "",
-        "storeStateInContext": false,
-        "disableValidationErrors": false,
-        "sendDeviceNameAndLocation": false
-    },
-    {
-        "id": "6ffbdea027b3ead8",
-        "type": "global-config",
-        "env": [],
-        "modules": {
-            "node-red-contrib-smartnora": "1.25.0"
-        }
     }
 ]
