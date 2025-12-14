@@ -1,0 +1,103 @@
+[
+    {
+        "id": "tab_phone_static_v2",
+        "type": "tab",
+        "label": "Phone Parking (Static 127)",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "auto_init_v2",
+        "type": "inject",
+        "z": "tab_phone_static_v2",
+        "name": "Sensor Reader",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 150,
+        "y": 120,
+        "wires": [
+            [
+                "publish_value_v2"
+            ]
+        ]
+    },
+    {
+        "id": "publish_value_v2",
+        "type": "function",
+        "z": "tab_phone_static_v2",
+        "name": "Publish Reading: 127",
+        "func": "// Define current sensor reading\nmsg.payload = {\n    temperature: 127,\n    humidity: 127,\n    setpoint: 127,\n    mode: \"heat\"\n};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 120,
+        "wires": [
+            [
+                "nora_thermostat_v2"
+            ]
+        ]
+    },
+    {
+        "id": "nora_thermostat_v2",
+        "type": "noraf-thermostat",
+        "z": "tab_phone_static_v2",
+        "devicename": "Mój Parking",
+        "roomhint": "",
+        "name": "",
+        "modes": "",
+        "unit": "F",
+        "rangeMin": "",
+        "rangeMax": "",
+        "topic": "parking/thermostat",
+        "passthru": false,
+        "commandOnly": false,
+        "queryOnly": false,
+        "bufferRangeCelsius": "2",
+        "nora": "nora_config_unique_v2",
+        "twofactorpin": "",
+        "filter": false,
+        "x": 610,
+        "y": 120,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "nora_config_unique_v2",
+        "type": "noraf-config",
+        "name": "NORA Config (Phone)",
+        "group": "My Group",
+        "twofactor": "off",
+        "twofactorpin": "",
+        "localexecution": true,
+        "structure": "",
+        "storeStateInContext": false,
+        "disableValidationErrors": false,
+        "sendDeviceNameAndLocation": false
+    },
+    {
+        "id": "2a47f52673ea1d8c",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-contrib-smartnora": "1.25.0"
+        }
+    }
+]

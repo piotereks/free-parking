@@ -1,0 +1,206 @@
+[
+    {
+        "id": "c540f2014b8a365c",
+        "type": "tab",
+        "label": "Parking Assistant (Live)",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "8174dc50dd200088",
+        "type": "inject",
+        "z": "c540f2014b8a365c",
+        "name": "Poll 5m",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "300",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 100,
+        "wires": [
+            [
+                "6ce29716f40f3512"
+            ]
+        ]
+    },
+    {
+        "id": "6ce29716f40f3512",
+        "type": "http request",
+        "z": "c540f2014b8a365c",
+        "name": "Get Green Day",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "https://gd.zaparkuj.pl/api/freegroupcountervalue.json",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 300,
+        "y": 100,
+        "wires": [
+            [
+                "c2f59de43f647f17"
+            ]
+        ]
+    },
+    {
+        "id": "c2f59de43f647f17",
+        "type": "change",
+        "z": "c540f2014b8a365c",
+        "name": "Save First Result",
+        "rules": [
+            {
+                "t": "set",
+                "p": "parking1",
+                "pt": "msg",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 450,
+        "y": 200,
+        "wires": [
+            [
+                "a7e22db45469619b"
+            ]
+        ]
+    },
+    {
+        "id": "a7e22db45469619b",
+        "type": "http request",
+        "z": "c540f2014b8a365c",
+        "name": "Get Uniwersystet",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "https://gd.zaparkuj.pl/api/freegroupcountervalue-green.json",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 590,
+        "y": 100,
+        "wires": [
+            [
+                "501c4bfb22eff525"
+            ]
+        ]
+    },
+    {
+        "id": "f61abc18610858f6",
+        "type": "function",
+        "z": "c540f2014b8a365c",
+        "name": "Format: Temp=GreenDay, Hum=Uni",
+        "func": "// Extract data from first call (saved in msg.parking1)\nvar p1 = msg.parking1;\nvar countGreenDay = p1.CurrentFreeGroupCounterValue;\n\n// Extract data from second call (current msg.payload)\nvar p2 = msg.parking2;\nvar countUniversity = p2.CurrentFreeGroupCounterValue;\n\n// Map to Thermostat Traits\nmsg.payload = {\n    setpoint:countGreenDay,\n    temperature: countUniversity,\n    mode: \"heat\"\n};\nreturn msg;\n\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 930,
+        "y": 100,
+        "wires": [
+            [
+                "b131db83a5eecb1f"
+            ]
+        ]
+    },
+    {
+        "id": "b131db83a5eecb1f",
+        "type": "noraf-thermostat",
+        "z": "c540f2014b8a365c",
+        "devicename": "parking",
+        "roomhint": "",
+        "name": "",
+        "modes": "heat",
+        "unit": "C",
+        "rangeMin": "",
+        "rangeMax": "",
+        "topic": "parking/thermostat",
+        "passthru": false,
+        "commandOnly": false,
+        "queryOnly": false,
+        "bufferRangeCelsius": "2",
+        "nora": "nora_config_unique_v4",
+        "twofactorpin": "",
+        "filter": false,
+        "x": 1080,
+        "y": 200,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "501c4bfb22eff525",
+        "type": "change",
+        "z": "c540f2014b8a365c",
+        "name": "Save Second Result",
+        "rules": [
+            {
+                "t": "set",
+                "p": "parking2",
+                "pt": "msg",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 740,
+        "y": 200,
+        "wires": [
+            [
+                "f61abc18610858f6"
+            ]
+        ]
+    },
+    {
+        "id": "nora_config_unique_v4",
+        "type": "noraf-config",
+        "name": "NORA config",
+        "group": "",
+        "twofactor": "off",
+        "twofactorpin": "",
+        "localexecution": true,
+        "structure": "",
+        "storeStateInContext": false,
+        "disableValidationErrors": false,
+        "sendDeviceNameAndLocation": false
+    },
+    {
+        "id": "3fa523a59e63e394",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-contrib-smartnora": "1.25.0"
+        }
+    }
+]
