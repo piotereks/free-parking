@@ -121,6 +121,12 @@ main() {
         exit 1
     fi
     
+    # Random wait to avoid thundering herd (0-60s)
+    # Using awk for portable random number generation on Ash/BusyBox
+    wait_time=$(awk 'BEGIN{srand(); print int(rand()*61)}')
+    log "Waiting ${wait_time}s before execution..."
+    sleep "$wait_time"
+    
     # Step 1: Fetch Green Day parking data
     log "Step 1: Fetching Green Day parking data..."
     parking1=$(fetch_parking_data "$API_URL_GREEN_DAY")
