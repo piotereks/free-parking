@@ -57,3 +57,39 @@
 [2025-12-14 19:08:51] ==========================================
 [2025-12-14 19:08:51] Sync completed successfully
 [2025-12-14 19:08:51] ==========================================
+[2025-12-14 19:28:23] ==========================================
+[2025-12-14 19:28:23] Starting parking data sync
+[2025-12-14 19:28:23] ==========================================
+[2025-12-14 19:28:23] Step 1: Fetching Green Day parking data...
+[2025-12-14 19:28:23] Fetching: https://gd.zaparkuj.pl/api/freegroupcountervalue.json?time=1765740503048
+[2025-12-14 19:28:23]   Green Day: 187 spots free at 2025-12-14 17:24:40
+[2025-12-14 19:28:23] Step 2: Fetching University parking data...
+[2025-12-14 19:28:23] Fetching: https://gd.zaparkuj.pl/api/freegroupcountervalue-green.json?time=1765740503308
+[2025-12-14 19:28:23]   University: 41 spots free at 2025-12-14 20:27:56
+[2025-12-14 19:28:23] Step 3: Preparing form submission...
+[2025-12-14 19:28:23]   Form data prepared
+[2025-12-14 19:28:23] Step 4: Submitting to Google Form...
+[2025-12-14 19:28:24] SUCCESS: Form submitted (HTTP 200)
+[2025-12-14 19:28:24]   Green Day: 187 @ 2025-12-14 17:24:40
+[2025-12-14 19:28:24]   University: 41 @ 2025-12-14 20:27:56
+[2025-12-14 19:28:24] ==========================================
+[2025-12-14 19:28:24] Sync completed successfully
+[2025-12-14 19:28:24] ==========================================
+[2025-12-14 19:29:12] ==========================================
+[2025-12-14 19:29:12] Starting parking data sync
+[2025-12-14 19:29:12] ==========================================
+[2025-12-14 19:29:12] Step 1: Fetching Green Day parking data...
+[2025-12-14 19:29:12] Fetching: https://gd.zaparkuj.pl/api/freegroupcountervalue.json?time=1765740552094
+[2025-12-14 19:29:12]   Green Day: 187 spots free at 2025-12-14 17:24:40
+[2025-12-14 19:29:12] Step 2: Fetching University parking data...
+[2025-12-14 19:29:12] Fetching: https://gd.zaparkuj.pl/api/freegroupcountervalue-green.json?time=1765740552262
+[2025-12-14 19:29:12]   University: 41 spots free at 2025-12-14 20:28:56
+[2025-12-14 19:29:12] Step 3: Preparing form submission...
+[2025-12-14 19:29:12]   Form data prepared
+[2025-12-14 19:29:12] Step 4: Submitting to Google Form...
+[2025-12-14 19:29:13] SUCCESS: Form submitted (HTTP 200)
+[2025-12-14 19:29:13]   Green Day: 187 @ 2025-12-14 17:24:40
+[2025-12-14 19:29:13]   University: 41 @ 2025-12-14 20:28:56
+[2025-12-14 19:29:13] ==========================================
+[2025-12-14 19:29:13] Sync completed successfully
+[2025-12-14 19:29:13] ==========================================

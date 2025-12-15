@@ -56,7 +56,7 @@ fetch_parking_data() {
         -H "Expires: 0")
     
     if [ $? -eq 0 ] && [ -n "$response" ]; then
-        echo "$response"
+        echo xxxxxxxxxxx "$response"
     else
         log "ERROR: Failed to fetch from $url"
         return 1
