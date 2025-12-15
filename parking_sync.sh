@@ -1,12 +1,7 @@
-#!/bin/bash
+#!/bin/sh
 
 # ==============================================================================
-# Parking Data to Google Form - Based on Node-RED Flow
-# ==============================================================================
-# This script replicates your Node-RED workflow:
-# 1. Fetches parking data from 2 APIs (Green Day & Uniwersystet)
-# 2. Extracts counts and timestamps
-# 3. Submits to Google Form
+# Parking Data to Google Form - Ash/BusyBox Compatible Version
 # ==============================================================================
 
 set -e
@@ -15,28 +10,34 @@ set -e
 # CONFIGURATION
 # ==============================================================================
 
-# API URLs (from your Node-RED flow)
+# API URLs
 API_URL_GREEN_DAY="https://gd.zaparkuj.pl/api/freegroupcountervalue.json"
 API_URL_UNIVERSITY="https://gd.zaparkuj.pl/api/freegroupcountervalue-green.json"
 
-# Google Form URL (from your Node-RED flow)
+# Google Form URL
 GOOGLE_FORM_URL="https://docs.google.com/forms/d/e/1FAIpQLSdeQ-rmw_VfOidGmtSNb9DLkt1RfPdduu-jH898sf3lhj17LA/formResponse"
 
-# Form Entry IDs (from your Node-RED function node)
+# Form Entry IDs
 ENTRY_ID_GREEN="entry.2026993163"
 ENTRY_TIME_GREEN="entry.51469670"
 ENTRY_ID_UNI="entry.1412144904"
 ENTRY_TIME_UNI="entry.364658642"
 
-# Logging
-LOG_FILE="parking_sync.log"
+# Global verbose flag
+VERBOSE=0
 
 # ==============================================================================
 # FUNCTIONS
 # ==============================================================================
 
 log() {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG_FILE"
+    if [ "$VERBOSE" -eq 1 ]; then
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
+    fi
+}
+
+error() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: $1" >&2
 }
 
 # ==============================================================================
@@ -44,21 +45,21 @@ log() {
 # ==============================================================================
 
 fetch_parking_data() {
-    local url="$1"
-    local timestamp=$(date +%s%3N)  # milliseconds like Node-RED $millis()
+    url="$1"
+    timestamp=$(date +%s)000
     
     log "Fetching: $url?time=$timestamp"
     
-    local response=$(curl -s -X GET "${url}?time=${timestamp}" \
+    response=$(curl -s -X GET "${url}?time=${timestamp}" \
         -H "Accept: application/json" \
         -H "Cache-Control: no-cache, no-store, must-revalidate" \
         -H "Pragma: no-cache" \
         -H "Expires: 0")
     
     if [ $? -eq 0 ] && [ -n "$response" ]; then
-        echo xxxxxxxxxxx "$response"
+        echo "$response"
     else
-        log "ERROR: Failed to fetch from $url"
+        log "Failed to fetch from $url"
         return 1
     fi
 }
@@ -67,31 +68,32 @@ fetch_parking_data() {
 # MAIN EXECUTION
 # ==============================================================================
 
-# URL encode function (replaces jq @uri)
+# URL encode function using awk (standard on Busybox)
 urlencode() {
-    local string="$1"
-    local strlen=${#string}
-    local encoded=""
-    local pos c o
-    
-    for (( pos=0 ; pos<strlen ; pos++ )); do
-        c=${string:$pos:1}
-        case "$c" in
-            [-_.~a-zA-Z0-9] ) o="${c}" ;;
-            * ) printf -v o '%%%02x' "'$c"
-        esac
-        encoded+="${o}"
-    done
-    echo "${encoded}"
+    echo "$1" | awk 'BEGIN {
+        for (i=0; i<=255; i++) ord[sprintf("%c", i)] = i
+    }
+    {
+        len = length($0)
+        for (i=1; i<=len; i++) {
+            c = substr($0, i, 1)
+            # Safe characters: alphanumeric, dash, underscore, dot, tilde
+            if (c ~ /[a-zA-Z0-9.\-_~]/) {
+                printf "%s", c
+            } else {
+                printf "%%%02X", ord[c]
+            }
+        }
+    }'
 }
 
-# Extract JSON value (pure bash, no jq)
+# Extract JSON value (using sed, POSIX compliant)
 extract_json_value() {
-    local json="$1"
-    local key="$2"
+    json="$1"
+    key="$2"
     
-    # First try to extract quoted string value (for strings with spaces like timestamps)
-    local value=$(echo "$json" | sed -n "s/.*\"${key}\"[[:space:]]*:[[:space:]]*\"\([^\"]*\)\".*/\1/p")
+    # First try to extract quoted string value
+    value=$(echo "$json" | sed -n "s/.*\"${key}\"[[:space:]]*:[[:space:]]*\"\([^\"]*\)\".*/\1/p")
     
     # If no match (numeric value), extract without quotes
     if [ -z "$value" ]; then
@@ -102,13 +104,20 @@ extract_json_value() {
 }
 
 main() {
+    # Parse arguments
+    for arg in "$@"; do
+        if [ "$arg" = "-l" ]; then
+            VERBOSE=1
+        fi
+    done
+
     log "=========================================="
     log "Starting parking data sync"
     log "=========================================="
     
     # Check for required tools
-    if ! command -v curl &> /dev/null; then
-        log "ERROR: curl is not installed. Install with: sudo apt-get install curl"
+    if ! which curl >/dev/null 2>&1; then
+        error "curl is not installed."
         exit 1
     fi
     
@@ -117,7 +126,7 @@ main() {
     parking1=$(fetch_parking_data "$API_URL_GREEN_DAY")
     
     if [ -z "$parking1" ]; then
-        log "ERROR: No data from Green Day API"
+        error "No data from Green Day API"
         exit 1
     fi
     
@@ -132,7 +141,7 @@ main() {
     parking2=$(fetch_parking_data "$API_URL_UNIVERSITY")
     
     if [ -z "$parking2" ]; then
-        log "ERROR: No data from University API"
+        error "No data from University API"
         exit 1
     fi
     
@@ -142,7 +151,7 @@ main() {
     
     log "  University: $countUniversity spots free at $timestampUniversity"
     
-    # Step 3: Prepare form data (matching your Node-RED function logic)
+    # Step 3: Prepare form data
     log "Step 3: Preparing form submission..."
     
     # URL encode values
@@ -164,14 +173,16 @@ main() {
         -d "$form_data" \
         -w "\n%{http_code}")
     
+    # Extract status code (last line)
     http_code=$(echo "$response" | tail -n1)
     
-    if [ "$http_code" -eq 200 ] || [ "$http_code" -eq 302 ]; then
+    if [ "$http_code" = "200" ] || [ "$http_code" = "302" ]; then
         log "SUCCESS: Form submitted (HTTP $http_code)"
         log "  Green Day: $countGreenDay @ $timestampGreenDay"
         log "  University: $countUniversity @ $timestampUniversity"
     else
-        log "ERROR: Form submission failed (HTTP $http_code)"
+        error "Form submission failed (HTTP $http_code)"
+        log "Response: $response"
         exit 1
     fi
     
