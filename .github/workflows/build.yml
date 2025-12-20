@@ -14,13 +14,21 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          persist-credentials: false  # CRITICAL: Don't persist the default GITHUB_TOKEN
+          # persist-credentials: false  # CRITICAL: Don't persist the default GITHUB_TOKEN
       
       - uses: actions/setup-node@v4
         with:
           node-version: 20
       
       # Debug: Check if token is available
+      - name: Verify github token exists
+        run: |
+          if [ -z "$GITHUB_TOKEN" ]; then
+            echo "ERROR: GITHUB_TOKEN is not set!"
+            exit 1
+          else
+            echo "GITHUB_TOKEN is set (length: ${#GITHUB_TOKEN})"
+          fi
       - name: Verify token exists
         run: |
           if [ -z "$DEPLOY_TOKEN" ]; then
