@@ -2,11 +2,15 @@
 git remote add piotereks_pages https://github.com/piotereks/piotereks.git
 git fetch piotereks_pages main
 git worktree add ./parking-deploy piotereks_pages/main
-cd /parking-deploy/
+cd ./parking-deploy/
 git sparse-checkout init --cone
 git sparse-checkout set docs/html/parking
 cd ..
 npm run build
-cd parking-deploy/
+cd ./parking-deploy/
+echo date > docs/html/parking/date.txt
+git add .
+git commit -m "Deploy {date + %Y-%m-%d %H:%M:%S}"
 git push piotereks_pages HEAD:main
-
+git sparse-checkout disable
+cd ..
