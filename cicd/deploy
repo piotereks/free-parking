@@ -83,7 +83,7 @@ echo ""
 echo "=== PUSHING ==="
 # git push piotereks_pages HEAD:main
 # echo "✓ Push main successful!"
-git push --force piotereks_pages HEAD:gh-pages-deploy
+git push --force piotereks_pages HEAD:refs/heads/gh-pages-deploy
 echo "✓ Push gh-pages-deploy successful!"
 
 echo ""
