@@ -1,45 +1,43 @@
 #!/bin/bash
-set -e  # Exit on error
+set -e
 
 echo "=== DEPLOY SCRIPT STARTED ==="
 
-# Validate DEPLOY_TOKEN
 if [ -z "$DEPLOY_TOKEN" ]; then
-    echo "❌ ERROR: DEPLOY_TOKEN environment variable is not set"
+    echo "❌ ERROR: DEPLOY_TOKEN is not set"
     exit 1
 fi
 echo "✓ DEPLOY_TOKEN is set (length: ${#DEPLOY_TOKEN})"
 
 echo ""
-echo "=== CLEARING ALL GIT CREDENTIALS ==="
-# Nuclear option: clear everything
-git config --global --unset-all credential.helper 2>/dev/null || true
-git config --system --unset-all credential.helper 2>/dev/null || true
-git config --unset-all credential.helper 2>/dev/null || true
-git config --global --unset-all url."https://github.com/".insteadOf 2>/dev/null || true
-echo "✓ All git credentials cleared"
+echo "=== REMOVING GITHUB ACTIONS AUTHENTICATION ==="
+# This is THE critical step - remove the auth header that checkout added
+git config --local --unset-all http.https://github.com/.extraheader 2>/dev/null || true
+git config --global --unset-all http.https://github.com/.extraheader 2>/dev/null || true
+
+# Disable all credential helpers
+git config --global credential.helper ""
+git config --local credential.helper ""
+
+export GIT_TERMINAL_PROMPT=0
+
+echo "✓ GitHub Actions authentication removed"
 
 echo ""
 echo "=== CONFIGURING GIT USER ==="
 git config --global user.name "Piotr Sakowski"
 git config --global user.email "piotereks@gmail.com"
-echo "✓ Git user configured"
 
 echo ""
-echo "=== SETTING UP REMOTE ==="
-# Use x-access-token format which is GitHub's recommended way
+echo "=== SETTING UP REMOTE WITH TOKEN ==="
 REPO_URL="https://x-access-token:${DEPLOY_TOKEN}@github.com/piotereks/piotereks.git"
-
-# Remove remote if exists
 git remote remove piotereks_pages 2>/dev/null || true
-
-# Add remote
 git remote add piotereks_pages "$REPO_URL"
-echo "✓ Remote 'piotereks_pages' added (with token authentication)"
+echo "✓ Remote added with token"
 
 echo ""
-echo "=== FETCHING FROM REMOTE ==="
-GIT_TERMINAL_PROMPT=0 git fetch piotereks_pages main
+echo "=== FETCHING ==="
+git fetch piotereks_pages main
 echo "✓ Fetch successful"
 
 echo ""
@@ -48,35 +46,39 @@ git worktree add ./parking-deploy piotereks_pages/main
 echo "✓ Worktree created"
 
 echo ""
-echo "=== CONFIGURING SPARSE CHECKOUT ==="
+echo "=== CONFIGURING WORKTREE ==="
 cd ./parking-deploy/
+
+# Remove extraheader in the worktree too
+git config --local --unset-all http.https://github.com/.extraheader 2>/dev/null || true
+git config --local credential.helper ""
+
+# Set remote URL with token in worktree
+git remote set-url piotereks_pages "https://x-access-token:${DEPLOY_TOKEN}@github.com/piotereks/piotereks.git"
+
 git sparse-checkout init --cone
 git sparse-checkout set docs/html/parking
-echo "✓ Sparse checkout configured for docs/html/parking"
+echo "✓ Sparse checkout configured"
 cd ..
 
 echo ""
-echo "=== BUILDING PROJECT ==="
+echo "=== BUILDING ==="
 npm ci
 npm run build
 echo "✓ Build complete"
 
 echo ""
-echo "=== PREPARING DEPLOYMENT FILES ==="
+echo "=== DEPLOYING ==="
 cd ./parking-deploy/
 echo "$(date '+%Y-%m-%d %H:%M:%S')" > docs/html/parking/date.txt
-echo "✓ Date file created"
 
-echo ""
-echo "=== COMMITTING CHANGES ==="
 git add .
 git commit -m "Deploy $(date '+%Y-%m-%d %H:%M:%S')"
 echo "✓ Changes committed"
 
 echo ""
-echo "=== PUSHING TO REMOTE ==="
-# Push using the remote name (which has the token embedded)
-GIT_TERMINAL_PROMPT=0 git push piotereks_pages HEAD:main
+echo "=== PUSHING ==="
+git push piotereks_pages HEAD:main
 echo "✓ Push successful!"
 
 echo ""
