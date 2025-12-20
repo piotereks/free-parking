@@ -1,45 +1,89 @@
 #!/bin/bash
 set -e  # Exit on error
 
-# Check if DEPLOY_TOKEN is set
+echo "=== DEPLOY SCRIPT STARTED ==="
+
+# Validate DEPLOY_TOKEN
 if [ -z "$DEPLOY_TOKEN" ]; then
-    echo "ERROR: DEPLOY_TOKEN is not set"
+    echo "❌ ERROR: DEPLOY_TOKEN environment variable is not set"
     exit 1
 fi
+echo "✓ DEPLOY_TOKEN is set (length: ${#DEPLOY_TOKEN})"
 
-echo "DEPLOY_TOKEN is set (length: ${#DEPLOY_TOKEN})"
+echo ""
+echo "=== CLEARING ALL GIT CREDENTIALS ==="
+# Nuclear option: clear everything
+git config --global --unset-all credential.helper 2>/dev/null || true
+git config --system --unset-all credential.helper 2>/dev/null || true
+git config --unset-all credential.helper 2>/dev/null || true
+git config --global --unset-all url."https://github.com/".insteadOf 2>/dev/null || true
+echo "✓ All git credentials cleared"
 
-# Configure git user early
-git config --global user.name "GitHub Actions"
-git config --global user.email "actions@github.com"
-# Add remote with token
-git remote add piotereks_pages https://$DEPLOY_TOKEN@github.com/piotereks/piotereks.git
+echo ""
+echo "=== CONFIGURING GIT USER ==="
+git config --global user.name "Piotr Sakowski"
+git config --global user.email "piotereks@gmail.com"
+echo "✓ Git user configured"
 
-# Fetch the target repository
-git fetch piotereks_pages main
+echo ""
+echo "=== SETTING UP REMOTE ==="
+# Use x-access-token format which is GitHub's recommended way
+REPO_URL="https://x-access-token:${DEPLOY_TOKEN}@github.com/piotereks/piotereks.git"
 
-# Create worktree
+# Remove remote if exists
+git remote remove piotereks_pages 2>/dev/null || true
+
+# Add remote
+git remote add piotereks_pages "$REPO_URL"
+echo "✓ Remote 'piotereks_pages' added (with token authentication)"
+
+echo ""
+echo "=== FETCHING FROM REMOTE ==="
+GIT_TERMINAL_PROMPT=0 git fetch piotereks_pages main
+echo "✓ Fetch successful"
+
+echo ""
+echo "=== CREATING WORKTREE ==="
 git worktree add ./parking-deploy piotereks_pages/main
+echo "✓ Worktree created"
 
-# Set up sparse checkout
+echo ""
+echo "=== CONFIGURING SPARSE CHECKOUT ==="
 cd ./parking-deploy/
 git sparse-checkout init --cone
 git sparse-checkout set docs/html/parking
+echo "✓ Sparse checkout configured for docs/html/parking"
 cd ..
 
-# Build the project
+echo ""
+echo "=== BUILDING PROJECT ==="
 npm ci
 npm run build
+echo "✓ Build complete"
 
-# Deploy changes
+echo ""
+echo "=== PREPARING DEPLOYMENT FILES ==="
 cd ./parking-deploy/
 echo "$(date '+%Y-%m-%d %H:%M:%S')" > docs/html/parking/date.txt
+echo "✓ Date file created"
 
+echo ""
+echo "=== COMMITTING CHANGES ==="
 git add .
 git commit -m "Deploy $(date '+%Y-%m-%d %H:%M:%S')"
-git push piotereks_pages HEAD:main
+echo "✓ Changes committed"
 
-# Cleanup
-git sparse-checkout disable
+echo ""
+echo "=== PUSHING TO REMOTE ==="
+# Push using the remote name (which has the token embedded)
+GIT_TERMINAL_PROMPT=0 git push piotereks_pages HEAD:main
+echo "✓ Push successful!"
+
+echo ""
+echo "=== CLEANUP ==="
 cd ..
 git worktree remove ./parking-deploy
+echo "✓ Worktree removed"
+
+echo ""
+echo "=== DEPLOYMENT COMPLETE ==="
