@@ -19,6 +19,6 @@ jobs:
           node-version: 20
       # Run your custom deploy script
       - name: Run deployment
-        run: ./cicd/deploy
+        run: bash ./cicd/deploy
         # env:
           # DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
