@@ -1,0 +1,12 @@
+#!/bin/bash
+git remote add piotereks_pages https://github.com/piotereks/piotereks.git
+git fetch piotereks_pages main
+git worktree add ./parking-deploy piotereks_pages/main
+cd /parking-deploy/
+git sparse-checkout init --cone
+git sparse-checkout set docs/html/parking
+cd ..
+npm run build
+cd parking-deploy/
+git push piotereks_pages HEAD:main
+
