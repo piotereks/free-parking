@@ -20,4 +20,4 @@ git commit -m "Deploy {date + %Y-%m-%d %H:%M:%S}"
 git push piotereks_pages HEAD:main
 # git push https://$DEPLOY_TOKEN@github.com/piotereks/piotereks.git HEAD:main 
 git sparse-checkout disable
-cd ..
+cd .
