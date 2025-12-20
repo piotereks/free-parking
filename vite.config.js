@@ -11,14 +11,16 @@ export default defineConfig(({ command, mode }) => {
   console.log('isPreview:', isPreview)
   console.log('serve and ispreview', command === 'serve' && isPreview)
   console.log('serve', command === 'serve')
-  let base
-  if (command === 'serve' && isPreview) {
-    base = '/piotereks/docs/html/parking/'
-  } else if (command === 'serve' && !isPreview) {
-    base = '/piotereks/html/parking/'
-  } else {
-    base = '/'
-  }
+  // let base
+  // if (command === 'serve' && isPreview) {
+  //   base = '/piotereks/docs/html/parking/'
+  // } else if (command === 'serve' && !isPreview) {
+  //   base = '/piotereks/html/parking/'
+  // } else {
+  //   base = '/'
+  // }
+
+  const base = '/piotereks/html/parking/'
 
   console.log('Using base:', base)
 

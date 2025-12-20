@@ -4,10 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "lint": "eslint .",
     "dev": "vite",
     "build": "vite build",
-    "lint": "eslint .",
-    "preview": "cross-env PREVIEW=true vite preview"
+    "preview": "vite build && vite preview"
   },
   "dependencies": {
     "react": "^18.2.0",
