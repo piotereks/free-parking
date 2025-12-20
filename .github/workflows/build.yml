@@ -14,13 +14,41 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false  # CRITICAL: Don't persist the default GITHUB_TOKEN
+      
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      
+      # Debug: Check if token is available
+      - name: Verify token exists
+        run: |
+          if [ -z "$DEPLOY_TOKEN" ]; then
+            echo "ERROR: DEPLOY_TOKEN is not set!"
+            exit 1
+          else
+            echo "DEPLOY_TOKEN is set (length: ${#DEPLOY_TOKEN})"
+          fi
+        env:
+          DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+      
+      # Debug: Test token with API
+      - name: Test token permissions
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: token $DEPLOY_TOKEN" https://api.github.com/repos/piotereks/piotereks)
+          echo "API response code: $response"
+          if [ "$response" = "200" ]; then
+            echo "✓ Token has access to piotereks/piotereks"
+          else
+            echo "✗ Token does NOT have access to piotereks/piotereks"
+            echo "Response: $response (403 = forbidden, 404 = not found or no access)"
+            exit 1
+          fi
+        env:
+          DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+      
       # Run your custom deploy script
       - name: Run deployment
         run: bash ./cicd/deploy
         env:
           DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
-
-          
