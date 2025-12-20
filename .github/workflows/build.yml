@@ -20,5 +20,7 @@ jobs:
       # Run your custom deploy script
       - name: Run deployment
         run: bash ./cicd/deploy
-        # env:
-          # DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+        env:
+          DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+
+          
