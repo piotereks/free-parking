@@ -1,6 +1,6 @@
 #!/bin/bash
 [ -z "$DEPLOY_TOKEN" ] && echo "DEPLOY_TOKEN is not set" || echo "DEPLOY_TOKEN is set"
-# git remote add piotereks_pages https://$DEPLOY_TOKEN@github.com/piotereks/piotereks.git
+git remote add piotereks_pages https://$DEPLOY_TOKEN@github.com/piotereks/piotereks.git
 git remote set-url piotereks_pages https://$DEPLOY_TOKEN@github.com/piotereks/piotereks.git
 git fetch piotereks_pages main
 git worktree add ./parking-deploy piotereks_pages/main
