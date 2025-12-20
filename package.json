@@ -7,8 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "build:preview": "set PREVIEW=true && vite build",
-    "preview": "npm run build:preview && vite preview"
+    "preview": "cross-env PREVIEW=true vite preview"
   },
   "dependencies": {
     "react": "^18.2.0",
@@ -31,6 +30,7 @@
   "devDependencies": {
     "http-server": "^14.1.1",
     "vite": "^5.0.8",
-    "@vitejs/plugin-react": "^4.2.1"
+    "@vitejs/plugin-react": "^4.2.1",
+    "cross-env": "^7.0.3"
   }
 }
