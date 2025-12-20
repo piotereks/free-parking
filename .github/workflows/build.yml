@@ -1,4 +1,4 @@
-name: Deploy (Full Debug)
+name: Deploy (Test Checkout)
 
 on:
   push:
@@ -9,97 +9,42 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      # Try checkout WITHOUT persist-credentials first
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          # persist-credentials: false
+      
+      - name: Check checkout success
+        run: |
+          echo "Checkout successful"
+          ls -la
+          git status
+      
+      # Now remove the GitHub token authentication that was set up
+      - name: Remove GitHub Actions token authentication
+        run: |
+          echo "=== Removing http.extraheader set by checkout ==="
+          git config --local --unset-all http.https://github.com/.extraheader 2>/dev/null || echo "No extraheader found"
+          
+          echo ""
+          echo "=== Current git config ==="
+          git config --list --show-origin | grep -E "(credential|http)" || echo "No credential/http config"
       
       - uses: actions/setup-node@v4
         with:
           node-version: 20
       
-      # Debug step 1: Check if secret exists
-      - name: Check DEPLOY_TOKEN
+      - name: Verify DEPLOY_TOKEN
         run: |
           if [ -z "$DEPLOY_TOKEN" ]; then
-            echo "❌ DEPLOY_TOKEN is NOT set!"
-            echo "Go to Settings > Secrets and variables > Actions"
-            echo "Add a secret named DEPLOY_TOKEN with your Personal Access Token"
+            echo "ERROR: DEPLOY_TOKEN is not set!"
             exit 1
           fi
-          echo "✓ DEPLOY_TOKEN is set (length: ${#DEPLOY_TOKEN})"
+          echo "DEPLOY_TOKEN is set (length: ${#DEPLOY_TOKEN})"
         env:
           DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
       
-      # Debug step 2: Clear ALL git credentials
-      - name: Clear git credentials completely
-        run: |
-          echo "Clearing all git credential configurations..."
-          git config --global --unset-all credential.helper 2>/dev/null || true
-          git config --system --unset-all credential.helper 2>/dev/null || true
-          git config --unset-all credential.helper 2>/dev/null || true
-          
-          # Also clear any insteadOf configs that might redirect URLs
-          git config --global --unset-all url."https://github.com/".insteadOf 2>/dev/null || true
-          
-          echo "Current git config:"
-          git config --list --show-origin | grep -i credential || echo "No credential config found"
-        env:
-          DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
-      
-      # Debug step 3: Test token with GitHub API
-      - name: Test token with GitHub API
-        run: |
-          echo "Testing token access to piotereks/piotereks..."
-          response=$(curl -s -w "\n%{http_code}" -H "Authorization: token $DEPLOY_TOKEN" https://api.github.com/repos/piotereks/piotereks)
-          http_code=$(echo "$response" | tail -n1)
-          
-          echo "Response code: $http_code"
-          
-          if [ "$http_code" = "200" ]; then
-            echo "✓ Token has access to piotereks/piotereks"
-            echo "Repository info:"
-            echo "$response" | head -n-1 | jq -r '.full_name, .permissions'
-          elif [ "$http_code" = "404" ]; then
-            echo "❌ Token cannot see repository (404)"
-            echo "This means either:"
-            echo "  1. The token doesn't have 'repo' scope"
-            echo "  2. The repository doesn't exist"
-            echo "  3. The token is for a different account"
-          elif [ "$http_code" = "401" ]; then
-            echo "❌ Token is invalid (401 Unauthorized)"
-            echo "Generate a new Personal Access Token"
-          else
-            echo "❌ Unexpected response: $http_code"
-            echo "$response" | head -n-1
-          fi
-          
-          exit $([ "$http_code" = "200" ] && echo 0 || echo 1)
-        env:
-          DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
-      
-      # Debug step 4: Test git push with token
-      - name: Test git authentication
-        run: |
-          echo "Testing git push authentication..."
-          
-          git config --global user.name "Piotr Sakowski"
-          git config --global user.email "piotereks@gmail.com"
-          
-          # Try to list remote refs using the token
-          echo "Attempting to list remote refs..."
-          git ls-remote https://x-access-token:${DEPLOY_TOKEN}@github.com/piotereks/piotereks.git HEAD
-          
-          if [ $? -eq 0 ]; then
-            echo "✓ Git authentication with token works!"
-          else
-            echo "❌ Git authentication with token failed"
-            exit 1
-          fi
-        env:
-          DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
-      
-      # If all checks pass, run the actual deployment
       - name: Run deployment
         run: bash ./cicd/deploy
         env:
