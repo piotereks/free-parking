@@ -14,7 +14,7 @@ cd ./parking-deploy/
 echo date > docs/html/parking/date.txt
 
 git config --global user.name "Piotr Sakowski"
-git config --global user.email "piotrek.sakowski@gmail.com"
+git config --global user.email "piotereks@gmail.com"
 git add .
 git commit -m "Deploy {date + %Y-%m-%d %H:%M:%S}"
 git push piotereks_pages HEAD:main
