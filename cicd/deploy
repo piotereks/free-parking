@@ -25,8 +25,11 @@ echo "✓ GitHub Actions authentication removed"
 
 echo ""
 echo "=== CONFIGURING GIT USER ==="
-git config --global user.name "Piotr Sakowski"
-git config --global user.email "piotereks@gmail.com"
+# git config --global user.name "Piotr Sakowski"
+# git config --global user.email "piotereks@gmail.com"
+
+git config --global user.name "GitHub Actions"
+git config --global user.email "actions@github.com"
 
 echo ""
 echo "=== SETTING UP REMOTE WITH TOKEN ==="
