@@ -1,6 +1,7 @@
 #!/bin/bash
 [ -z "$DEPLOY_TOKEN" ] && echo "DEPLOY_TOKEN is not set" || echo "DEPLOY_TOKEN is set"
-git remote add piotereks_pages https://$DEPLOY_TOKEN@github.com/piotereks/piotereks.git
+git remote add piotereks_pages https://github.com/piotereks/piotereks.git
+git remote set-url piotereks_pages https://$DEPLOY_TOKEN@github.com/piotereks/piotereks.git
 git fetch piotereks_pages main
 git worktree add ./parking-deploy piotereks_pages/main
 cd ./parking-deploy/
@@ -11,11 +12,12 @@ npm ci
 npm run build
 cd ./parking-deploy/
 echo date > docs/html/parking/date.txt
+
 git config --global user.name "GitHub Actions"
 git config --global user.email "actions@github.com"
 git add .
 git commit -m "Deploy {date + %Y-%m-%d %H:%M:%S}"
-# git push piotereks_pages HEAD:main
-git push https://$DEPLOY_TOKEN@github.com/piotereks/piotereks.git HEAD:main 
+git push piotereks_pages HEAD:main
+# git push https://$DEPLOY_TOKEN@github.com/piotereks/piotereks.git HEAD:main 
 git sparse-checkout disable
 cd ..
