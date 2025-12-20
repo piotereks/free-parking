@@ -4,7 +4,7 @@ import path from 'path'
 
 export default defineConfig({
   plugins: [react()],
-
+  base: '/piotereks/docs/html/parking/',
   build: {
     emptyOutDir: true,
     outDir: path.resolve(__dirname, 'parking-deploy/docs/html/parking'),
