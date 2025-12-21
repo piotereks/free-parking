@@ -29,9 +29,6 @@ ENTRY_TIME_GREEN="entry.51469670"
 ENTRY_ID_UNI="entry.1412144904"
 ENTRY_TIME_UNI="entry.364658642"
 
-# Published CSV (Google Sheets)
-CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTwLNDbg8KjlVHsZWj9JUnO_OBIyZaRgZ4gZ8_Gbyly2J3f6rlCW6lDHAihwbuLhxWbBkNMI1wdWRAq/pub?gid=411529798&single=true&output=csv"
-
 # Global verbose flag
 VERBOSE=0
 
@@ -114,7 +111,7 @@ extract_json_value() {
 
 # ------------------------------------------------------------------------------
 # Fetch last row timestamps from published CSV
-# Expects headers: gd_time, uni_time (case/space insensitive)
+# Expects headers: gd_time:!:, uni_time (case/space insensitive)
 # ------------------------------------------------------------------------------
 
 fetch_last_csv_timestamps() {

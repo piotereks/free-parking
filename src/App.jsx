@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ThemeProvider } from './ThemeContext';
+import { ParkingDataProvider } from './ParkingDataManager';
 import Dashboard from './Dashboard';
 import Statistics from './Statistics';
 
@@ -8,11 +9,13 @@ function App() {
 
   return (
     <ThemeProvider>
-      {view === 'dashboard' ? (
-        <Dashboard setView={setView} />
-      ) : (
-        <Statistics setView={setView} />
-      )}
+      <ParkingDataProvider>
+        {view === 'dashboard' ? (
+          <Dashboard setView={setView} />
+        ) : (
+          <Statistics setView={setView} />
+        )}
+      </ParkingDataProvider>
     </ThemeProvider>
   );
 }
