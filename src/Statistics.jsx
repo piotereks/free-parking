@@ -23,6 +23,7 @@ const Statistics = ({ setView }) => {
 
     // Persistent zoom state to prevent reset on palette change
     const zoomRef = useRef({ start: 80, end: 100 });
+    const chartRef = useRef(null);
 
     const fetchData = async () => {
         setLoading(true);
@@ -250,11 +251,13 @@ const Statistics = ({ setView }) => {
                 ) : (
                     chartOption ? (
                         <ReactECharts
+                            ref={chartRef}
                             option={chartOption}
-                            style={{ height: '100%', width: '100%' }}
+                            style={{ height: '100%', width: '100%', touchAction: 'none' }}
                             onEvents={onChartEvents}
                             notMerge={false}
                             lazyUpdate={true}
+                            opts={{ renderer: 'canvas' }}
                         />
                     ) : (
                         <div className="loader">No data available to display.</div>

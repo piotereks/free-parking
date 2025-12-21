@@ -3,22 +3,6 @@ import react from '@vitejs/plugin-react'
 import path from 'path'
 
 export default defineConfig(({ command, mode }) => {
-  const isPreview = process.env.PREVIEW === 'true'
-  console.log('Command:', command)
-  console.log('Command:', command)
-  console.log('Mode:', mode)
-  console.log('isPreview:', isPreview)
-  console.log('isPreview:', isPreview)
-  console.log('serve and ispreview', command === 'serve' && isPreview)
-  console.log('serve', command === 'serve')
-  // let base
-  // if (command === 'serve' && isPreview) {
-  //   base = '/piotereks/docs/html/parking/'
-  // } else if (command === 'serve' && !isPreview) {
-  //   base = '/piotereks/html/parking/'
-  // } else {
-  //   base = '/'
-  // }
 
   const base = '/piotereks/html/parking/'
 
