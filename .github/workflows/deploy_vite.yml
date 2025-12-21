@@ -23,6 +23,7 @@ jobs:
         with:
           personal_token: ${{ secrets.DEPLOY_TOKEN }}
           external_repository: piotereks/piotereks
+          publish_branch: main
           publish_dir: ./parking-deploy/docs/html/parking
           destination_dir: docs/html/parking
           user_name: 'github-actions[bot]'
