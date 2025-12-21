@@ -118,8 +118,8 @@ extract_json_value() {
 # ------------------------------------------------------------------------------
 
 fetch_last_csv_timestamps() {
-    log ""
-    log "Fetching CSV last row"
+    # log ""
+    # log "Fetching CSV last row"
     curl -s -L "${CSV_URL}&time=$(date +%s)" | tail -n 1 | awk -F',' '{
     gd = $4; uni = $7
     gsub(/^[ \t"]+|[ \t"]+$/, "", gd)
@@ -149,9 +149,11 @@ main() {
     
     # Random wait to avoid thundering herd (0-60s)
     # Using awk for portable random number generation on Ash/BusyBox
-    wait_time=$(awk 'BEGIN{srand(); print int(rand()*61)}')
-    log "Waiting ${wait_time}s before execution..."
-    sleep "$wait_time"
+    if [ -z "$VERBOSE" ]; then 
+        wait_time=$(awk 'BEGIN{srand(); print int(rand()*61)}')
+        log "Waiting ${wait_time}s before execution..."
+        sleep "$wait_time"
+    fi
     
     # Step 1: Fetch Green Day parking data
     log "Step 1: Fetching Green Day parking data..."
@@ -189,12 +191,13 @@ main() {
     lastGreenTs=$(echo "$last_ts" | cut -d'|' -f1)
     lastUniTs=$(echo "$last_ts" | cut -d'|' -f2)
 
-    log "CSV timestamps: GD=$lastGreenTs UNI=$lastUniTs"
+    log "CSV timestamps: GD=$lastGreenTs | UNI=$lastUniTs"
+    log ""
 
     # Skip submit if nothing changed
     if [ "$timestampGreenDay" = "$lastGreenTs" ] && [ "$timestampUniversity" = "$lastUniTs" ]; then
         log "No timestamp change, skipping submission"
-        exit 0
+        exit 1
     fi
 
     log "Change detected, submitting form"
