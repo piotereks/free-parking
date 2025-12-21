@@ -111,6 +111,7 @@ const Statistics = ({ setView }) => {
         return {
             backgroundColor: 'transparent',
             animation: true,
+            animationDuration: 300,
             tooltip: { trigger: 'axis', confine: true, axisPointer: { type: 'cross' } },
             legend: {
                 data: [gdName, uniName],
