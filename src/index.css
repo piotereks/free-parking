@@ -57,9 +57,8 @@ body {
 .page-wrapper {
   display: flex;
   flex-direction: column;
-  height: 100dvh; /* Dynamic viewport height for mobile browsers */
+  height: 100vh;
   width: 100vw;
-  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .container {
@@ -99,6 +98,10 @@ body {
   letter-spacing: -0.01em;
   margin: 0;
   line-height: 1.2;
+}
+
+.title-text-short {
+  display: none;
 }
 
 .title-icon {
@@ -146,6 +149,11 @@ body {
   background: var(--bg-card);
   box-shadow: 0 4px 6px var(--shadow);
   border-color: var(--accent);
+}
+
+.btn-icon {
+  margin-right: 8px;
+  font-size: 1.1rem;
 }
 
 .theme-toggle {
@@ -263,7 +271,7 @@ body {
 }
 
 .free-spots {
-  font-size: 3rem;
+  font-size: 3.5rem;
   font-weight: 700;
   color: var(--success);
 }
@@ -298,6 +306,8 @@ body {
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 .status-label {
@@ -364,8 +374,13 @@ body {
    Responsive
 ------------------------------------------ */
 @media (max-width: 600px) {
+  html {
+    height: -webkit-fill-available;
+  }
+
   .page-wrapper {
-    height: 100dvh; /* Dynamic viewport height for Samsung Internet */
+    height: 100vh;
+    min-height: -webkit-fill-available; /* Safari/Samsung fallback */
   }
 
   .container {
@@ -384,14 +399,23 @@ body {
   }
 
   .header-title-group h1 {
-    font-size: 0.9rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    font-size: 1.3rem;
+  }
+
+  .header-title-group h1 .title-text-full {
+    display: none;
+  }
+
+  .header-title-group h1 .title-text-short {
+    display: inline;
   }
 
   .btn-text {
     display: none;
+  }
+
+  .btn-icon {
+    margin-right: 0;
   }
 
   .nav-btn {
@@ -429,7 +453,7 @@ body {
   }
 
   .free-spots {
-    font-size: 2.2rem;
+    font-size: 5.2rem;
   }
 
   .palette-group {

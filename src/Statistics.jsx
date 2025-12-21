@@ -143,7 +143,7 @@ const Statistics = ({ setView }) => {
                 top: 5,
                 textStyle: { color: textColor }
             },
-            grid: { left: 40, right: 20, bottom: isMobile ? 75 : 65, top: 40, containLabel: true },
+            grid: { left: isMobile ? 10 : 15, right: isMobile ? 10 : 15, bottom: isMobile ? 50 : 50, top: 40, containLabel: true },
             xAxis: {
                 type: 'time',
                 axisLabel: { color: textColor, margin: 10 },
@@ -233,6 +233,7 @@ const Statistics = ({ setView }) => {
         <div className="page-wrapper">
             <Header
                 title="Parking History"
+                shortTitle="Hist"
                 icon="📈"
                 onRefresh={fetchData}
                 updateStatus={loading ? 'Updating...' : 'Ready'}
