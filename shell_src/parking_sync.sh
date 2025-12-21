@@ -197,7 +197,7 @@ main() {
     # Skip submit if nothing changed
     if [ "$timestampGreenDay" = "$lastGreenTs" ] && [ "$timestampUniversity" = "$lastUniTs" ]; then
         log "No timestamp change, skipping submission"
-        exit 1
+        return 0
     fi
 
     log "Change detected, submitting form"
