@@ -23,6 +23,7 @@ const Statistics = ({ setView }) => {
 
     // Persistent zoom state to prevent reset on palette change
     const zoomRef = useRef({ start: 80, end: 100 });
+    const chartRef = useRef(null);
 
     const fetchData = async () => {
         setLoading(true);
@@ -52,6 +53,7 @@ const Statistics = ({ setView }) => {
 
         const textColor = isLight ? '#1e293b' : '#8b95c9';
         const gridColor = isLight ? '#cbd5e1' : '#2d3b6b';
+        const isMobile = window.innerWidth <= 600;
 
         const greenDayMap = new Map();
         const uniFreeMap = new Map();
@@ -141,7 +143,7 @@ const Statistics = ({ setView }) => {
                 top: 5,
                 textStyle: { color: textColor }
             },
-            grid: { left: 40, right: 20, bottom: 65, top: 40, containLabel: true },
+            grid: { left: isMobile ? 10 : 15, right: isMobile ? 10 : 15, bottom: isMobile ? 50 : 50, top: 40, containLabel: true },
             xAxis: {
                 type: 'time',
                 axisLabel: { color: textColor, margin: 10 },
@@ -160,7 +162,16 @@ const Statistics = ({ setView }) => {
             },
             dataZoom: [
                 { type: 'inside', start: zoomRef.current.start, end: zoomRef.current.end, filterMode: 'none' },
-                { type: 'slider', start: zoomRef.current.start, end: zoomRef.current.end, bottom: 10, height: 25, textStyle: { color: textColor }, filterMode: 'none' }
+                {
+                    type: 'slider',
+                    start: zoomRef.current.start,
+                    end: zoomRef.current.end,
+                    bottom: isMobile ? 5 : 10,
+                    height: isMobile ? 30 : 25,
+                    textStyle: { color: textColor },
+                    filterMode: 'none',
+                    handleSize: isMobile ? '120%' : '100%'
+                }
             ],
             series: [
                 // GreenDay
@@ -222,6 +233,7 @@ const Statistics = ({ setView }) => {
         <div className="page-wrapper">
             <Header
                 title="Parking History"
+                shortTitle="Hist"
                 icon="📈"
                 onRefresh={fetchData}
                 updateStatus={loading ? 'Updating...' : 'Ready'}
@@ -250,11 +262,13 @@ const Statistics = ({ setView }) => {
                 ) : (
                     chartOption ? (
                         <ReactECharts
+                            ref={chartRef}
                             option={chartOption}
-                            style={{ height: '100%', width: '100%' }}
+                            style={{ height: '100%', width: '100%', touchAction: 'none' }}
                             onEvents={onChartEvents}
                             notMerge={false}
                             lazyUpdate={true}
+                            opts={{ renderer: 'canvas' }}
                         />
                     ) : (
                         <div className="loader">No data available to display.</div>

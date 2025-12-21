@@ -4,7 +4,7 @@ import path from 'path'
 
 export default defineConfig(({ command, mode }) => {
 
-  const base = '/piotereks/html/parking/'
+  const base = '/free-parking/'
 
   console.log('Using base:', base)
 
@@ -30,8 +30,8 @@ export default defineConfig(({ command, mode }) => {
 
     preview: {
       port: 4173
-      // Preview will automatically use base: '/piotereks/docs/html/parking/'
-      // Access at: http://localhost:4173/piotereks/docs/html/parking/
+      // Preview will automatically use base: '/free-parking/'
+      // Access at: http://localhost:4173/free-parking/
     }
   }
 })
