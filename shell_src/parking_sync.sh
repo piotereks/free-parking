@@ -149,7 +149,7 @@ main() {
     
     # Random wait to avoid thundering herd (0-60s)
     # Using awk for portable random number generation on Ash/BusyBox
-    if [ -z "$VERBOSE" ]; then 
+    if [ "$VERBOSE" -eq "0" ]; then 
         wait_time=$(awk 'BEGIN{srand(); print int(rand()*61)}')
         log "Waiting ${wait_time}s before execution..."
         sleep "$wait_time"
