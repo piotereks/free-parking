@@ -143,7 +143,7 @@ const Statistics = ({ setView }) => {
                 top: 5,
                 textStyle: { color: textColor }
             },
-            grid: { left: isMobile ? 10 : 15, right: isMobile ? 10 : 15, bottom: isMobile ? 50 : 50, top: 40, containLabel: true },
+            grid: { left: isMobile ? 10 : 15, right: isMobile ? 10 : 15, bottom: isMobile ? 80 : 50, top: 40, containLabel: true },
             xAxis: {
                 type: 'time',
                 axisLabel: { color: textColor, margin: 10 },
@@ -166,11 +166,23 @@ const Statistics = ({ setView }) => {
                     type: 'slider',
                     start: zoomRef.current.start,
                     end: zoomRef.current.end,
-                    bottom: isMobile ? 5 : 10,
+                    bottom: isMobile ? 40 : 10,
                     height: isMobile ? 30 : 25,
-                    textStyle: { color: textColor },
+                    textStyle: { color: textColor, fontSize: isMobile ? 11 : 12 },
                     filterMode: 'none',
-                    handleSize: isMobile ? '120%' : '100%'
+                    handleSize: isMobile ? '180%' : '100%',
+                    borderColor: textColor,
+                    fillerColor: 'rgba(100, 149, 237, 0.3)',
+                    dataBackground: {
+                        lineStyle: { color: textColor, opacity: 0.5 },
+                        areaStyle: { color: textColor, opacity: 0.2 }
+                    },
+                    moveHandleSize: isMobile ? 10 : 7,
+                    emphasis: {
+                        handleStyle: {
+                            borderWidth: 2
+                        }
+                    }
                 }
             ],
             series: [
