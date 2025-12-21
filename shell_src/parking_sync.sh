@@ -118,25 +118,14 @@ extract_json_value() {
 # ------------------------------------------------------------------------------
 
 fetch_last_csv_timestamps() {
+    log ""
     log "Fetching CSV last row"
-    curl -s "${CSV_URL}&time=$(date +%s)" | awk -F',' '
-        NR==1 {
-            for (i=1;i<=NF;i++) {
-                k=tolower($i)
-                gsub(/^[ \t"]+|[ \t"]+$/, "", k)
-                if (k=="gd_time") gd=i
-                if (k=="uni_time") uni=i
-            }
-        }
-        NR>1 { row=$0 }
-        END {
-            if (row!="") {
-                split(row,f,",")
-                gsub(/^[ \t"]+|[ \t"]+$/, "", f[gd])
-                gsub(/^[ \t"]+|[ \t"]+$/, "", f[uni])
-                print f[gd] "|" f[uni]
-            }
-        }'
+    curl -s -L "${CSV_URL}&time=$(date +%s)" | tail -n 1 | awk -F',' '{
+    gd = $4; uni = $7
+    gsub(/^[ \t"]+|[ \t"]+$/, "", gd)
+    gsub(/^[ \t"]+|[ \t"]+$/, "", uni)
+    print gd "|" uni
+}'
 }
 
 
@@ -197,8 +186,8 @@ main() {
     # Step 2.5: Fetch last CSV timestamps
     log "Step 2.5: Fetch last CSV timestamps"
     last_ts=$(fetch_last_csv_timestamps || true)
-    lastGreenTs=$(echo "$last_ts" | cut -d',' -f1)
-    lastUniTs=$(echo "$last_ts" | cut -d',' -f2)
+    lastGreenTs=$(echo "$last_ts" | cut -d'|' -f1)
+    lastUniTs=$(echo "$last_ts" | cut -d'|' -f2)
 
     log "CSV timestamps: GD=$lastGreenTs UNI=$lastUniTs"
 
