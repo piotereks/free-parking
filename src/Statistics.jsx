@@ -1,11 +1,9 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
 import ReactECharts from 'echarts-for-react';
-import Papa from 'papaparse';
 import * as echarts from 'echarts';
 import Header from './Header';
 import { useTheme } from './ThemeContext';
-
-const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTwLNDbg8KjlVHsZWj9JUnO_OBIyZaRgZ4gZ8_Gbyly2J3f6rlCW6lDHAihwbuLhxWbBkNMI1wdWRAq/pub?gid=411529798&single=true&output=csv';
+import { useParkingData } from './ParkingDataManager';
 
 const PALETTES = {
     neon: { gd: '#05ffa1', uni: '#01beff' },
@@ -15,41 +13,17 @@ const PALETTES = {
 };
 
 const Statistics = ({ setView }) => {
-    const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [palette, setPalette] = useState('neon');
-    const [showSymbols, setShowSymbols] = useState(false);
+    const { historyData, historyLoading, refresh } = useParkingData();
+    const [palette, setPalette] = React.useState('neon');
+    const [showSymbols, setShowSymbols] = React.useState(false);
     const { isLight } = useTheme();
 
     // Persistent zoom state to prevent reset on palette change
     const zoomRef = useRef({ start: 80, end: 100 });
     const chartRef = useRef(null);
 
-    const fetchData = async () => {
-        setLoading(true);
-        try {
-            const response = await fetch(`${CSV_URL}&time=${Date.now()}`);
-            const csvText = await response.text();
-            Papa.parse(csvText, {
-                header: true,
-                skipEmptyLines: true,
-                complete: (results) => {
-                    setData(results.data);
-                    setLoading(false);
-                }
-            });
-        } catch (err) {
-            console.error(err);
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchData();
-    }, []);
-
     const chartOption = useMemo(() => {
-        if (!data || data.length === 0) return null;
+        if (!historyData || historyData.length === 0) return null;
 
         const textColor = isLight ? '#1e293b' : '#8b95c9';
         const gridColor = isLight ? '#cbd5e1' : '#2d3b6b';
@@ -58,7 +32,7 @@ const Statistics = ({ setView }) => {
         const greenDayMap = new Map();
         const uniFreeMap = new Map();
 
-        data.forEach(row => {
+        historyData.forEach(row => {
             const findKey = (name) => Object.keys(row).find(k => k.trim().toLowerCase() === name);
             const gdTimeKey = findKey('gd_time');
             const gdFreeKey = findKey('greenday free');
@@ -229,7 +203,7 @@ const Statistics = ({ setView }) => {
                 }
             ]
         };
-    }, [data, palette, showSymbols, isLight]);
+    }, [historyData, palette, showSymbols, isLight]);
 
     const onChartEvents = {
         'datazoom': (params) => {
@@ -247,8 +221,8 @@ const Statistics = ({ setView }) => {
                 title="Parking History"
                 shortTitle="Hist"
                 icon="📈"
-                onRefresh={fetchData}
-                updateStatus={loading ? 'Updating...' : 'Ready'}
+                onRefresh={refresh}
+                updateStatus={historyLoading ? 'Updating...' : 'Ready'}
                 currentView="stats"
                 setView={setView}
             >
@@ -269,7 +243,7 @@ const Statistics = ({ setView }) => {
                 </div>
             </Header>
             <main className="stats-container">
-                {loading && data.length === 0 ? (
+                {historyLoading && historyData.length === 0 ? (
                     <div className="loader">Loading history data...</div>
                 ) : (
                     chartOption ? (

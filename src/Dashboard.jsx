@@ -1,11 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from './Header';
-
-const API_URLS = [
-  'https://gd.zaparkuj.pl/api/freegroupcountervalue.json',
-  'https://gd.zaparkuj.pl/api/freegroupcountervalue-green.json'
-];
-const CORS_PROXY = 'https://corsproxy.io/?';
+import { useParkingData } from './ParkingDataManager';
 
 const ParkingCard = ({ data, now }) => {
   const ts = new Date(data.Timestamp.replace(' ', 'T'));
@@ -31,48 +26,23 @@ const ParkingCard = ({ data, now }) => {
 };
 
 const Dashboard = ({ setView }) => {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [lastUpdate, setLastUpdate] = useState(null);
+  const { realtimeData, realtimeLoading, realtimeError, lastRealtimeUpdate, refresh } = useParkingData();
   const [now, setNow] = useState(new Date());
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const results = await Promise.all(API_URLS.map(url =>
-        fetch(`${CORS_PROXY}${encodeURIComponent(url + '?time=' + Date.now())}`)
-          .then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`))
-      ));
-      setData(results);
-      setLastUpdate(new Date());
-    } catch (err) {
-      setError(err.toString());
-    } finally {
-      setLoading(false);
-    }
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(timer);
   }, []);
 
-  useEffect(() => {
-    fetchData();
-    const timer = setInterval(() => setNow(new Date()), 1000);
-    const refreshTimer = setInterval(fetchData, 5 * 60 * 1000); // Auto refresh 5m
-    return () => {
-      clearInterval(timer);
-      clearInterval(refreshTimer);
-    };
-  }, [fetchData]);
-
-  const totalSpaces = data.reduce((sum, d) => sum + (d.CurrentFreeGroupCounterValue || 0), 0);
-  const updateStatus = lastUpdate ? `Last update: ${lastUpdate.toLocaleTimeString('pl-PL')}` : 'Loading...';
+  const totalSpaces = realtimeData.reduce((sum, d) => sum + (d.CurrentFreeGroupCounterValue || 0), 0);
+  const updateStatus = lastRealtimeUpdate ? `Last update: ${lastRealtimeUpdate.toLocaleTimeString('pl-PL')}` : 'Loading...';
 
   return (
     <>
       <Header
         title="Parking Monitor"
         icon="🅿️"
-        onRefresh={fetchData}
+        onRefresh={refresh}
         updateStatus={updateStatus}
         currentView="dashboard"
         setView={setView}
@@ -80,31 +50,31 @@ const Dashboard = ({ setView }) => {
       <main className="container-main">
         <div className="subtitle">Real-time parking availability • UBS Wrocław</div>
 
-        {error && <div className="error"><strong>ERROR:</strong> {error}</div>}
+        {realtimeError && <div className="error"><strong>ERROR:</strong> {realtimeError}</div>}
 
         <div className="grid-container">
-          {loading && data.length === 0 ? (
+          {realtimeLoading && realtimeData.length === 0 ? (
             <div className="loader">Loading parking data...</div>
           ) : (
-            data.map((d, i) => <ParkingCard key={i} data={d} now={now} />)
+            realtimeData.map((d, i) => <ParkingCard key={i} data={d} now={now} />)
           )}
         </div>
 
         <div className="status-panel">
           <div className="panel-section">
             <div className="status-label">Total Spaces</div>
-            <div className="status-value big-value">{loading ? '---' : totalSpaces}</div>
+            <div className="status-value big-value">{realtimeLoading ? '---' : totalSpaces}</div>
           </div>
           <div className="panel-section">
             <div className="status-label">Data Status</div>
-            <div className="status-value" style={{ color: error ? 'var(--warning)' : 'var(--success)' }}>
-              {loading ? 'LOADING' : (error ? 'OFFLINE' : 'ONLINE')}
+            <div className="status-value" style={{ color: realtimeError ? 'var(--warning)' : 'var(--success)' }}>
+              {realtimeLoading ? 'LOADING' : (realtimeError ? 'OFFLINE' : 'ONLINE')}
             </div>
           </div>
           <div className="panel-section">
             <div className="status-label">Last Update / Current Time</div>
             <div className="time-group">
-              <span>{lastUpdate ? lastUpdate.toLocaleTimeString('pl-PL') : '--:--:--'}</span>
+              <span>{lastRealtimeUpdate ? lastRealtimeUpdate.toLocaleTimeString('pl-PL') : '--:--:--'}</span>
               <span className="status-current-inline">{now.toLocaleTimeString('pl-PL')}</span>
             </div>
           </div>
