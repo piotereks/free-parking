@@ -111,7 +111,7 @@ extract_json_value() {
 
 # ------------------------------------------------------------------------------
 # Fetch last row timestamps from published CSV
-# Expects headers: gd_time, uni_time (case/space insensitive)
+# Expects headers: gd_time:!:, uni_time (case/space insensitive)
 # ------------------------------------------------------------------------------
 
 fetch_last_csv_timestamps() {
