@@ -77,7 +77,7 @@ const Dashboard = ({ setView }) => {
         currentView="dashboard"
         setView={setView}
       />
-      <main className="container">
+      <main className="container-main">
         <div className="subtitle">Real-time parking availability • UBS Wrocław</div>
 
         {error && <div className="error"><strong>ERROR:</strong> {error}</div>}
