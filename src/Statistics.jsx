@@ -53,6 +53,7 @@ const Statistics = ({ setView }) => {
 
         const textColor = isLight ? '#1e293b' : '#8b95c9';
         const gridColor = isLight ? '#cbd5e1' : '#2d3b6b';
+        const isMobile = window.innerWidth <= 600;
 
         const greenDayMap = new Map();
         const uniFreeMap = new Map();
@@ -142,7 +143,7 @@ const Statistics = ({ setView }) => {
                 top: 5,
                 textStyle: { color: textColor }
             },
-            grid: { left: 40, right: 20, bottom: 65, top: 40, containLabel: true },
+            grid: { left: 40, right: 20, bottom: isMobile ? 75 : 65, top: 40, containLabel: true },
             xAxis: {
                 type: 'time',
                 axisLabel: { color: textColor, margin: 10 },
@@ -161,7 +162,16 @@ const Statistics = ({ setView }) => {
             },
             dataZoom: [
                 { type: 'inside', start: zoomRef.current.start, end: zoomRef.current.end, filterMode: 'none' },
-                { type: 'slider', start: zoomRef.current.start, end: zoomRef.current.end, bottom: 10, height: 25, textStyle: { color: textColor }, filterMode: 'none' }
+                {
+                    type: 'slider',
+                    start: zoomRef.current.start,
+                    end: zoomRef.current.end,
+                    bottom: isMobile ? 5 : 10,
+                    height: isMobile ? 30 : 25,
+                    textStyle: { color: textColor },
+                    filterMode: 'none',
+                    handleSize: isMobile ? '120%' : '100%'
+                }
             ],
             series: [
                 // GreenDay
