@@ -233,7 +233,14 @@ export const ParkingDataProvider = ({ children }) => {
     const fetchHistoryData = useCallback(async () => {
         setHistoryLoading(true);
         try {
-            const response = await fetch(`${CSV_URL}&time=${Date.now()}`);
+            const response = await fetch(`${CSV_URL}&time=${Date.now()}`, {
+                cache: 'no-store',
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                }
+            });
             const csvText = await response.text();
             
             Papa.parse(csvText, {
