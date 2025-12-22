@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ErrorBoundary from './ErrorBoundary';
 import { ThemeProvider } from './ThemeContext';
 import { ParkingDataProvider } from './ParkingDataManager';
 import Dashboard from './Dashboard';
@@ -8,15 +9,17 @@ function App() {
   const [view, setView] = useState('dashboard'); // 'dashboard' or 'stats'
 
   return (
-    <ThemeProvider>
-      <ParkingDataProvider>
-        {view === 'dashboard' ? (
-          <Dashboard setView={setView} />
-        ) : (
-          <Statistics setView={setView} />
-        )}
-      </ParkingDataProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <ParkingDataProvider>
+          {view === 'dashboard' ? (
+            <Dashboard setView={setView} />
+          ) : (
+            <Statistics setView={setView} />
+          )}
+        </ParkingDataProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 

@@ -14,14 +14,27 @@ const ParkingCard = ({ data, now }) => {
   let name = data.ParkingGroupName;
   if (name === 'Bank_1') name = 'Uni Wroc';
 
+  const freeSpots = data.CurrentFreeGroupCounterValue || 0;
+
   return (
-    <div className="parking-card">
+    <div 
+      className="parking-card" 
+      role="article"
+      aria-label={`${name} parking information`}
+    >
       <div className="parking-name">{name}</div>
-      <div className={`free-spots ${ageClass}`}>
-        {data.CurrentFreeGroupCounterValue || 0}
+      <div 
+        className={`free-spots ${ageClass}`}
+        aria-label={`${freeSpots} free parking spaces`}
+      >
+        {freeSpots}
       </div>
-      <div className="age-indicator-small">{age} min ago</div>
-      <div className="timestamp-small">@{ts.toLocaleTimeString('pl-PL')}</div>
+      <div className="age-indicator-small" aria-label={`Data from ${age} minutes ago`}>
+        {age} min ago
+      </div>
+      <div className="timestamp-small" aria-label={`Timestamp at ${ts.toLocaleTimeString('pl-PL')}`}>
+        @{ts.toLocaleTimeString('pl-PL')}
+      </div>
     </div>
   );
 };
@@ -60,35 +73,50 @@ const Dashboard = ({ setView }) => {
         currentView="dashboard"
         setView={setView}
       />
-      <main className="container-main">
+      <main className="container-main" role="main" aria-label="Parking dashboard">
         <div className="subtitle">Real-time parking availability • UBS Wrocław</div>
 
-        {realtimeError && <div className="error"><strong>ERROR:</strong> {realtimeError}</div>}
+        {realtimeError && (
+          <div className="error" role="alert" aria-live="polite">
+            <strong>ERROR:</strong> {realtimeError}
+          </div>
+        )}
 
-        <div className="grid-container">
+        <div className="grid-container" role="list" aria-label="Parking facilities">
           {realtimeLoading && realtimeData.length === 0 ? (
-            <div className="loader">Loading parking data...</div>
+            <div className="loader" role="status" aria-live="polite">Loading parking data...</div>
           ) : (
             realtimeData.map((d, i) => <ParkingCard key={i} data={d} now={now} />)
           )}
         </div>
 
-        <div className="status-panel">
+        <div className="status-panel" role="complementary" aria-label="Status information">
           <div className="panel-section">
             <div className="status-label">Total Spaces</div>
-            <div className="status-value big-value">{realtimeLoading ? '---' : totalSpaces}</div>
+            <div className="status-value big-value" aria-label={`Total free spaces: ${realtimeLoading ? 'loading' : totalSpaces}`}>
+              {realtimeLoading ? '---' : totalSpaces}
+            </div>
           </div>
           <div className="panel-section">
             <div className="status-label">Data Status</div>
-            <div className="status-value" style={{ color: realtimeError ? 'var(--warning)' : 'var(--success)' }}>
+            <div 
+              className="status-value" 
+              style={{ color: realtimeError ? 'var(--warning)' : 'var(--success)' }}
+              role="status"
+              aria-live="polite"
+            >
               {realtimeLoading ? 'LOADING' : (realtimeError ? 'OFFLINE' : 'ONLINE')}
             </div>
           </div>
           <div className="panel-section">
             <div className="status-label">Last Update / Current Time</div>
             <div className="time-group">
-              <span>{lastRealtimeUpdate ? lastRealtimeUpdate.toLocaleTimeString('pl-PL') : '--:--:--'}</span>
-              <span className="status-current-inline">{now.toLocaleTimeString('pl-PL')}</span>
+              <span aria-label={`Last updated at ${lastRealtimeUpdate ? lastRealtimeUpdate.toLocaleTimeString('pl-PL') : 'unknown'}`}>
+                {lastRealtimeUpdate ? lastRealtimeUpdate.toLocaleTimeString('pl-PL') : '--:--:--'}
+              </span>
+              <span className="status-current-inline" aria-label={`Current time ${now.toLocaleTimeString('pl-PL')}`}>
+                {now.toLocaleTimeString('pl-PL')}
+              </span>
             </div>
           </div>
         </div>
