@@ -35,3 +35,6 @@ xxx/
 *.tmp
 *.bak
 *~
+ 
+# Local working artifacts
+wrk/

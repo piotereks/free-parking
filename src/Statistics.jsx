@@ -19,7 +19,8 @@ const Statistics = ({ setView }) => {
     const { isLight } = useTheme();
 
     // Persistent zoom state to prevent reset on palette change
-    const zoomRef = useRef({ start: 80, end: 100 });
+    // Default to full range on first render so chart isn't zoomed in by default
+    const zoomRef = useRef({ start: 0, end: 100 });
     const chartRef = useRef(null);
 
     const chartOption = useMemo(() => {
@@ -58,8 +59,43 @@ const Statistics = ({ setView }) => {
                 .sort((a, b) => a.t - b.t);
         };
 
-        const rawGD = getRawData(greenDayMap);
-        const rawUni = getRawData(uniFreeMap);
+        let rawGD = getRawData(greenDayMap);
+        let rawUni = getRawData(uniFreeMap);
+
+        // Deduplicate entries by timestamp + value so identical rows aren't plotted twice
+        const dedupeByRawAndValue = (arr) => {
+            const seen = new Set();
+            return arr.filter(item => {
+                const key = `${item.raw}|${item.v}`;
+                if (seen.has(key)) return false;
+                seen.add(key);
+                return true;
+            });
+        };
+
+        rawGD = dedupeByRawAndValue(rawGD);
+        rawUni = dedupeByRawAndValue(rawUni);
+
+        // If one series' first (earliest) data point is much older than the other's
+        // (e.g. Uni only has an old single point), align the older first point's
+        // timestamp to the newer series' first timestamp so it displays near the
+        // recent data instead of as a long-out-of-range flat line.
+        if (rawGD.length > 0 && rawUni.length > 0) {
+            const gdFirst = rawGD[0].t.getTime();
+            const uniFirst = rawUni[0].t.getTime();
+
+            // If uni is older than gd, move uni first timestamp to gd first
+            if (uniFirst < gdFirst) {
+                rawUni[0].t = new Date(gdFirst);
+                rawUni[0].raw = rawGD[0].raw;
+            }
+
+            // Conversely, if gd is older than uni, align gd to uni
+            if (gdFirst < uniFirst) {
+                rawGD[0].t = new Date(uniFirst);
+                rawGD[0].raw = rawUni[0].raw;
+            }
+        }
 
         // Find global max timestamp across all series
         const allTimestamps = [...rawGD.map(d => d.t.getTime()), ...rawUni.map(d => d.t.getTime())];
