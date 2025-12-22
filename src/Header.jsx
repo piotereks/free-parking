@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTheme } from './ThemeContext';
+import { clearCache } from './store/parkingStore';
 
 const Header = ({ title, shortTitle, icon, onRefresh, updateStatus, currentView, setView, children }) => {
   const { isLight, toggleTheme } = useTheme();
@@ -18,12 +19,24 @@ const Header = ({ title, shortTitle, icon, onRefresh, updateStatus, currentView,
         {/* Extra actions like Palette Selector */}
         {children}
 
-        {onRefresh && (
-          <button className="nav-btn" onClick={onRefresh}>
-            <span className="btn-icon">⟳</span>
-            <span className="btn-text">Refresh</span>
-          </button>
-        )}
+        {(() => {
+          const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
+          const showClear = params.has('clear_cache');
+          if (showClear) {
+            return (
+              <button className="nav-btn" onClick={() => clearCache()}>
+                <span className="btn-icon">🧹</span>
+                <span className="btn-text">Clear Cache</span>
+              </button>
+            );
+          }
+          return onRefresh ? (
+            <button className="nav-btn" onClick={onRefresh}>
+              <span className="btn-icon">⟳</span>
+              <span className="btn-text">Refresh</span>
+            </button>
+          ) : null;
+        })()}
 
         {currentView === 'stats' && (
           <button className="nav-btn" onClick={() => setView('dashboard')}>
