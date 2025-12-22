@@ -37,6 +37,123 @@ const FORM_ENTRIES = {
 const CACHE_KEY_REALTIME = 'parking_realtime_cache';
 const CACHE_KEY_HISTORY = 'parking_history_cache';
 
+const COLUMN_ALIASES = {
+    GD_TIME: 'gd_time',
+    GD_VALUE: 'greenday free',
+    UNI_TIME: 'uni_time',
+    UNI_VALUE: 'uni free'
+};
+
+const normalizeKey = (key) => (key ? key.trim().toLowerCase() : '');
+
+const findColumnKey = (row, target) => {
+    if (!row) return null;
+    const targetKey = normalizeKey(target);
+    return Object.keys(row).find((key) => normalizeKey(key) === targetKey) || null;
+};
+
+const getRowValue = (row, keyName) => {
+    const columnKey = findColumnKey(row, keyName);
+    if (!columnKey) return undefined;
+    const value = row[columnKey];
+    return typeof value === 'string' ? value.trim() : value;
+};
+
+const parseTimestampValue = (raw) => {
+    if (!raw) return null;
+    const normalized = raw.includes('T') ? raw : raw.replace(' ', 'T');
+    const date = new Date(normalized);
+    return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const buildEntryFromRow = (row, timeKey, valueKey) => {
+    if (!row) return null;
+    const raw = getRowValue(row, timeKey);
+    const date = parseTimestampValue(raw);
+    if (!date) return null;
+    const valueRaw = getRowValue(row, valueKey);
+    const valueNumber = valueRaw === undefined || valueRaw === null || valueRaw === '' ? null : Number(valueRaw);
+    return {
+        raw,
+        date,
+        value: Number.isNaN(valueNumber) ? null : valueNumber
+    };
+};
+
+const extractLastEntry = (rows) => {
+    if (!rows || rows.length === 0) {
+        return { gd: null, uni: null };
+    }
+    const lastRow = rows[rows.length - 1];
+    return {
+        gd: buildEntryFromRow(lastRow, COLUMN_ALIASES.GD_TIME, COLUMN_ALIASES.GD_VALUE),
+        uni: buildEntryFromRow(lastRow, COLUMN_ALIASES.UNI_TIME, COLUMN_ALIASES.UNI_VALUE)
+    };
+};
+
+const dedupeHistoryRows = (rows = []) => {
+    const seen = new Set();
+    const result = [];
+    rows.forEach((row) => {
+        const gdKey = getRowValue(row, COLUMN_ALIASES.GD_TIME) || '';
+        const uniKey = getRowValue(row, COLUMN_ALIASES.UNI_TIME) || '';
+        const composite = `${gdKey}|||${uniKey}`;
+        if (!seen.has(composite)) {
+            seen.add(composite);
+            result.push(row);
+        }
+    });
+    return result;
+};
+
+const parseApiEntry = (record) => {
+    if (!record || !record.Timestamp) return null;
+    const raw = record.Timestamp.trim();
+    if (!raw) return null;
+    const iso = raw.includes('T') ? raw : raw.replace(' ', 'T');
+    const date = new Date(iso);
+    if (Number.isNaN(date.getTime())) return null;
+    const valueNumber = Number(record.CurrentFreeGroupCounterValue);
+    return {
+        raw,
+        date,
+        value: Number.isNaN(valueNumber) ? null : valueNumber
+    };
+};
+
+const cloneApiResults = (apiResults = []) => (
+    Array.isArray(apiResults) ? apiResults.map((result) => ({ ...(result || {}) })) : []
+);
+
+const buildCacheRowFromPayload = (gdPayload, uniPayload) => ({
+    [COLUMN_ALIASES.GD_TIME]: gdPayload?.Timestamp || '',
+    [COLUMN_ALIASES.GD_VALUE]: gdPayload?.CurrentFreeGroupCounterValue ?? '',
+    [COLUMN_ALIASES.UNI_TIME]: uniPayload?.Timestamp || '',
+    [COLUMN_ALIASES.UNI_VALUE]: uniPayload?.CurrentFreeGroupCounterValue ?? ''
+});
+
+const readHistoryCacheSnapshot = () => {
+    if (typeof localStorage === 'undefined') {
+        return { rows: [], timestamp: null, last: { gd: null, uni: null } };
+    }
+    const cached = localStorage.getItem(CACHE_KEY_HISTORY);
+    if (!cached) {
+        return { rows: [], timestamp: null, last: { gd: null, uni: null } };
+    }
+    try {
+        const parsed = JSON.parse(cached);
+        const rows = Array.isArray(parsed.data) ? parsed.data : [];
+        return {
+            rows,
+            timestamp: parsed.timestamp || null,
+            last: extractLastEntry(rows)
+        };
+    } catch (error) {
+        console.error('Failed to parse history cache snapshot:', error);
+        return { rows: [], timestamp: null, last: { gd: null, uni: null } };
+    }
+};
+
 export const ParkingDataProvider = ({ children }) => {
     // Real-time data from APIs
     const [realtimeData, setRealtimeData] = useState([]);
@@ -50,6 +167,22 @@ export const ParkingDataProvider = ({ children }) => {
     const [lastHistoryUpdate, setLastHistoryUpdate] = useState(null);
 
     const fetchInProgressRef = useRef(false);
+
+    const persistHistorySnapshot = useCallback((rows) => {
+        const safeRows = Array.isArray(rows) ? rows : [];
+        const updateTime = new Date();
+        setHistoryData(safeRows);
+        setLastHistoryUpdate(updateTime);
+        try {
+            localStorage.setItem(CACHE_KEY_HISTORY, JSON.stringify({
+                data: safeRows,
+                timestamp: updateTime.toISOString()
+            }));
+            console.log('History cache updated');
+        } catch (e) {
+            console.error('Failed to cache history data:', e);
+        }
+    }, []);
 
     // Submit new data to Google Form
     const submitToGoogleForm = useCallback(async (apiResults) => {
@@ -97,43 +230,34 @@ export const ParkingDataProvider = ({ children }) => {
         }
     }, []);
 
-    // Get last timestamps from cached history data
-    const getLastTimestamps = useCallback((cachedData) => {
-        if (!cachedData || cachedData.length === 0) return { gd: null, uni: null };
-
-        const findKey = (row, name) => Object.keys(row).find(k => k.trim().toLowerCase() === name);
-        
-        let lastGdTime = null;
-        let lastUniTime = null;
-
-        for (let i = cachedData.length - 1; i >= 0; i--) {
-            const row = cachedData[i];
-            
-            if (!lastGdTime) {
-                const gdTimeKey = findKey(row, 'gd_time');
-                if (gdTimeKey && row[gdTimeKey]) {
-                    const ts = new Date(row[gdTimeKey].trim());
-                    if (!isNaN(ts.getTime())) {
-                        lastGdTime = ts;
-                    }
+    const fetchHistoryData = useCallback(async () => {
+        setHistoryLoading(true);
+        try {
+            const response = await fetch(`${CSV_URL}&time=${Date.now()}`, {
+                cache: 'no-store',
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
                 }
-            }
+            });
+            const csvText = await response.text();
             
-            if (!lastUniTime) {
-                const uniTimeKey = findKey(row, 'uni_time');
-                if (uniTimeKey && row[uniTimeKey]) {
-                    const ts = new Date(row[uniTimeKey].trim());
-                    if (!isNaN(ts.getTime())) {
-                        lastUniTime = ts;
-                    }
+            Papa.parse(csvText, {
+                header: true,
+                skipEmptyLines: true,
+                complete: (results) => {
+                    const deduped = dedupeHistoryRows(results.data || []);
+                    console.log('CSV fetched, parsed, and deduplicated');
+                    persistHistorySnapshot(deduped);
+                    setHistoryLoading(false);
                 }
-            }
-
-            if (lastGdTime && lastUniTime) break;
+            });
+        } catch (err) {
+            console.error('Failed to fetch history data:', err);
+            setHistoryLoading(false);
         }
-
-        return { gd: lastGdTime, uni: lastUniTime };
-    }, []);
+    }, [persistHistorySnapshot]);
 
     // Fetch real-time API data
     const fetchRealtimeData = useCallback(async () => {
@@ -195,104 +319,93 @@ export const ParkingDataProvider = ({ children }) => {
     // Check API timestamps against cached history and fetch CSV if needed
     const checkAndUpdateHistory = useCallback(async (apiResults) => {
         try {
-            // Get API timestamps
-            const gdTimestamp = apiResults[0]?.Timestamp ? new Date(apiResults[0].Timestamp.replace(' ', 'T')) : null;
-            const uniTimestamp = apiResults[1]?.Timestamp ? new Date(apiResults[1].Timestamp.replace(' ', 'T')) : null;
+            const apiGdEntry = parseApiEntry(apiResults[0]);
+            const apiUniEntry = parseApiEntry(apiResults[1]);
 
             console.log('API timestamps:', {
-                gd: gdTimestamp?.toISOString(),
-                uni: uniTimestamp?.toISOString()
+                gd: apiGdEntry?.date?.toISOString(),
+                uni: apiUniEntry?.date?.toISOString()
             });
 
-            // Load cached history
-            const cached = localStorage.getItem(CACHE_KEY_HISTORY);
-            let cachedData = null;
-            let cachedTimestamps = { gd: null, uni: null };
+            let snapshot = readHistoryCacheSnapshot();
 
-            if (cached) {
-                try {
-                    const parsedCache = JSON.parse(cached);
-                    cachedData = parsedCache.data;
-                    cachedTimestamps = getLastTimestamps(cachedData);
-                    console.log('History cache timestamps:', {
-                        gd: cachedTimestamps.gd?.toISOString(),
-                        uni: cachedTimestamps.uni?.toISOString()
-                    });
-
-                    // Set cached data immediately if not already set
-                    if (historyData.length === 0) {
-                        setHistoryData(cachedData);
-                        setLastHistoryUpdate(new Date(parsedCache.timestamp));
-                    }
-                } catch (e) {
-                    console.error('Failed to parse history cache:', e);
+            if (snapshot.rows.length && historyData.length === 0) {
+                setHistoryData(snapshot.rows);
+                if (snapshot.timestamp) {
+                    setLastHistoryUpdate(new Date(snapshot.timestamp));
                 }
             }
 
-            // Check if we need to fetch CSV
-            const gdNewer = gdTimestamp && cachedTimestamps.gd && 
-                            gdTimestamp.getTime() > cachedTimestamps.gd.getTime();
-            const uniNewer = uniTimestamp && cachedTimestamps.uni && 
-                             uniTimestamp.getTime() > cachedTimestamps.uni.getTime();
-            
-            const noCache = !cachedTimestamps.gd && !cachedTimestamps.uni;
+            const gdFastSatisfied = !apiGdEntry?.date || (snapshot.last.gd?.date && apiGdEntry.date.getTime() <= snapshot.last.gd.date.getTime());
+            const uniFastSatisfied = !apiUniEntry?.date || (snapshot.last.uni?.date && apiUniEntry.date.getTime() <= snapshot.last.uni.date.getTime());
+            const hasCacheRows = snapshot.rows.length > 0;
 
-            if (noCache || gdNewer || uniNewer) {
-                console.log('New data detected:', {
-                    noCache,
-                    gdNewer,
-                    uniNewer
-                });
-
-                // Submit new data to Google Form
-                await submitToGoogleForm(apiResults);
-
-                // Then fetch updated CSV
-                console.log('Fetching CSV...');
-                await fetchHistoryData();
-            } else {
-                console.log('History cache is up to date');
+            if (hasCacheRows && gdFastSatisfied && uniFastSatisfied) {
+                console.log('Fast path hit — cache already covers API timestamps');
+                return;
             }
+
+            console.log('Slow path triggered — fetching CSV for reconciliation');
+            await fetchHistoryData();
+            snapshot = readHistoryCacheSnapshot();
+
+            if (snapshot.rows.length) {
+                setHistoryData(snapshot.rows);
+                if (snapshot.timestamp) {
+                    setLastHistoryUpdate(new Date(snapshot.timestamp));
+                }
+            }
+
+            const gdIsNew = apiGdEntry?.date
+                ? (!snapshot.last.gd?.date || apiGdEntry.date.getTime() > snapshot.last.gd.date.getTime())
+                : false;
+            const uniIsNew = apiUniEntry?.date
+                ? (!snapshot.last.uni?.date || apiUniEntry.date.getTime() > snapshot.last.uni.date.getTime())
+                : false;
+
+            if (!gdIsNew && !uniIsNew) {
+                console.log('After reconciliation, no newer timestamps detected');
+                return;
+            }
+
+            const payload = cloneApiResults(apiResults);
+            while (payload.length < 2) {
+                payload.push({});
+            }
+
+            if (snapshot.last.gd?.date) {
+                const apiDate = apiGdEntry?.date;
+                if (!apiDate || apiDate.getTime() < snapshot.last.gd.date.getTime()) {
+                    payload[0] = {
+                        ...payload[0],
+                        Timestamp: snapshot.last.gd.raw,
+                        CurrentFreeGroupCounterValue: snapshot.last.gd.value ?? payload[0].CurrentFreeGroupCounterValue ?? 0
+                    };
+                }
+            }
+
+            if (snapshot.last.uni?.date) {
+                const apiDate = apiUniEntry?.date;
+                if (!apiDate || apiDate.getTime() < snapshot.last.uni.date.getTime()) {
+                    payload[1] = {
+                        ...payload[1],
+                        Timestamp: snapshot.last.uni.raw,
+                        CurrentFreeGroupCounterValue: snapshot.last.uni.value ?? payload[1].CurrentFreeGroupCounterValue ?? 0
+                    };
+                }
+            }
+
+            await submitToGoogleForm(payload);
+
+            const appendedRows = dedupeHistoryRows([
+                ...snapshot.rows,
+                buildCacheRowFromPayload(payload[0], payload[1])
+            ]);
+            persistHistorySnapshot(appendedRows);
         } catch (err) {
             console.error('Error checking history update:', err);
         }
-    }, [historyData.length, getLastTimestamps, submitToGoogleForm]);
-
-    // Fetch CSV history data
-    const fetchHistoryData = useCallback(async () => {
-        setHistoryLoading(true);
-        try {
-            const response = await fetch(`${CSV_URL}&time=${Date.now()}`);
-            const csvText = await response.text();
-            
-            Papa.parse(csvText, {
-                header: true,
-                skipEmptyLines: true,
-                complete: (results) => {
-                    const newData = results.data;
-                    console.log('CSV fetched and parsed');
-                    setHistoryData(newData);
-                    const updateTime = new Date();
-                    setLastHistoryUpdate(updateTime);
-                    
-                    // Update cache
-                    try {
-                        localStorage.setItem(CACHE_KEY_HISTORY, JSON.stringify({
-                            data: newData,
-                            timestamp: updateTime.toISOString()
-                        }));
-                        console.log('History cache updated');
-                    } catch (e) {
-                        console.error('Failed to cache history data:', e);
-                    }
-                    setHistoryLoading(false);
-                }
-            });
-        } catch (err) {
-            console.error('Failed to fetch history data:', err);
-            setHistoryLoading(false);
-        }
-    }, []);
+    }, [fetchHistoryData, historyData.length, persistHistorySnapshot, submitToGoogleForm]);
 
     // Load history cache on mount
     useEffect(() => {
