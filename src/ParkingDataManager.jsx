@@ -242,16 +242,11 @@ export const ParkingDataProvider = ({ children }) => {
         }
         setHistoryLoading(true);
         try {
-            // Use the configured CORS proxy to avoid browser preflight blocking
-            const proxiedUrl = `${CORS_PROXY}${encodeURIComponent(CSV_URL + '&time=' + Date.now())}`;
-            const response = await fetch(proxiedUrl, {
+            const response = await fetch(`${CSV_URL}&time=${Date.now()}`, {
                 cache: 'no-store'
             });
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
             const csvText = await response.text();
-
+            
             Papa.parse(csvText, {
                 header: true,
                 skipEmptyLines: true,

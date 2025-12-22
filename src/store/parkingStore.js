@@ -85,15 +85,9 @@ export const clearCache = () => {
             localStorage.removeItem('parking_history_cache');
         }
 
-        // Update store state to cleared and reset slices
+        // Mark store as cache-cleared and stop future automatic fetches.
+        // Do NOT wipe in-memory data so the UI remains visible.
         useParkingStore.setState({
-            realtimeData: [],
-            realtimeLoading: false,
-            realtimeError: null,
-            lastRealtimeUpdate: null,
-            historyData: [],
-            historyLoading: false,
-            lastHistoryUpdate: null,
             fetchInProgress: false,
             cacheCleared: true
         });
