@@ -21,6 +21,10 @@ export const useParkingStore = create((set, get) => {
 
         // Refresh callback (set by ParkingDataProvider)
         refreshCallback: null,
+        // Stop auto-refresh callback (set by ParkingDataProvider)
+        stopAutoRefresh: null,
+        // Cache-cleared flag to prevent further automatic fetches
+        cacheCleared: false,
 
         // Actions
         setRealtimeData: (data) => set({ realtimeData: data }),
@@ -35,6 +39,8 @@ export const useParkingStore = create((set, get) => {
         setFetchInProgress: (inProgress) => set({ fetchInProgress: inProgress }),
 
         setRefreshCallback: (callback) => set({ refreshCallback: callback }),
+        setStopAutoRefresh: (cb) => set({ stopAutoRefresh: cb }),
+        setCacheCleared: (v) => set({ cacheCleared: v }),
 
         // Convenience action to update all realtime fields at once
         updateRealtimeState: (updates) => set(updates),
@@ -69,3 +75,41 @@ export const refreshParkingData = async () => {
         console.warn('Refresh callback not set yet');
     }
 };
+
+// Clear local caches and stop auto-refresh. Safe to call from console.
+export const clearCache = () => {
+    try {
+        // Remove known cache keys
+        if (typeof localStorage !== 'undefined') {
+            localStorage.removeItem('parking_realtime_cache');
+            localStorage.removeItem('parking_history_cache');
+        }
+
+        // Update store state to cleared and reset slices
+        useParkingStore.setState({
+            realtimeData: [],
+            realtimeLoading: false,
+            realtimeError: null,
+            lastRealtimeUpdate: null,
+            historyData: [],
+            historyLoading: false,
+            lastHistoryUpdate: null,
+            fetchInProgress: false,
+            cacheCleared: true
+        });
+
+        const stopCb = useParkingStore.getState().stopAutoRefresh;
+        if (typeof stopCb === 'function') {
+            try { stopCb(); } catch (e) { console.warn('stopAutoRefresh failed', e); }
+        }
+
+        console.log('Cache cleared and auto-refresh stopped');
+    } catch (e) {
+        console.error('clearCache failed', e);
+    }
+};
+
+// Attach helper to window in dev for convenience
+if (typeof window !== 'undefined') {
+    window.clearCache = clearCache;
+}

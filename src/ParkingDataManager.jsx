@@ -167,9 +167,11 @@ export const ParkingDataProvider = ({ children }) => {
     const fetchInProgress = useParkingStore((state) => state.fetchInProgress);
     const setFetchInProgress = useParkingStore((state) => state.setFetchInProgress);
     const setRefreshCallback = useParkingStore((state) => state.setRefreshCallback);
+    const setStopAutoRefresh = useParkingStore((state) => state.setStopAutoRefresh);
     const historyData = useParkingStore((state) => state.historyData);
 
     const fetchInProgressRef = useRef(false);
+    const cacheCleared = useParkingStore((state) => state.cacheCleared);
 
     const persistHistorySnapshot = useCallback((rows) => {
         const safeRows = Array.isArray(rows) ? rows : [];
@@ -234,6 +236,10 @@ export const ParkingDataProvider = ({ children }) => {
     }, []);
 
     const fetchHistoryData = useCallback(async () => {
+        if (cacheCleared) {
+            console.log('Cache cleared — skipping history fetch');
+            return;
+        }
         setHistoryLoading(true);
         try {
             const response = await fetch(`${CSV_URL}&time=${Date.now()}`, {
@@ -264,6 +270,11 @@ export const ParkingDataProvider = ({ children }) => {
 
     // Fetch real-time API data
     const fetchRealtimeData = useCallback(async () => {
+        if (cacheCleared) {
+            console.log('Cache cleared — skipping realtime fetch');
+            return;
+        }
+
         if (fetchInProgressRef.current) {
             console.log('Fetch already in progress, skipping...');
             return;
@@ -423,14 +434,27 @@ export const ParkingDataProvider = ({ children }) => {
                 console.error('Failed to load history cache on mount:', e);
             }
         }
-    }, []);
+    }, [setHistoryData, setLastHistoryUpdate]);
 
     // Initial fetch and auto-refresh for real-time data
     useEffect(() => {
+        if (cacheCleared) {
+            console.log('Cache cleared — skipping initial realtime fetch and auto-refresh');
+            return;
+        }
+
         fetchRealtimeData();
         const refreshTimer = setInterval(fetchRealtimeData, 5 * 60 * 1000); // Auto refresh every 5 minutes
+
+        // expose stop callback so clearCache can stop the interval
+        try {
+            setStopAutoRefresh(() => () => clearInterval(refreshTimer));
+        } catch (e) {
+            console.warn('Failed to register stopAutoRefresh', e);
+        }
+
         return () => clearInterval(refreshTimer);
-    }, [fetchRealtimeData]);
+    }, [fetchRealtimeData, setStopAutoRefresh, cacheCleared]);
 
     // Manual refresh function (for refresh buttons)
     const refresh = useCallback(async () => {
