@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useCallback, useRef } from 'react';
+import PropTypes from 'prop-types';
 import Papa from 'papaparse';
 import { useParkingStore } from './store/parkingStore';
 
@@ -491,6 +492,10 @@ export const ParkingDataProvider = ({ children }) => {
             {children}
         </ParkingDataContext.Provider>
     );
+};
+
+ParkingDataProvider.propTypes = {
+    children: PropTypes.node.isRequired
 };
 
 export const useParkingData = () => {

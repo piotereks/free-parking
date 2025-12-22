@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { useTheme } from './ThemeContext';
 import { clearCache } from './store/parkingStore';
 
@@ -58,6 +59,17 @@ const Header = ({ title, shortTitle, icon, onRefresh, updateStatus, currentView,
       </div>
     </header>
   );
+};
+
+Header.propTypes = {
+  title: PropTypes.string.isRequired,
+  shortTitle: PropTypes.string,
+  icon: PropTypes.string.isRequired,
+  onRefresh: PropTypes.func,
+  updateStatus: PropTypes.string.isRequired,
+  currentView: PropTypes.oneOf(['dashboard', 'stats']).isRequired,
+  setView: PropTypes.func.isRequired,
+  children: PropTypes.node
 };
 
 export default Header;

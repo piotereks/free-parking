@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import Header from './Header';
 import { useParkingStore, refreshParkingData } from './store/parkingStore';
 
@@ -23,6 +24,15 @@ const ParkingCard = ({ data, now }) => {
       <div className="timestamp-small">@{ts.toLocaleTimeString('pl-PL')}</div>
     </div>
   );
+};
+
+ParkingCard.propTypes = {
+  data: PropTypes.shape({
+    ParkingGroupName: PropTypes.string.isRequired,
+    CurrentFreeGroupCounterValue: PropTypes.number,
+    Timestamp: PropTypes.string.isRequired
+  }).isRequired,
+  now: PropTypes.instanceOf(Date).isRequired
 };
 
 const Dashboard = ({ setView }) => {
@@ -85,6 +95,10 @@ const Dashboard = ({ setView }) => {
       </main>
     </>
   );
+};
+
+Dashboard.propTypes = {
+  setView: PropTypes.func.isRequired
 };
 
 export default Dashboard;

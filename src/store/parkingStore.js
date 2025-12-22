@@ -1,9 +1,6 @@
 import { create } from 'zustand';
 
-// Store reference for calling actions outside of React components
-let storeRef = null;
-
-export const useParkingStore = create((set, get) => {
+export const useParkingStore = create((set) => {
     const store = {
         // Real-time data state
         realtimeData: [],
@@ -62,7 +59,6 @@ export const useParkingStore = create((set, get) => {
         })
     };
     
-    storeRef = store;
     return store;
 });
 

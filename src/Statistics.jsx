@@ -1,4 +1,5 @@
 import React, { useMemo, useRef } from 'react';
+import PropTypes from 'prop-types';
 import ReactECharts from 'echarts-for-react';
 import * as echarts from 'echarts';
 import Header from './Header';
@@ -301,6 +302,10 @@ const Statistics = ({ setView }) => {
             </main>
         </div>
     );
+};
+
+Statistics.propTypes = {
+  setView: PropTypes.func.isRequired
 };
 
 export default Statistics;
