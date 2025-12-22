@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Header from './Header';
-import { useParkingData } from './ParkingDataManager';
+import { useParkingStore, refreshParkingData } from './store/parkingStore';
 
 const ParkingCard = ({ data, now }) => {
   const ts = new Date(data.Timestamp.replace(' ', 'T'));
@@ -26,7 +26,10 @@ const ParkingCard = ({ data, now }) => {
 };
 
 const Dashboard = ({ setView }) => {
-  const { realtimeData, realtimeLoading, realtimeError, lastRealtimeUpdate, refresh } = useParkingData();
+  const realtimeData = useParkingStore((state) => state.realtimeData);
+  const realtimeLoading = useParkingStore((state) => state.realtimeLoading);
+  const realtimeError = useParkingStore((state) => state.realtimeError);
+  const lastRealtimeUpdate = useParkingStore((state) => state.lastRealtimeUpdate);
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
@@ -42,7 +45,7 @@ const Dashboard = ({ setView }) => {
       <Header
         title="Parking Monitor"
         icon="🅿️"
-        onRefresh={refresh}
+        onRefresh={refreshParkingData}
         updateStatus={updateStatus}
         currentView="dashboard"
         setView={setView}

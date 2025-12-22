@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { createContext, useContext, useEffect, useCallback, useRef } from 'react';
 import Papa from 'papaparse';
+import { useParkingStore } from './store/parkingStore';
 
 const ParkingDataContext = createContext();
 
@@ -155,16 +156,18 @@ const readHistoryCacheSnapshot = () => {
 };
 
 export const ParkingDataProvider = ({ children }) => {
-    // Real-time data from APIs
-    const [realtimeData, setRealtimeData] = useState([]);
-    const [realtimeLoading, setRealtimeLoading] = useState(true);
-    const [realtimeError, setRealtimeError] = useState(null);
-    const [lastRealtimeUpdate, setLastRealtimeUpdate] = useState(null);
-
-    // Historical data from CSV
-    const [historyData, setHistoryData] = useState([]);
-    const [historyLoading, setHistoryLoading] = useState(false);
-    const [lastHistoryUpdate, setLastHistoryUpdate] = useState(null);
+    // Use Zustand store
+    const setRealtimeData = useParkingStore((state) => state.setRealtimeData);
+    const setRealtimeLoading = useParkingStore((state) => state.setRealtimeLoading);
+    const setRealtimeError = useParkingStore((state) => state.setRealtimeError);
+    const setLastRealtimeUpdate = useParkingStore((state) => state.setLastRealtimeUpdate);
+    const setHistoryData = useParkingStore((state) => state.setHistoryData);
+    const setHistoryLoading = useParkingStore((state) => state.setHistoryLoading);
+    const setLastHistoryUpdate = useParkingStore((state) => state.setLastHistoryUpdate);
+    const fetchInProgress = useParkingStore((state) => state.fetchInProgress);
+    const setFetchInProgress = useParkingStore((state) => state.setFetchInProgress);
+    const setRefreshCallback = useParkingStore((state) => state.setRefreshCallback);
+    const historyData = useParkingStore((state) => state.historyData);
 
     const fetchInProgressRef = useRef(false);
 
@@ -182,7 +185,7 @@ export const ParkingDataProvider = ({ children }) => {
         } catch (e) {
             console.error('Failed to cache history data:', e);
         }
-    }, []);
+    }, [setHistoryData, setLastHistoryUpdate]);
 
     // Submit new data to Google Form
     const submitToGoogleForm = useCallback(async (apiResults) => {
@@ -257,7 +260,7 @@ export const ParkingDataProvider = ({ children }) => {
             console.error('Failed to fetch history data:', err);
             setHistoryLoading(false);
         }
-    }, [persistHistorySnapshot]);
+    }, [persistHistorySnapshot, setHistoryLoading]);
 
     // Fetch real-time API data
     const fetchRealtimeData = useCallback(async () => {
@@ -314,7 +317,7 @@ export const ParkingDataProvider = ({ children }) => {
             setRealtimeLoading(false);
             fetchInProgressRef.current = false;
         }
-    }, []);
+    }, [setRealtimeData, setRealtimeLoading, setRealtimeError, setLastRealtimeUpdate]);
 
     // Check API timestamps against cached history and fetch CSV if needed
     const checkAndUpdateHistory = useCallback(async (apiResults) => {
@@ -434,6 +437,19 @@ export const ParkingDataProvider = ({ children }) => {
         console.log('Manual refresh triggered');
         await fetchRealtimeData();
     }, [fetchRealtimeData]);
+
+    // Register refresh callback in store
+    useEffect(() => {
+        setRefreshCallback(refresh);
+    }, [refresh, setRefreshCallback]);
+
+    // Compatibility layer: provide context value that mirrors store state
+    const realtimeData = useParkingStore((state) => state.realtimeData);
+    const realtimeLoading = useParkingStore((state) => state.realtimeLoading);
+    const realtimeError = useParkingStore((state) => state.realtimeError);
+    const lastRealtimeUpdate = useParkingStore((state) => state.lastRealtimeUpdate);
+    const historyLoading = useParkingStore((state) => state.historyLoading);
+    const lastHistoryUpdate = useParkingStore((state) => state.lastHistoryUpdate);
 
     const value = {
         // Real-time data (for Dashboard)
