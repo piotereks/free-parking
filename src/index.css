@@ -387,7 +387,7 @@
   }
 
   .container-main {
-    @apply px-4 py-4;
+    @apply px-4 py-3;
   }
 
   .stats-container {
@@ -444,7 +444,7 @@
   }
 
   .panel-section {
-    @apply border-b p-4 border-border-light;
+    @apply border-b p-3 border-border-light;
   }
 
   .dark .panel-section {
@@ -455,17 +455,29 @@
     @apply border-b-0;
   }
 
+  .subtitle {
+    @apply mb-4;
+  }
+
+  .status-panel {
+    @apply mb-4;
+  }
+
   .status-description {
-    font-size: 0.875rem; /* 14px for mobile - slightly larger */
-    @apply px-4 pb-3;
+    font-size: 0.75rem; /* 12px for mobile - compact */
+    @apply px-4 pb-2;
   }
 
   .grid-container {
-    @apply grid-cols-2 gap-3;
+    @apply grid-cols-2 gap-3 mb-4;
   }
 
   .free-spots {
-    @apply text-spot-number-mobile;
+    font-size: 3.5rem; /* Reduced from 5.2rem to match desktop */
+  }
+
+  .parking-card {
+    @apply p-3;
   }
 
   .palette-group {
