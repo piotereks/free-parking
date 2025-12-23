@@ -40,9 +40,10 @@ export const calculateTotalSpaces = (parkingData) => {
  * @returns {boolean} True if valid
  */
 export const isValidParkingData = (data) => {
+  if (!data || typeof data !== 'object') {
+    return false;
+  }
   return (
-    data &&
-    typeof data === 'object' &&
     'ParkingGroupName' in data &&
     'Timestamp' in data &&
     'CurrentFreeGroupCounterValue' in data

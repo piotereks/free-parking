@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { ThemeProvider } from '../ThemeContext';
+import { ThemeProvider } from '../src/ThemeContext';
 
 describe('ThemeContext', () => {
   it('provides theme context to children', () => {
