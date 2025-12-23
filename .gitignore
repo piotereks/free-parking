@@ -38,3 +38,6 @@ xxx/
  
 # Local working artifacts
 wrk/
+
+# Coverage reports (generated)
+coverage/
