@@ -260,12 +260,16 @@
 
   /* Status panel */
   .status-panel {
-    @apply flex justify-between rounded-card mb-8 border w-full;
+    @apply flex flex-col rounded-card mb-4 border w-full;
     @apply bg-bg-secondary-light border-border-light shadow-custom-light;
   }
 
   .dark .status-panel {
     @apply bg-bg-secondary-dark border-border-dark shadow-custom-dark;
+  }
+
+  .panel-sections-wrapper {
+    @apply flex justify-between w-full;
   }
 
   .panel-section {
@@ -286,6 +290,52 @@
 
   body:not(.dark) .status-value {
     @apply text-success-light;
+  }
+
+  .status-value.age-old {
+    @apply text-warning-dark;
+  }
+
+  body:not(.dark) .status-value.age-old {
+    @apply text-warning-light;
+  }
+
+  .status-value.age-medium {
+    @apply text-warning-medium-dark;
+  }
+
+  body:not(.dark) .status-value.age-medium {
+    @apply text-warning-medium-light;
+  }
+
+  .status-description {
+    @apply mt-4 mb-8 px-6 text-center font-bold w-full;
+    @apply text-success-dark;
+    font-size: 1.125rem; /* 18px for wide screen */
+  }
+
+  body:not(.dark) .status-description {
+    @apply text-success-light;
+  }
+
+  .dark .status-description {
+    @apply text-success-dark;
+  }
+
+  .status-description.age-old {
+    @apply text-warning-dark;
+  }
+
+  body:not(.dark) .status-description.age-old {
+    @apply text-warning-light;
+  }
+
+  .status-description.age-medium {
+    @apply text-warning-medium-dark;
+  }
+
+  body:not(.dark) .status-description.age-medium {
+    @apply text-warning-medium-light;
   }
 
   .big-value {
@@ -337,7 +387,7 @@
   }
 
   .container-main {
-    @apply px-4 py-4;
+    @apply px-4 py-3;
   }
 
   .stats-container {
@@ -389,8 +439,12 @@
     @apply flex-col;
   }
 
+  .panel-sections-wrapper {
+    @apply flex-col;
+  }
+
   .panel-section {
-    @apply border-b p-4 border-border-light;
+    @apply border-b p-3 border-border-light;
   }
 
   .dark .panel-section {
@@ -401,12 +455,29 @@
     @apply border-b-0;
   }
 
+  .subtitle {
+    @apply mb-4;
+  }
+
+  .status-panel {
+    @apply mb-3;
+  }
+
+  .status-description {
+    font-size: 0.75rem; /* 12px for mobile - compact */
+    @apply px-4 mt-3 mb-4;
+  }
+
   .grid-container {
-    @apply grid-cols-2 gap-3;
+    @apply grid-cols-2 gap-3 mb-4;
   }
 
   .free-spots {
-    @apply text-spot-number-mobile;
+    font-size: 3.5rem; /* Reduced from 5.2rem to match desktop */
+  }
+
+  .parking-card {
+    @apply p-3;
   }
 
   .palette-group {
