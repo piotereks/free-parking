@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import ErrorBoundary from './ErrorBoundary';
 import { ThemeProvider } from './ThemeContext';
 import { ParkingDataProvider } from './ParkingDataManager';

@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import ReactECharts from 'echarts-for-react';
 import * as echarts from 'echarts';
@@ -22,7 +22,7 @@ const Statistics = ({ setView }) => {
 
     // Persistent zoom state to prevent reset on palette change
     // Default to full range on first render so chart isn't zoomed in by default
-    const zoomRef = useRef({ start: 0, end: 100 });
+    const [zoom, setZoom] = useState({ start: 0, end: 100 });
     const chartRef = useRef(null);
 
     const chartOption = useMemo(() => {
@@ -174,11 +174,11 @@ const Statistics = ({ setView }) => {
                 }
             },
             dataZoom: [
-                { type: 'inside', start: zoomRef.current.start, end: zoomRef.current.end, filterMode: 'none' },
+                { type: 'inside', start: zoom.start, end: zoom.end, filterMode: 'none' },
                 {
                     type: 'slider',
-                    start: zoomRef.current.start,
-                    end: zoomRef.current.end,
+                    start: zoom.start,
+                    end: zoom.end,
                     bottom: isMobile ? 40 : 10,
                     height: isMobile ? 30 : 25,
                     textStyle: { color: textColor, fontSize: isMobile ? 11 : 12 },
@@ -242,14 +242,14 @@ const Statistics = ({ setView }) => {
                 }
             ]
         };
-    }, [historyData, palette, showSymbols, isLight]);
+    }, [historyData, palette, showSymbols, isLight, zoom]);
 
     const onChartEvents = {
         'datazoom': (params) => {
             if (params.batch && params.batch[0]) {
-                zoomRef.current = { start: params.batch[0].start, end: params.batch[0].end };
+                setZoom({ start: params.batch[0].start, end: params.batch[0].end });
             } else if (params.start !== undefined && params.end !== undefined) {
-                zoomRef.current = { start: params.start, end: params.end };
+                setZoom({ start: params.start, end: params.end });
             }
         }
     };

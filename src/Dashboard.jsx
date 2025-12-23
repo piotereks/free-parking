@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Header from './Header';
 import { useParkingStore, refreshParkingData } from './store/parkingStore';
@@ -17,13 +17,13 @@ const ParkingCard = ({ data, now }) => {
   const freeSpots = data.CurrentFreeGroupCounterValue || 0;
 
   return (
-    <div 
-      className="parking-card" 
+    <div
+      className="parking-card"
       role="article"
       aria-label={`${name} parking information`}
     >
       <div className="parking-name">{name}</div>
-      <div 
+      <div
         className={`free-spots ${ageClass}`}
         aria-label={`${freeSpots} free parking spaces`}
       >
@@ -107,6 +107,7 @@ const Dashboard = ({ setView }) => {
         currentView="dashboard"
         setView={setView}
       />
+
       <main className="container-main" role="main" aria-label="Parking dashboard">
         <div className="subtitle">Real-time parking availability • UBS Wrocław</div>
 
@@ -123,23 +124,12 @@ const Dashboard = ({ setView }) => {
             realtimeData.map((d, i) => <ParkingCard key={i} data={d} now={now} />)
           )}
         </div>
-
+        <div className={`status-description ${totalColorClass}`} aria-label="Status description">{statusMessage}</div>
         <div className="status-panel" role="complementary" aria-label="Status information">
           <div className="panel-section">
             <div className="status-label">Total Spaces</div>
             <div className="status-value big-value" aria-label={`Total free spaces: ${realtimeLoading ? 'loading' : totalSpaces}`}>
               {realtimeLoading ? '---' : totalSpaces}
-            </div>
-          </div>
-          <div className="panel-section">
-            <div className="status-label">Data Status</div>
-            <div 
-              className="status-value" 
-              style={{ color: realtimeError ? 'var(--warning)' : 'var(--success)' }}
-              role="status"
-              aria-live="polite"
-            >
-              {realtimeLoading ? 'LOADING' : (realtimeError ? 'OFFLINE' : 'ONLINE')}
             </div>
           </div>
           <div className="panel-section">
@@ -153,8 +143,19 @@ const Dashboard = ({ setView }) => {
               </span>
             </div>
           </div>
-        </div>
+          <div className="panel-section">
+            <div className="status-label">Data Status</div>
+            <div
+              className="status-value"
+              style={{ color: realtimeError ? 'var(--warning)' : 'var(--success)' }}
+              role="status"
+              aria-live="polite"
+            >
+              {realtimeLoading ? 'LOADING' : (realtimeError ? 'OFFLINE' : 'ONLINE')}
+            </div>
+          </div>
 
+        </div>
       </main>
     </>
   );
