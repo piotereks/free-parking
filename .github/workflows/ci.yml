@@ -76,10 +76,18 @@ jobs:
         run: npm run build
       
       - name: Deploy to GitHub Pages (if configured)
-        # Uncomment and configure if you want to deploy to GitHub Pages
-        # uses: peaceiris/actions-gh-pages@v3
-        # with:
-        #   github_token: ${{ secrets.GITHUB_TOKEN }}
-        #   publish_dir: ./parking-deploy/docs/html/parking
-        run: echo "Build completed successfully"
-        
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          personal_token: ${{ secrets.DEPLOY_TOKEN }}
+          external_repository: piotereks/piotereks
+          publish_branch: main
+          publish_dir: ./parking-deploy/docs/html/parking
+          destination_dir: docs/html/parking
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: 'Deploy from ${{ github.repository }}@${{ github.sha }}'
+
+      - run: echo "Build completed successfully"
+
+
+    
