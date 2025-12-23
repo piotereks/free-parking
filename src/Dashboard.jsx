@@ -128,7 +128,7 @@ const Dashboard = ({ setView }) => {
         <div className="status-panel" role="complementary" aria-label="Status information">
           <div className="panel-section">
             <div className="status-label">Total Spaces</div>
-            <div className="status-value big-value" aria-label={`Total free spaces: ${realtimeLoading ? 'loading' : totalSpaces}`}>
+            <div className={`status-value big-value ${totalColorClass}`} aria-label={`Total free spaces: ${realtimeLoading ? 'loading' : totalSpaces}`}>
               {realtimeLoading ? '---' : totalSpaces}
             </div>
           </div>
