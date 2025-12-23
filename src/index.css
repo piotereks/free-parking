@@ -309,7 +309,7 @@
   }
 
   .status-description {
-    @apply text-sm mt-2 px-6 pb-4 text-center font-bold;
+    @apply mt-2 px-6 pb-4 text-center font-bold;
     @apply text-success-dark;
     font-size: 1.125rem; /* 18px for wide screen */
   }
