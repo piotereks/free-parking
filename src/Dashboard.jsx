@@ -40,6 +40,40 @@ const Dashboard = ({ setView }) => {
   const totalSpaces = realtimeData.reduce((sum, d) => sum + (d.CurrentFreeGroupCounterValue || 0), 0);
   const updateStatus = lastRealtimeUpdate ? `Last update: ${lastRealtimeUpdate.toLocaleTimeString('pl-PL')}` : 'Loading...';
 
+  // Calculate worst-case color for aggregated total based on data freshness
+  const getAggregatedStatus = () => {
+    if (realtimeData.length === 0) {
+      return { colorClass: '', statusMessage: 'No data available' };
+    }
+
+    let maxAge = 0;
+    realtimeData.forEach((d) => {
+      const ts = new Date(d.Timestamp.replace(' ', 'T'));
+      const age = Math.max(0, Math.floor((now - ts) / 1000 / 60));
+      maxAge = Math.max(maxAge, age);
+    });
+
+    // Apply worst-case logic: green (< 5 min) → orange (5-15 min) → red (>= 15 min)
+    if (maxAge >= 15) {
+      return { 
+        colorClass: 'age-old', 
+        statusMessage: 'Data outdated - figures may not reflect actual free spaces' 
+      };
+    } else if (maxAge > 5) {
+      return { 
+        colorClass: 'age-medium', 
+        statusMessage: 'Data slightly outdated - refresh recommended' 
+      };
+    } else {
+      return { 
+        colorClass: '', 
+        statusMessage: 'Data is current and reliable' 
+      };
+    }
+  };
+
+  const { colorClass: totalColorClass, statusMessage } = getAggregatedStatus();
+
   return (
     <>
       <Header
@@ -66,7 +100,8 @@ const Dashboard = ({ setView }) => {
         <div className="status-panel">
           <div className="panel-section">
             <div className="status-label">Total Spaces</div>
-            <div className="status-value big-value">{realtimeLoading ? '---' : totalSpaces}</div>
+            <div className={`status-value big-value ${totalColorClass}`}>{realtimeLoading ? '---' : totalSpaces}</div>
+            <div className="status-description">{statusMessage}</div>
           </div>
           <div className="panel-section">
             <div className="status-label">Data Status</div>

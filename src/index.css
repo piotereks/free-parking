@@ -288,6 +288,30 @@
     @apply text-success-light;
   }
 
+  .status-value.age-old {
+    @apply text-warning-dark;
+  }
+
+  body:not(.dark) .status-value.age-old {
+    @apply text-warning-light;
+  }
+
+  .status-value.age-medium {
+    @apply text-warning-medium-dark;
+  }
+
+  body:not(.dark) .status-value.age-medium {
+    @apply text-warning-medium-light;
+  }
+
+  .status-description {
+    @apply text-xs mt-2 text-text-secondary-light;
+  }
+
+  .dark .status-description {
+    @apply text-text-secondary-dark;
+  }
+
   .big-value {
     @apply text-[2.5rem];
   }
