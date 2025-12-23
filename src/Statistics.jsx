@@ -117,14 +117,14 @@ const Statistics = ({ setView }) => {
             const solid = [];
             const gaps = [];
             const projections = [];
-            const GAP_LIMIT = 40 * 60 * 1000;
+            // const GAP_LIMIT = 40 * 60 * 1000;
 
             for (let i = 0; i < raw.length; i++) {
                 solid.push([raw[i].raw, raw[i].v]);
-                if (i < raw.length - 1 && (raw[i + 1].t - raw[i].t) > GAP_LIMIT) {
-                    solid.push([raw[i + 1].raw, null]);
-                    gaps.push([raw[i].raw, raw[i].v], [raw[i + 1].raw, raw[i + 1].v], [raw[i + 1].raw, null]);
-                }
+                // if (i < raw.length - 1 && (raw[i + 1].t - raw[i].t) > GAP_LIMIT) {
+                //     solid.push([raw[i + 1].raw, null]);
+                //     gaps.push([raw[i].raw, raw[i].v], [raw[i + 1].raw, raw[i + 1].v], [raw[i + 1].raw, null]);
+                // }
             }
 
             // Correct projection logic: only if this line ends significantly before the global max
