@@ -55,19 +55,19 @@ const Dashboard = ({ setView }) => {
 
     // Apply worst-case logic: green (< 5 min) → orange (5-15 min) → red (>= 15 min)
     if (maxAge >= 15) {
-      return { 
-        colorClass: 'age-old', 
-        statusMessage: 'Data outdated - figures may not reflect actual free spaces' 
+      return {
+        colorClass: 'age-old',
+        statusMessage: 'Data outdated - figures may not reflect actual free spaces'
       };
     } else if (maxAge > 5) {
-      return { 
-        colorClass: 'age-medium', 
-        statusMessage: 'Data slightly outdated - refresh recommended' 
+      return {
+        colorClass: 'age-medium',
+        statusMessage: 'Data slightly outdated - refresh recommended'
       };
     } else {
-      return { 
-        colorClass: '', 
-        statusMessage: 'Data is current and reliable' 
+      return {
+        colorClass: '',
+        statusMessage: 'Data is current and reliable'
       };
     }
   };
@@ -97,17 +97,12 @@ const Dashboard = ({ setView }) => {
           )}
         </div>
 
+        <div className={`status-description ${totalColorClass}`}>{statusMessage}</div>
         <div className="status-panel">
           <div className="panel-sections-wrapper">
             <div className="panel-section">
               <div className="status-label">Total Spaces</div>
               <div className={`status-value big-value ${totalColorClass}`}>{realtimeLoading ? '---' : totalSpaces}</div>
-            </div>
-            <div className="panel-section">
-              <div className="status-label">Data Status</div>
-              <div className="status-value" style={{ color: realtimeError ? 'var(--warning)' : 'var(--success)' }}>
-                {realtimeLoading ? 'LOADING' : (realtimeError ? 'OFFLINE' : 'ONLINE')}
-              </div>
             </div>
             <div className="panel-section">
               <div className="status-label">Last Update / Current Time</div>
@@ -116,9 +111,17 @@ const Dashboard = ({ setView }) => {
                 <span className="status-current-inline">{now.toLocaleTimeString('pl-PL')}</span>
               </div>
             </div>
+            <div className="panel-section">
+              <div className="status-label">Data Status</div>
+              <div className="status-value" style={{ color: realtimeError ? 'var(--warning)' : 'var(--success)' }}>
+                {realtimeLoading ? 'LOADING' : (realtimeError ? 'OFFLINE' : 'ONLINE')}
+              </div>
+            </div>
+
           </div>
+
         </div>
-        <div className={`status-description ${totalColorClass}`}>{statusMessage}</div>
+
       </main>
     </>
   );
