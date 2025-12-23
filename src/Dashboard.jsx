@@ -117,8 +117,8 @@ const Dashboard = ({ setView }) => {
               </div>
             </div>
           </div>
-          <div className={`status-description ${totalColorClass}`}>{statusMessage}</div>
         </div>
+        <div className={`status-description ${totalColorClass}`}>{statusMessage}</div>
       </main>
     </>
   );

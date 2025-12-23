@@ -260,7 +260,7 @@
 
   /* Status panel */
   .status-panel {
-    @apply flex flex-col rounded-card mb-8 border w-full;
+    @apply flex flex-col rounded-card mb-4 border w-full;
     @apply bg-bg-secondary-light border-border-light shadow-custom-light;
   }
 
@@ -309,7 +309,7 @@
   }
 
   .status-description {
-    @apply mt-2 px-6 pb-4 text-center font-bold;
+    @apply mt-4 mb-8 px-6 text-center font-bold w-full;
     @apply text-success-dark;
     font-size: 1.125rem; /* 18px for wide screen */
   }
@@ -460,12 +460,12 @@
   }
 
   .status-panel {
-    @apply mb-4;
+    @apply mb-3;
   }
 
   .status-description {
     font-size: 0.75rem; /* 12px for mobile - compact */
-    @apply px-4 pb-2;
+    @apply px-4 mt-3 mb-4;
   }
 
   .grid-container {
