@@ -1,4 +1,6 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useCallback, useRef } from 'react';
+import PropTypes from 'prop-types';
 import Papa from 'papaparse';
 import { useParkingStore } from './store/parkingStore';
 
@@ -164,8 +166,9 @@ export const ParkingDataProvider = ({ children }) => {
     const setHistoryData = useParkingStore((state) => state.setHistoryData);
     const setHistoryLoading = useParkingStore((state) => state.setHistoryLoading);
     const setLastHistoryUpdate = useParkingStore((state) => state.setLastHistoryUpdate);
-    const fetchInProgress = useParkingStore((state) => state.fetchInProgress);
-    const setFetchInProgress = useParkingStore((state) => state.setFetchInProgress);
+    // Note: fetchInProgress state is intentionally not read here to avoid
+    // duplicating the in-file ref-based protection. Use `fetchInProgressRef`
+    // above for local in-flight tracking.
     const setRefreshCallback = useParkingStore((state) => state.setRefreshCallback);
     const setStopAutoRefresh = useParkingStore((state) => state.setStopAutoRefresh);
     const historyData = useParkingStore((state) => state.historyData);
@@ -218,7 +221,7 @@ export const ParkingDataProvider = ({ children }) => {
                 uni: { value: countUni, time: timestampUni }
             });
 
-            const response = await fetch(GOOGLE_FORM_URL, {
+            await fetch(GOOGLE_FORM_URL, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
@@ -261,69 +264,7 @@ export const ParkingDataProvider = ({ children }) => {
             console.error('Failed to fetch history data:', err);
             setHistoryLoading(false);
         }
-    }, [persistHistorySnapshot, setHistoryLoading]);
-
-    // Fetch real-time API data
-    const fetchRealtimeData = useCallback(async () => {
-        if (cacheCleared) {
-            console.log('Cache cleared — skipping realtime fetch');
-            return;
-        }
-
-        if (fetchInProgressRef.current) {
-            console.log('Fetch already in progress, skipping...');
-            return;
-        }
-
-        fetchInProgressRef.current = true;
-        setRealtimeLoading(true);
-        setRealtimeError(null);
-
-        try {
-            // Try to load from cache first for instant display
-            const cached = localStorage.getItem(CACHE_KEY_REALTIME);
-            if (cached) {
-                try {
-                    const cachedData = JSON.parse(cached);
-                    setRealtimeData(cachedData.data);
-                    setLastRealtimeUpdate(new Date(cachedData.timestamp));
-                    console.log('Real-time cache loaded');
-                } catch (e) {
-                    console.error('Failed to parse real-time cache:', e);
-                }
-            }
-
-            // Fetch fresh data
-            const results = await Promise.all(API_URLS.map(url =>
-                fetch(`${CORS_PROXY}${encodeURIComponent(url + '?time=' + Date.now())}`)
-                    .then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`))
-            ));
-
-            setRealtimeData(results);
-            const updateTime = new Date();
-            setLastRealtimeUpdate(updateTime);
-
-            // Cache the real-time data
-            try {
-                localStorage.setItem(CACHE_KEY_REALTIME, JSON.stringify({
-                    data: results,
-                    timestamp: updateTime.toISOString()
-                }));
-            } catch (e) {
-                console.error('Failed to cache real-time data:', e);
-            }
-
-            // Check if we need to update history data
-            await checkAndUpdateHistory(results);
-
-        } catch (err) {
-            console.error('Failed to fetch real-time data:', err);
-            setRealtimeError(err.toString());
-        } finally {
-            setRealtimeLoading(false);
-            fetchInProgressRef.current = false;
-        }
-    }, [setRealtimeData, setRealtimeLoading, setRealtimeError, setLastRealtimeUpdate]);
+    }, [persistHistorySnapshot, setHistoryLoading, cacheCleared]);
 
     // Check API timestamps against cached history and fetch CSV if needed
     const checkAndUpdateHistory = useCallback(async (apiResults) => {
@@ -414,7 +355,69 @@ export const ParkingDataProvider = ({ children }) => {
         } catch (err) {
             console.error('Error checking history update:', err);
         }
-    }, [fetchHistoryData, historyData.length, persistHistorySnapshot, submitToGoogleForm]);
+    }, [fetchHistoryData, historyData.length, persistHistorySnapshot, submitToGoogleForm, setHistoryData, setLastHistoryUpdate]);
+
+    // Fetch real-time API data
+    const fetchRealtimeData = useCallback(async () => {
+        if (cacheCleared) {
+            console.log('Cache cleared — skipping realtime fetch');
+            return;
+        }
+
+        if (fetchInProgressRef.current) {
+            console.log('Fetch already in progress, skipping...');
+            return;
+        }
+
+        fetchInProgressRef.current = true;
+        setRealtimeLoading(true);
+        setRealtimeError(null);
+
+        try {
+            // Try to load from cache first for instant display
+            const cached = localStorage.getItem(CACHE_KEY_REALTIME);
+            if (cached) {
+                try {
+                    const cachedData = JSON.parse(cached);
+                    setRealtimeData(cachedData.data);
+                    setLastRealtimeUpdate(new Date(cachedData.timestamp));
+                    console.log('Real-time cache loaded');
+                } catch (e) {
+                    console.error('Failed to parse real-time cache:', e);
+                }
+            }
+
+            // Fetch fresh data
+            const results = await Promise.all(API_URLS.map(url =>
+                fetch(`${CORS_PROXY}${encodeURIComponent(url + '?time=' + Date.now())}`)
+                    .then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`))
+            ));
+
+            setRealtimeData(results);
+            const updateTime = new Date();
+            setLastRealtimeUpdate(updateTime);
+
+            // Cache the real-time data
+            try {
+                localStorage.setItem(CACHE_KEY_REALTIME, JSON.stringify({
+                    data: results,
+                    timestamp: updateTime.toISOString()
+                }));
+            } catch (e) {
+                console.error('Failed to cache real-time data:', e);
+            }
+
+            // Check if we need to update history data
+            await checkAndUpdateHistory(results);
+
+        } catch (err) {
+            console.error('Failed to fetch real-time data:', err);
+            setRealtimeError(err.toString());
+        } finally {
+            setRealtimeLoading(false);
+            fetchInProgressRef.current = false;
+        }
+    }, [setRealtimeData, setRealtimeLoading, setRealtimeError, setLastRealtimeUpdate, checkAndUpdateHistory, cacheCleared]);
 
     // Load history cache on mount
     useEffect(() => {
@@ -491,6 +494,10 @@ export const ParkingDataProvider = ({ children }) => {
             {children}
         </ParkingDataContext.Provider>
     );
+};
+
+ParkingDataProvider.propTypes = {
+    children: PropTypes.node.isRequired
 };
 
 export const useParkingData = () => {
