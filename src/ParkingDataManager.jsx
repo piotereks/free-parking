@@ -8,6 +8,7 @@ const API_URLS = [
     'https://gd.zaparkuj.pl/api/freegroupcountervalue.json',
     'https://gd.zaparkuj.pl/api/freegroupcountervalue-green.json'
 ];
+// CORS proxy pattern maintained per copilot-instructions.md guidance
 const CORS_PROXY = 'https://corsproxy.io/?';
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTwLNDbg8KjlVHsZWj9JUnO_OBIyZaRgZ4gZ8_Gbyly2J3f6rlCW6lDHAihwbuLhxWbBkNMI1wdWRAq/pub?gid=411529798&single=true&output=csv';
 
