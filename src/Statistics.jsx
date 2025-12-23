@@ -110,19 +110,50 @@ const Statistics = ({ setView }) => {
             globalMaxRaw = (foundGD || foundUni)?.raw;
         }
 
+        // Gap limit constants
+        const LOW_ACTIVITY_GAP_LIMIT = 2 * 60 * 60 * 1000; // 2 hours in milliseconds
+        const NORMAL_GAP_LIMIT = 40 * 60 * 1000; // 40 minutes in milliseconds
+
+        // Helper function to determine if a time is in low activity period
+        // (weekday nights 21:00-05:59 or weekends)
+        const isLowActivityPeriod = (date) => {
+            const day = date.getDay(); // 0 = Sunday, 6 = Saturday
+            const hour = date.getHours();
+            
+            // Weekend (Saturday or Sunday)
+            if (day === 0 || day === 6) return true;
+            
+            // Weekday night: 21:00-23:59 or 00:00-05:59 (hour 6 starts business hours)
+            if (hour >= 21 || hour < 6) return true;
+            
+            return false;
+        };
+
+        // Determine appropriate gap limit based on time period
+        const getGapLimit = (startDate, endDate) => {
+            // If either point is in low activity period, use longer gap limit
+            if (isLowActivityPeriod(startDate) || isLowActivityPeriod(endDate)) {
+                return LOW_ACTIVITY_GAP_LIMIT;
+            }
+            // Otherwise use standard gap limit for business hours
+            return NORMAL_GAP_LIMIT;
+        };
+
         const processMapWithProjections = (raw, maxT, maxR) => {
             if (raw.length === 0) return { solid: [], gaps: [], projections: [] };
 
             const solid = [];
             const gaps = [];
             const projections = [];
-            const GAP_LIMIT = 40 * 60 * 1000;
 
             for (let i = 0; i < raw.length; i++) {
                 solid.push([raw[i].raw, raw[i].v]);
-                if (i < raw.length - 1 && (raw[i + 1].t - raw[i].t) > GAP_LIMIT) {
-                    solid.push([raw[i + 1].raw, null]);
-                    gaps.push([raw[i].raw, raw[i].v], [raw[i + 1].raw, raw[i + 1].v], [raw[i + 1].raw, null]);
+                if (i < raw.length - 1) {
+                    const gapLimit = getGapLimit(raw[i].t, raw[i + 1].t);
+                    if ((raw[i + 1].t - raw[i].t) > gapLimit) {
+                        solid.push([raw[i + 1].raw, null]);
+                        gaps.push([raw[i].raw, raw[i].v], [raw[i + 1].raw, raw[i + 1].v], [raw[i + 1].raw, null]);
+                    }
                 }
             }
 
