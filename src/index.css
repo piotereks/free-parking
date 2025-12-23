@@ -260,12 +260,16 @@
 
   /* Status panel */
   .status-panel {
-    @apply flex justify-between rounded-card mb-8 border w-full;
+    @apply flex flex-col rounded-card mb-8 border w-full;
     @apply bg-bg-secondary-light border-border-light shadow-custom-light;
   }
 
   .dark .status-panel {
     @apply bg-bg-secondary-dark border-border-dark shadow-custom-dark;
+  }
+
+  .panel-sections-wrapper {
+    @apply flex justify-between w-full;
   }
 
   .panel-section {
@@ -305,11 +309,33 @@
   }
 
   .status-description {
-    @apply text-xs mt-2 text-text-secondary-light;
+    @apply text-sm mt-2 px-6 pb-4 text-center font-bold;
+    @apply text-success-dark;
+    font-size: 1.125rem; /* 18px for wide screen */
+  }
+
+  body:not(.dark) .status-description {
+    @apply text-success-light;
   }
 
   .dark .status-description {
-    @apply text-text-secondary-dark;
+    @apply text-success-dark;
+  }
+
+  .status-description.age-old {
+    @apply text-warning-dark;
+  }
+
+  body:not(.dark) .status-description.age-old {
+    @apply text-warning-light;
+  }
+
+  .status-description.age-medium {
+    @apply text-warning-medium-dark;
+  }
+
+  body:not(.dark) .status-description.age-medium {
+    @apply text-warning-medium-light;
   }
 
   .big-value {
@@ -413,6 +439,10 @@
     @apply flex-col;
   }
 
+  .panel-sections-wrapper {
+    @apply flex-col;
+  }
+
   .panel-section {
     @apply border-b p-4 border-border-light;
   }
@@ -423,6 +453,11 @@
 
   .panel-section:last-child {
     @apply border-b-0;
+  }
+
+  .status-description {
+    font-size: 0.875rem; /* 14px for mobile - slightly larger */
+    @apply px-4 pb-3;
   }
 
   .grid-container {

@@ -98,24 +98,26 @@ const Dashboard = ({ setView }) => {
         </div>
 
         <div className="status-panel">
-          <div className="panel-section">
-            <div className="status-label">Total Spaces</div>
-            <div className={`status-value big-value ${totalColorClass}`}>{realtimeLoading ? '---' : totalSpaces}</div>
-            <div className="status-description">{statusMessage}</div>
-          </div>
-          <div className="panel-section">
-            <div className="status-label">Data Status</div>
-            <div className="status-value" style={{ color: realtimeError ? 'var(--warning)' : 'var(--success)' }}>
-              {realtimeLoading ? 'LOADING' : (realtimeError ? 'OFFLINE' : 'ONLINE')}
+          <div className="panel-sections-wrapper">
+            <div className="panel-section">
+              <div className="status-label">Total Spaces</div>
+              <div className={`status-value big-value ${totalColorClass}`}>{realtimeLoading ? '---' : totalSpaces}</div>
+            </div>
+            <div className="panel-section">
+              <div className="status-label">Data Status</div>
+              <div className="status-value" style={{ color: realtimeError ? 'var(--warning)' : 'var(--success)' }}>
+                {realtimeLoading ? 'LOADING' : (realtimeError ? 'OFFLINE' : 'ONLINE')}
+              </div>
+            </div>
+            <div className="panel-section">
+              <div className="status-label">Last Update / Current Time</div>
+              <div className="time-group">
+                <span>{lastRealtimeUpdate ? lastRealtimeUpdate.toLocaleTimeString('pl-PL') : '--:--:--'}</span>
+                <span className="status-current-inline">{now.toLocaleTimeString('pl-PL')}</span>
+              </div>
             </div>
           </div>
-          <div className="panel-section">
-            <div className="status-label">Last Update / Current Time</div>
-            <div className="time-group">
-              <span>{lastRealtimeUpdate ? lastRealtimeUpdate.toLocaleTimeString('pl-PL') : '--:--:--'}</span>
-              <span className="status-current-inline">{now.toLocaleTimeString('pl-PL')}</span>
-            </div>
-          </div>
+          <div className={`status-description ${totalColorClass}`}>{statusMessage}</div>
         </div>
       </main>
     </>
