@@ -18,7 +18,7 @@ const ParkingCard = ({ data, now }) => {
   const isApproximated = approximationInfo.isApproximated;
   const freeSpots = isApproximated ? approximationInfo.approximated : (data.CurrentFreeGroupCounterValue || 0);
   const originalSpots = approximationInfo.original || data.CurrentFreeGroupCounterValue || 0;
-  
+
   const ts = new Date(data.Timestamp.replace(' ', 'T'));
 
   return (
@@ -91,7 +91,7 @@ const Dashboard = ({ setView }) => {
   }, 0);
 
   const originalTotalSpaces = realtimeData.reduce((sum, d) => sum + (d.CurrentFreeGroupCounterValue || 0), 0);
-  
+
   const updateStatus = lastRealtimeUpdate ? `Last update: ${lastRealtimeUpdate.toLocaleTimeString('pl-PL')}` : 'Loading...';
 
   // Calculate worst-case color for aggregated total based on data freshness
@@ -156,41 +156,42 @@ const Dashboard = ({ setView }) => {
         </div>
         <div className={`status-description ${totalColorClass}`} aria-label="Status description">{statusMessage}</div>
         <div className="status-panel" role="complementary" aria-label="Status information">
-          <div className="panel-section">
-            <div className="status-label">Total Spaces</div>
-            <div className={`status-value big-value ${totalColorClass}`} aria-label={`Total free spaces: ${realtimeLoading ? 'loading' : totalSpaces}`}>
-              {realtimeLoading ? '---' : totalSpaces}
-              {hasApproximation && !realtimeLoading && <span className="approx-indicator-small" title="Includes approximated values">≈</span>}
-            </div>
-            {hasApproximation && !realtimeLoading && (
-              <div className="original-total" aria-label={`Original total: ${originalTotalSpaces}`}>
-                (orig: {originalTotalSpaces})
+          <div className="panel-sections-wrapper">
+            <div className="panel-section">
+              <div className="status-label">Total Spaces</div>
+              <div className={`status-value big-value ${totalColorClass}`} aria-label={`Total free spaces: ${realtimeLoading ? 'loading' : totalSpaces}`}>
+                {realtimeLoading ? '---' : totalSpaces}
+                {hasApproximation && !realtimeLoading && <span className="approx-indicator-small" title="Includes approximated values">≈</span>}
               </div>
-            )}
-          </div>
-          <div className="panel-section">
-            <div className="status-label">Last Update / Current Time</div>
-            <div className="time-group">
-              <span aria-label={`Last updated at ${lastRealtimeUpdate ? lastRealtimeUpdate.toLocaleTimeString('pl-PL') : 'unknown'}`}>
-                {lastRealtimeUpdate ? lastRealtimeUpdate.toLocaleTimeString('pl-PL') : '--:--:--'}
-              </span>
-              <span className="status-current-inline" aria-label={`Current time ${now.toLocaleTimeString('pl-PL')}`}>
-                {now.toLocaleTimeString('pl-PL')}
-              </span>
+              {hasApproximation && !realtimeLoading && (
+                <div className="original-total" aria-label={`Original total: ${originalTotalSpaces}`}>
+                  (orig: {originalTotalSpaces})
+                </div>
+              )}
+            </div>
+            <div className="panel-section">
+              <div className="status-label">Last Update / Current Time</div>
+              <div className="time-group">
+                <span aria-label={`Last updated at ${lastRealtimeUpdate ? lastRealtimeUpdate.toLocaleTimeString('pl-PL') : 'unknown'}`}>
+                  {lastRealtimeUpdate ? lastRealtimeUpdate.toLocaleTimeString('pl-PL') : '--:--:--'}
+                </span>
+                <span className="status-current-inline" aria-label={`Current time ${now.toLocaleTimeString('pl-PL')}`}>
+                  {now.toLocaleTimeString('pl-PL')}
+                </span>
+              </div>
+            </div>
+            <div className="panel-section">
+              <div className="status-label">Data Status</div>
+              <div
+                className="status-value"
+                style={{ color: realtimeError ? 'var(--warning)' : (hasApproximation ? 'var(--age-medium)' : 'var(--success)') }}
+                role="status"
+                aria-live="polite"
+              >
+                {realtimeLoading ? 'LOADING' : (realtimeError ? 'OFFLINE' : (hasApproximation ? 'APPROXIMATE' : 'ONLINE'))}
+              </div>
             </div>
           </div>
-          <div className="panel-section">
-            <div className="status-label">Data Status</div>
-            <div
-              className="status-value"
-              style={{ color: realtimeError ? 'var(--warning)' : (hasApproximation ? 'var(--age-medium)' : 'var(--success)') }}
-              role="status"
-              aria-live="polite"
-            >
-              {realtimeLoading ? 'LOADING' : (realtimeError ? 'OFFLINE' : (hasApproximation ? 'APPROXIMATE' : 'ONLINE'))}
-            </div>
-          </div>
-
         </div>
       </main>
     </>
