@@ -218,19 +218,15 @@
 
   .parking-name {
     @apply text-base font-semibold mb-1 text-center text-text-secondary-light;
-    @apply flex items-center justify-center gap-1;
   }
 
   .dark .parking-name {
     @apply text-text-secondary-dark;
   }
 
-  .status-icon {
-    @apply inline-block text-lg;
-  }
-
   .free-spots {
     @apply text-spot-number font-bold text-success-dark;
+    @apply flex items-center justify-center gap-1;
   }
 
   body:not(.dark) .free-spots {
@@ -251,6 +247,10 @@
 
   body:not(.dark) .free-spots.age-medium {
     @apply text-warning-medium-light;
+  }
+
+  .status-icon-number {
+    @apply inline-block text-2xl;
   }
 
   .age-indicator-small,

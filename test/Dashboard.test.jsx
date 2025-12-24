@@ -252,7 +252,7 @@ describe('Dashboard - ParkingCard', () => {
     useParkingStore.getState().setRealtimeLoading(false);
 
     const { container } = render(<Dashboard setView={mockSetView} />);
-    const statusIcon = container.querySelector('.status-icon');
+    const statusIcon = container.querySelector('.status-icon-number');
     expect(statusIcon).not.toBeInTheDocument();
   });
 
@@ -268,13 +268,13 @@ describe('Dashboard - ParkingCard', () => {
     useParkingStore.getState().setRealtimeLoading(false);
 
     const { container } = render(<Dashboard setView={mockSetView} />);
-    const statusIcon = container.querySelector('.status-icon');
+    const statusIcon = container.querySelector('.status-icon-number');
     expect(statusIcon).toBeInTheDocument();
-    expect(statusIcon?.textContent).toBe('⚡');
-    expect(statusIcon?.getAttribute('aria-label')).toBe('Data slightly outdated');
+    expect(statusIcon?.textContent).toBe('⚠️');
+    expect(statusIcon?.getAttribute('aria-label')).toBe('Warning - data slightly outdated');
   });
 
-  it('displays alert icon for old data (15+ minutes but < 24 hours)', () => {
+  it('displays error icon for old data (15+ minutes but < 24 hours)', () => {
     const oldDate = new Date(Date.now() - 30 * 60 * 1000); // 30 minutes ago
     const testData = [{
       ParkingGroupName: 'Test',
@@ -286,27 +286,63 @@ describe('Dashboard - ParkingCard', () => {
     useParkingStore.getState().setRealtimeLoading(false);
 
     const { container } = render(<Dashboard setView={mockSetView} />);
-    const statusIcon = container.querySelector('.status-icon');
+    const statusIcon = container.querySelector('.status-icon-number');
     expect(statusIcon).toBeInTheDocument();
-    expect(statusIcon?.textContent).toBe('⚠️');
-    expect(statusIcon?.getAttribute('aria-label')).toBe('Data outdated');
+    expect(statusIcon?.textContent).toBe('❌');
+    expect(statusIcon?.getAttribute('aria-label')).toBe('Error - data outdated');
   });
 
-  it('displays offline icon for very old data (24+ hours)', () => {
+  it('displays offline icon only when ALL data is 24+ hours old', () => {
     const veryOldDate = new Date(Date.now() - 25 * 60 * 60 * 1000); // 25 hours ago
-    const testData = [{
-      ParkingGroupName: 'Test',
-      CurrentFreeGroupCounterValue: 10,
-      Timestamp: veryOldDate.toISOString().replace('T', ' ').substring(0, 19)
-    }];
+    const testData = [
+      {
+        ParkingGroupName: 'Test1',
+        CurrentFreeGroupCounterValue: 10,
+        Timestamp: veryOldDate.toISOString().replace('T', ' ').substring(0, 19)
+      },
+      {
+        ParkingGroupName: 'Test2',
+        CurrentFreeGroupCounterValue: 5,
+        Timestamp: veryOldDate.toISOString().replace('T', ' ').substring(0, 19)
+      }
+    ];
 
     useParkingStore.getState().setRealtimeData(testData);
     useParkingStore.getState().setRealtimeLoading(false);
 
     const { container } = render(<Dashboard setView={mockSetView} />);
-    const statusIcon = container.querySelector('.status-icon');
-    expect(statusIcon).toBeInTheDocument();
-    expect(statusIcon?.textContent).toBe('📵');
-    expect(statusIcon?.getAttribute('aria-label')).toBe('Data offline (24+ hours old)');
+    const statusIcons = container.querySelectorAll('.status-icon-number');
+    expect(statusIcons.length).toBe(2);
+    statusIcons.forEach(icon => {
+      expect(icon.textContent).toBe('📵');
+      expect(icon.getAttribute('aria-label')).toBe('Offline');
+    });
+  });
+
+  it('does not display offline icon when only some data is 24+ hours old', () => {
+    const veryOldDate = new Date(Date.now() - 25 * 60 * 60 * 1000); // 25 hours ago
+    const recentDate = new Date(Date.now() - 10 * 60 * 1000); // 10 minutes ago
+    const testData = [
+      {
+        ParkingGroupName: 'Test1',
+        CurrentFreeGroupCounterValue: 10,
+        Timestamp: veryOldDate.toISOString().replace('T', ' ').substring(0, 19)
+      },
+      {
+        ParkingGroupName: 'Test2',
+        CurrentFreeGroupCounterValue: 5,
+        Timestamp: recentDate.toISOString().replace('T', ' ').substring(0, 19)
+      }
+    ];
+
+    useParkingStore.getState().setRealtimeData(testData);
+    useParkingStore.getState().setRealtimeLoading(false);
+
+    const { container } = render(<Dashboard setView={mockSetView} />);
+    const statusIcons = container.querySelectorAll('.status-icon-number');
+    // First card should show error icon (not offline), second should show warning
+    expect(statusIcons.length).toBe(2);
+    expect(statusIcons[0].textContent).toBe('❌'); // error for 24+ hours when not all offline
+    expect(statusIcons[1].textContent).toBe('⚠️'); // warning for 10 minutes
   });
 });

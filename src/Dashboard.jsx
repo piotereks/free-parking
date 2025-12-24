@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import Header from './Header';
 import { useParkingStore, refreshParkingData } from './store/parkingStore';
 
-const ParkingCard = ({ data, now }) => {
+const ParkingCard = ({ data, now, allOffline }) => {
   const ts = new Date(data.Timestamp.replace(' ', 'T'));
   const age = Math.max(0, Math.floor((now - ts) / 1000 / 60));
 
@@ -11,21 +11,22 @@ const ParkingCard = ({ data, now }) => {
   let statusIcon = null;
   let statusLabel = '';
   
-  // Determine age class and status icon based on data freshness
-  if (age >= 1440) { // 24 hours or more - offline
+  // Determine status: online, warning, error, offline
+  // offline icon only when ALL data is offline
+  if (allOffline) {
     ageClass = 'age-old';
     statusIcon = '📵';
-    statusLabel = 'Data offline (24+ hours old)';
-  } else if (age >= 15) { // 15 minutes or more - old/stale
+    statusLabel = 'Offline';
+  } else if (age >= 15) { // 15 minutes or more - error
     ageClass = 'age-old';
-    statusIcon = '⚠️';
-    statusLabel = 'Data outdated';
-  } else if (age > 5) { // 5-15 minutes - medium age
+    statusIcon = '❌';
+    statusLabel = 'Error - data outdated';
+  } else if (age > 5) { // 5-15 minutes - warning
     ageClass = 'age-medium';
-    statusIcon = '⚡';
-    statusLabel = 'Data slightly outdated';
+    statusIcon = '⚠️';
+    statusLabel = 'Warning - data slightly outdated';
   }
-  // No icon for fresh data (< 5 minutes)
+  // No icon for fresh data (< 5 minutes) - online status
 
   let name = data.ParkingGroupName;
   if (name === 'Bank_1') name = 'Uni Wroc';
@@ -38,11 +39,14 @@ const ParkingCard = ({ data, now }) => {
       role="article"
       aria-label={`${name} parking information`}
     >
-      <div className="parking-name">
-        {name}
+      <div className="parking-name">{name}</div>
+      <div
+        className={`free-spots ${ageClass}`}
+        aria-label={`${freeSpots} free parking spaces`}
+      >
         {statusIcon && (
           <span 
-            className="status-icon" 
+            className="status-icon-number" 
             role="img" 
             aria-label={statusLabel}
             title={statusLabel}
@@ -50,11 +54,6 @@ const ParkingCard = ({ data, now }) => {
             {statusIcon}
           </span>
         )}
-      </div>
-      <div
-        className={`free-spots ${ageClass}`}
-        aria-label={`${freeSpots} free parking spaces`}
-      >
         {freeSpots}
       </div>
       <div className="age-indicator-small" aria-label={`Data from ${age} minutes ago`}>
@@ -73,7 +72,8 @@ ParkingCard.propTypes = {
     CurrentFreeGroupCounterValue: PropTypes.number,
     Timestamp: PropTypes.string.isRequired
   }).isRequired,
-  now: PropTypes.instanceOf(Date).isRequired
+  now: PropTypes.instanceOf(Date).isRequired,
+  allOffline: PropTypes.bool.isRequired
 };
 
 const Dashboard = ({ setView }) => {
@@ -90,6 +90,13 @@ const Dashboard = ({ setView }) => {
 
   const totalSpaces = realtimeData.reduce((sum, d) => sum + (d.CurrentFreeGroupCounterValue || 0), 0);
   const updateStatus = lastRealtimeUpdate ? `Last update: ${lastRealtimeUpdate.toLocaleTimeString('pl-PL')}` : 'Loading...';
+
+  // Check if all data is offline (24+ hours old)
+  const allOffline = realtimeData.length > 0 && realtimeData.every((d) => {
+    const ts = new Date(d.Timestamp.replace(' ', 'T'));
+    const age = Math.max(0, Math.floor((now - ts) / 1000 / 60));
+    return age >= 1440; // 24 hours
+  });
 
   // Calculate worst-case color for aggregated total based on data freshness
   const getAggregatedStatus = () => {
@@ -149,7 +156,7 @@ const Dashboard = ({ setView }) => {
           {realtimeLoading && realtimeData.length === 0 ? (
             <div className="loader" role="status" aria-live="polite">Loading parking data...</div>
           ) : (
-            realtimeData.map((d, i) => <ParkingCard key={i} data={d} now={now} />)
+            realtimeData.map((d, i) => <ParkingCard key={i} data={d} now={now} allOffline={allOffline} />)
           )}
         </div>
         <div className={`status-description ${totalColorClass}`} aria-label="Status description">{statusMessage}</div>
