@@ -258,6 +258,35 @@
     @apply text-text-secondary-dark;
   }
 
+  /* Approximation indicators */
+  .approx-indicator {
+    @apply ml-1 text-warning-medium-light font-normal text-base;
+    vertical-align: super;
+  }
+
+  .dark .approx-indicator {
+    @apply text-warning-medium-dark;
+  }
+
+  .approx-indicator-small {
+    @apply ml-1 text-warning-medium-light font-normal text-lg;
+    vertical-align: super;
+  }
+
+  .dark .approx-indicator-small {
+    @apply text-warning-medium-dark;
+  }
+
+  .original-value,
+  .original-total {
+    @apply text-xs mt-1 text-text-secondary-light italic;
+  }
+
+  .dark .original-value,
+  .dark .original-total {
+    @apply text-text-secondary-dark;
+  }
+
   /* Status panel */
   .status-panel {
     @apply flex flex-col rounded-card mb-4 border w-full;
