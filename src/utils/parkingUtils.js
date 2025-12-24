@@ -3,10 +3,11 @@
  */
 
 // Maximum capacity for each parking area
+// These values are documented in README.md and used in Statistics.jsx
 export const PARKING_MAX_CAPACITY = {
-  'GreenDay': 150,
-  'Bank_1': 100,  // Uni Wroc
-  'Uni Wroc': 100
+  'GreenDay': 187,
+  'Bank_1': 41,  // Uni Wroc
+  'Uni Wroc': 41
 };
 
 // Default capacity for unknown parking areas

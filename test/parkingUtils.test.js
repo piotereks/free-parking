@@ -273,8 +273,8 @@ describe('parkingUtils', () => {
       const result = calculateApproximation(staleData, freshData, now);
       expect(result.isApproximated).toBe(true);
       expect(result.original).toBe(50);
-      // Fresh ratio: 30/100 = 0.3, applied to stale max: 0.3 * 150 = 45
-      expect(result.approximated).toBe(45);
+      // Fresh ratio: 30/41 = 0.7317, applied to stale max: 0.7317 * 187 = 137 (rounded)
+      expect(result.approximated).toBe(137);
     });
 
     it('handles threshold boundary at 30 minutes', () => {
@@ -320,7 +320,7 @@ describe('parkingUtils', () => {
       
       const result = applyApproximations(parkingData, now);
       expect(result[0].approximationInfo.isApproximated).toBe(true);
-      expect(result[0].approximationInfo.approximated).toBe(45); // (30/100) * 150
+      expect(result[0].approximationInfo.approximated).toBe(137); // (30/41) * 187
       expect(result[1].approximationInfo.isApproximated).toBe(false);
     });
 
@@ -342,7 +342,7 @@ describe('parkingUtils', () => {
       const result = applyApproximations(parkingData, now);
       expect(result[0].approximationInfo.isApproximated).toBe(false);
       expect(result[1].approximationInfo.isApproximated).toBe(true);
-      expect(result[1].approximationInfo.approximated).toBe(40); // (60/150) * 100
+      expect(result[1].approximationInfo.approximated).toBe(13); // (60/187) * 41
     });
 
     it('does not approximate when both areas are fresh', () => {
