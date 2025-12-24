@@ -8,8 +8,7 @@ import {
   getMaxCapacity,
   calculateApproximation,
   applyApproximations,
-  PARKING_MAX_CAPACITY,
-  DEFAULT_PARKING_CAPACITY
+  PARKING_MAX_CAPACITY
 } from '../src/utils/parkingUtils';
 
 describe('parkingUtils', () => {
@@ -232,8 +231,8 @@ describe('parkingUtils', () => {
       expect(getMaxCapacity('Uni Wroc')).toBe(PARKING_MAX_CAPACITY['Uni Wroc']);
     });
 
-    it('returns default capacity for unknown parking', () => {
-      expect(getMaxCapacity('Unknown')).toBe(DEFAULT_PARKING_CAPACITY);
+    it('returns undefined for unknown parking', () => {
+      expect(getMaxCapacity('Unknown')).toBeUndefined();
     });
   });
 

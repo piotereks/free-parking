@@ -10,11 +10,8 @@ export const PARKING_MAX_CAPACITY = {
   'Uni Wroc': 41
 };
 
-// Default capacity for unknown parking areas
-export const DEFAULT_PARKING_CAPACITY = 100;
-
 // Threshold for approximation (in minutes)
-export const APPROXIMATION_THRESHOLD_MINUTES = 30;
+export const APPROXIMATION_THRESHOLD_MINUTES = 3000;
 
 /**
  * Normalize parking name for display
@@ -79,10 +76,10 @@ export const calculateDataAge = (timestamp, now = new Date()) => {
 /**
  * Get maximum capacity for a parking area
  * @param {string} parkingName - Name of the parking area
- * @returns {number} Maximum capacity
+ * @returns {number|undefined} Maximum capacity or undefined if unknown
  */
 export const getMaxCapacity = (parkingName) => {
-  return PARKING_MAX_CAPACITY[parkingName] || PARKING_MAX_CAPACITY[normalizeParkingName(parkingName)] || DEFAULT_PARKING_CAPACITY;
+  return PARKING_MAX_CAPACITY[parkingName] || PARKING_MAX_CAPACITY[normalizeParkingName(parkingName)];
 };
 
 /**
