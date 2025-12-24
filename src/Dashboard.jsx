@@ -8,8 +8,24 @@ const ParkingCard = ({ data, now }) => {
   const age = Math.max(0, Math.floor((now - ts) / 1000 / 60));
 
   let ageClass = '';
-  if (age >= 15) ageClass = 'age-old';
-  else if (age > 5) ageClass = 'age-medium';
+  let statusIcon = null;
+  let statusLabel = '';
+  
+  // Determine age class and status icon based on data freshness
+  if (age >= 1440) { // 24 hours or more - offline
+    ageClass = 'age-old';
+    statusIcon = '📵';
+    statusLabel = 'Data offline (24+ hours old)';
+  } else if (age >= 15) { // 15 minutes or more - old/stale
+    ageClass = 'age-old';
+    statusIcon = '⚠️';
+    statusLabel = 'Data outdated';
+  } else if (age > 5) { // 5-15 minutes - medium age
+    ageClass = 'age-medium';
+    statusIcon = '⚡';
+    statusLabel = 'Data slightly outdated';
+  }
+  // No icon for fresh data (< 5 minutes)
 
   let name = data.ParkingGroupName;
   if (name === 'Bank_1') name = 'Uni Wroc';
@@ -22,7 +38,19 @@ const ParkingCard = ({ data, now }) => {
       role="article"
       aria-label={`${name} parking information`}
     >
-      <div className="parking-name">{name}</div>
+      <div className="parking-name">
+        {name}
+        {statusIcon && (
+          <span 
+            className="status-icon" 
+            role="img" 
+            aria-label={statusLabel}
+            title={statusLabel}
+          >
+            {statusIcon}
+          </span>
+        )}
+      </div>
       <div
         className={`free-spots ${ageClass}`}
         aria-label={`${freeSpots} free parking spaces`}

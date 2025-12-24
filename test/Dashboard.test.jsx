@@ -238,4 +238,75 @@ describe('Dashboard - ParkingCard', () => {
     render(<Dashboard setView={mockSetView} />);
     expect(screen.getByRole('article', { name: /Test Parking parking information/i })).toBeInTheDocument();
   });
+
+  // Status icon tests
+  it('does not display status icon for fresh data (< 5 minutes)', () => {
+    const freshDate = new Date(Date.now() - 2 * 60 * 1000); // 2 minutes ago
+    const testData = [{
+      ParkingGroupName: 'Test',
+      CurrentFreeGroupCounterValue: 10,
+      Timestamp: freshDate.toISOString().replace('T', ' ').substring(0, 19)
+    }];
+
+    useParkingStore.getState().setRealtimeData(testData);
+    useParkingStore.getState().setRealtimeLoading(false);
+
+    const { container } = render(<Dashboard setView={mockSetView} />);
+    const statusIcon = container.querySelector('.status-icon');
+    expect(statusIcon).not.toBeInTheDocument();
+  });
+
+  it('displays warning icon for medium-age data (5-15 minutes)', () => {
+    const mediumDate = new Date(Date.now() - 8 * 60 * 1000); // 8 minutes ago
+    const testData = [{
+      ParkingGroupName: 'Test',
+      CurrentFreeGroupCounterValue: 10,
+      Timestamp: mediumDate.toISOString().replace('T', ' ').substring(0, 19)
+    }];
+
+    useParkingStore.getState().setRealtimeData(testData);
+    useParkingStore.getState().setRealtimeLoading(false);
+
+    const { container } = render(<Dashboard setView={mockSetView} />);
+    const statusIcon = container.querySelector('.status-icon');
+    expect(statusIcon).toBeInTheDocument();
+    expect(statusIcon?.textContent).toBe('⚡');
+    expect(statusIcon?.getAttribute('aria-label')).toBe('Data slightly outdated');
+  });
+
+  it('displays alert icon for old data (15+ minutes but < 24 hours)', () => {
+    const oldDate = new Date(Date.now() - 30 * 60 * 1000); // 30 minutes ago
+    const testData = [{
+      ParkingGroupName: 'Test',
+      CurrentFreeGroupCounterValue: 10,
+      Timestamp: oldDate.toISOString().replace('T', ' ').substring(0, 19)
+    }];
+
+    useParkingStore.getState().setRealtimeData(testData);
+    useParkingStore.getState().setRealtimeLoading(false);
+
+    const { container } = render(<Dashboard setView={mockSetView} />);
+    const statusIcon = container.querySelector('.status-icon');
+    expect(statusIcon).toBeInTheDocument();
+    expect(statusIcon?.textContent).toBe('⚠️');
+    expect(statusIcon?.getAttribute('aria-label')).toBe('Data outdated');
+  });
+
+  it('displays offline icon for very old data (24+ hours)', () => {
+    const veryOldDate = new Date(Date.now() - 25 * 60 * 60 * 1000); // 25 hours ago
+    const testData = [{
+      ParkingGroupName: 'Test',
+      CurrentFreeGroupCounterValue: 10,
+      Timestamp: veryOldDate.toISOString().replace('T', ' ').substring(0, 19)
+    }];
+
+    useParkingStore.getState().setRealtimeData(testData);
+    useParkingStore.getState().setRealtimeLoading(false);
+
+    const { container } = render(<Dashboard setView={mockSetView} />);
+    const statusIcon = container.querySelector('.status-icon');
+    expect(statusIcon).toBeInTheDocument();
+    expect(statusIcon?.textContent).toBe('📵');
+    expect(statusIcon?.getAttribute('aria-label')).toBe('Data offline (24+ hours old)');
+  });
 });

@@ -218,10 +218,15 @@
 
   .parking-name {
     @apply text-base font-semibold mb-1 text-center text-text-secondary-light;
+    @apply flex items-center justify-center gap-1;
   }
 
   .dark .parking-name {
     @apply text-text-secondary-dark;
+  }
+
+  .status-icon {
+    @apply inline-block text-lg;
   }
 
   .free-spots {
