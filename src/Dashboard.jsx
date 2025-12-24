@@ -2,11 +2,10 @@ import { useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import Header from './Header';
 import { useParkingStore, refreshParkingData } from './store/parkingStore';
-import { applyApproximations } from './utils/parkingUtils';
+import { applyApproximations, calculateDataAge } from './utils/parkingUtils';
 
 const ParkingCard = ({ data, now }) => {
-  const ts = new Date(data.Timestamp.replace(' ', 'T'));
-  const age = Math.max(0, Math.floor((now - ts) / 1000 / 60));
+  const age = calculateDataAge(data.Timestamp, now);
 
   let ageClass = '';
   if (age >= 15) ageClass = 'age-old';
@@ -19,6 +18,8 @@ const ParkingCard = ({ data, now }) => {
   const isApproximated = approximationInfo.isApproximated;
   const freeSpots = isApproximated ? approximationInfo.approximated : (data.CurrentFreeGroupCounterValue || 0);
   const originalSpots = approximationInfo.original || data.CurrentFreeGroupCounterValue || 0;
+  
+  const ts = new Date(data.Timestamp.replace(' ', 'T'));
 
   return (
     <div
@@ -101,8 +102,7 @@ const Dashboard = ({ setView }) => {
 
     let maxAge = 0;
     processedData.forEach((d) => {
-      const ts = new Date(d.Timestamp.replace(' ', 'T'));
-      const age = Math.max(0, Math.floor((now - ts) / 1000 / 60));
+      const age = calculateDataAge(d.Timestamp, now);
       maxAge = Math.max(maxAge, age);
     });
 
