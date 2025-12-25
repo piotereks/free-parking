@@ -118,6 +118,18 @@ export const calculateApproximation = (staleData, freshData, now = new Date()) =
   console.log('[Approximation] Stale parking:', staleData.ParkingGroupName, 'max:', staleMax);
   console.log('[Approximation] Fresh parking:', freshData.ParkingGroupName, 'max:', freshMax);
   
+  // Cannot approximate if we don't know the maximum capacity of either parking area
+  if (!staleMax || !freshMax) {
+    console.log('[Approximation] Skipping - unknown capacity');
+    return {
+      approximated: staleData.CurrentFreeGroupCounterValue || 0,
+      original: staleData.CurrentFreeGroupCounterValue || 0,
+      isApproximated: false,
+      ageMinutes: staleAge,
+      reason: 'Unknown capacity'
+    };
+  }
+  
   // Calculate fresh area ratio
   const freshFree = freshData.CurrentFreeGroupCounterValue || 0;
   const freshRatio = freshFree / freshMax;
@@ -139,8 +151,14 @@ export const calculateApproximation = (staleData, freshData, now = new Date()) =
   };
 };
 
+// Cache for processed data to prevent unnecessary object creation
+let lastProcessedData = null;
+let lastParkingDataRef = null;
+let lastApproximationState = null;
+
 /**
  * Process parking data array and apply approximations where needed
+ * Returns stable references when approximation values haven't changed
  * @param {Array} parkingData - Array of parking data objects
  * @param {Date} now - Current time
  * @returns {Array} Processed parking data with approximations
@@ -170,10 +188,31 @@ export const applyApproximations = (parkingData, now = new Date()) => {
   const age1 = calculateDataAge(area1?.Timestamp, now);
   const age2 = calculateDataAge(area2?.Timestamp, now);
   
+  // Determine approximation state for both areas
+  const area1NeedsApprox = age1 >= APPROXIMATION_THRESHOLD_MINUTES && age2 < APPROXIMATION_THRESHOLD_MINUTES;
+  const area2NeedsApprox = age2 >= APPROXIMATION_THRESHOLD_MINUTES && age1 < APPROXIMATION_THRESHOLD_MINUTES;
+  
+  // Create a state signature to detect when approximation values might have changed
+  const currentState = JSON.stringify({
+    area1Name: area1?.ParkingGroupName,
+    area1Value: area1?.CurrentFreeGroupCounterValue,
+    area1Timestamp: area1?.Timestamp,
+    area1NeedsApprox,
+    area2Name: area2?.ParkingGroupName,
+    area2Value: area2?.CurrentFreeGroupCounterValue,
+    area2Timestamp: area2?.Timestamp,
+    area2NeedsApprox
+  });
+  
+  // If parkingData reference hasn't changed and approximation state is the same, return cached result
+  if (lastParkingDataRef === parkingData && lastApproximationState === currentState && lastProcessedData) {
+    return lastProcessedData;
+  }
+  
   const result = [];
   
   // Process first parking area
-  if (age1 >= APPROXIMATION_THRESHOLD_MINUTES && age2 < APPROXIMATION_THRESHOLD_MINUTES) {
+  if (area1NeedsApprox) {
     const approxInfo = calculateApproximation(area1, area2, now);
     result.push({
       ...area1,
@@ -192,7 +231,7 @@ export const applyApproximations = (parkingData, now = new Date()) => {
   }
   
   // Process second parking area
-  if (age2 >= APPROXIMATION_THRESHOLD_MINUTES && age1 < APPROXIMATION_THRESHOLD_MINUTES) {
+  if (area2NeedsApprox) {
     const approxInfo = calculateApproximation(area2, area1, now);
     result.push({
       ...area2,
@@ -209,6 +248,11 @@ export const applyApproximations = (parkingData, now = new Date()) => {
       }
     });
   }
+  
+  // Cache the result
+  lastParkingDataRef = parkingData;
+  lastApproximationState = currentState;
+  lastProcessedData = result;
   
   return result;
 };
