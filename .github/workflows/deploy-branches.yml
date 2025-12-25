@@ -50,6 +50,10 @@ jobs:
           # Get the branch name
           BRANCH_NAME="${GITHUB_REF#refs/heads/}"
           echo "Branch name: $BRANCH_NAME"
+          # Repository owner and name
+          OWNER="${GITHUB_REPOSITORY%%/*}"
+          REPO="${GITHUB_REPOSITORY#*/}"
+          echo "Repository: ${OWNER}/${REPO}"
           
           # Normalize branch name for use in paths
           # Replace: / (slash), . (dot), _ (underscore) with - (hyphen), then convert to lowercase
@@ -59,13 +63,13 @@ jobs:
           # Determine destination directory and base path
           if [ "$BRANCH_NAME" = "main" ]; then
             # Main branch deploys to the primary location
-            DEST_DIR="docs/html/parking"
-            BASE_PATH="/piotereks/html/parking/"
+            DEST_DIR="./"
+            BASE_PATH="/${OWNER}/${REPO}/"
             echo "Deploying main branch to primary location"
           else
             # Other branches deploy to branch-specific subfolders
-            DEST_DIR="docs/html/parking-${NORMALIZED_BRANCH}"
-            BASE_PATH="/piotereks/html/parking-${NORMALIZED_BRANCH}/"
+            DEST_DIR="${NORMALIZED_BRANCH}/"
+            BASE_PATH="/${OWNER}/${REPO}/${NORMALIZED_BRANCH}/"
             echo "Deploying branch '$BRANCH_NAME' to subfolder: $DEST_DIR"
           fi
           
@@ -90,7 +94,7 @@ jobs:
         run: |
           DEST_DIR="${{ steps.deployment-config.outputs.dest_dir }}"
           # SUBDIR is the tail after docs/html/ (e.g. parking or parking-feature-x)
-          SUBDIR="${DEST_DIR#docs/html/}"
+          SUBDIR="${DEST_DIR}"
           mkdir -p "parking-deploy/docs/html/${SUBDIR}"
           # Move built files into the branch-specific subfolder
           mv -v parking-deploy/docs/html/parking/* "parking-deploy/docs/html/${SUBDIR}/" || true
@@ -109,11 +113,14 @@ jobs:
         run: |
           DEST_DIR="${{ steps.deployment-config.outputs.dest_dir }}"
           BRANCH_NAME="${{ steps.deployment-config.outputs.branch_name }}"
-          
+          NORMALIZED="${{ steps.deployment-config.outputs.normalized_branch }}"
+          OWNER="${GITHUB_REPOSITORY%%/*}"
+          REPO="${GITHUB_REPOSITORY#*/}"
+
           if [ "$BRANCH_NAME" = "main" ]; then
-            URL="https://piotereks.github.io/piotereks/html/parking/"
+            URL="https://${OWNER}.github.io/${REPO}/"
           else
-            URL="https://piotereks.github.io/piotereks/html/parking-${{ steps.deployment-config.outputs.normalized_branch }}/"
+            URL="https://${OWNER}.github.io/${REPO}/${NORMALIZED}/"
           fi
           
           echo "::notice::✅ Deployment successful!"
