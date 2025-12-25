@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -101,19 +101,16 @@ jobs:
           # Remove the (now-empty) default parking folder if present
           rm -rf parking-deploy/docs/html/parking || true
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./parking-deploy/docs/html
-
-      - name: Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages (peaceiris)
         uses: peaceiris/actions-gh-pages@v3
         with:
-          personal_token: ${{ secrets.DEPLOY_TOKEN }}
-          # external_repository: piotereks/piotereks
+          # Use the repo token to push to gh-pages in this repository
+          personal_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: ./
-          destination_dir: ${{ steps.deployment-config.outputs.dest_dir }}
+          # Publish the built docs/html directory (contains subfolders per branch)
+          publish_dir: ./parking-deploy/docs/html
+          # Place published files under docs/html on the publish branch (preserves other files)
+          destination_dir: docs/html
           keep_files: true
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
