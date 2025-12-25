@@ -1,0 +1,26 @@
+{
+  "name": "Free Parking Dev Container",
+  "image": "mcr.microsoft.com/vscode/devcontainers/javascript-node:0-20",
+  "postCreateCommand": "npm install",
+  "postStartCommand": "npm install",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "esbenp.prettier-vscode"
+      ]
+    }
+  }
+}
+{
+  "name": "Free Parking Dev Container",
+  "image": "mcr.microsoft.com/vscode/devcontainers/javascript-node:0-20",
+  "postCreateCommand": "npm install",
+  "postStartCommand": "npm install",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "esbenp.prettier-vscode"
+      ]
+    }
+  }
+}

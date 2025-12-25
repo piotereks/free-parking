@@ -7,7 +7,7 @@ dist-ssr/
 
 # IDE
 .idea/
-.vscode/
+# .vscode/
 *.sublime-*
 
 # OS
