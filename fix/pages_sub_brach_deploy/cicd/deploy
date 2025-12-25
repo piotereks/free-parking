@@ -1,0 +1,97 @@
+#!/bin/bash
+set -e
+
+echo "=== DEPLOY SCRIPT STARTED ==="
+
+if [ -z "$DEPLOY_TOKEN" ]; then
+    echo "❌ ERROR: DEPLOY_TOKEN is not set"
+    exit 1
+fi
+echo "✓ DEPLOY_TOKEN is set (length: ${#DEPLOY_TOKEN})"
+
+echo ""
+echo "=== REMOVING GITHUB ACTIONS AUTHENTICATION ==="
+# This is THE critical step - remove the auth header that checkout added
+git config --local --unset-all http.https://github.com/.extraheader 2>/dev/null || true
+git config --global --unset-all http.https://github.com/.extraheader 2>/dev/null || true
+
+# Disable all credential helpers
+git config --global credential.helper ""
+git config --local credential.helper ""
+
+export GIT_TERMINAL_PROMPT=0
+
+echo "✓ GitHub Actions authentication removed"
+
+echo ""
+echo "=== CONFIGURING GIT USER ==="
+# git config --global user.name "Piotr Sakowski"
+# git config --global user.email "piotereks@gmail.com"
+
+git config --global user.name "free-parking cicd"
+git config --global user.email "actions@github.com"
+
+echo ""
+echo "=== SETTING UP REMOTE WITH TOKEN ==="
+REPO_URL="https://x-access-token:${DEPLOY_TOKEN}@github.com/piotereks/piotereks.git"
+git remote remove piotereks_pages 2>/dev/null || true
+git remote add piotereks_pages "$REPO_URL"
+echo "✓ Remote added with token"
+
+echo ""
+echo "=== FETCHING ==="
+git fetch piotereks_pages main
+echo "✓ Fetch successful"
+
+echo ""
+echo "=== CREATING WORKTREE ==="
+git worktree add ./parking-deploy piotereks_pages/main
+echo "✓ Worktree created"
+
+echo ""
+echo "=== CONFIGURING WORKTREE ==="
+cd ./parking-deploy/
+
+# Remove extraheader in the worktree too
+git config --local --unset-all http.https://github.com/.extraheader 2>/dev/null || true
+git config --local credential.helper ""
+
+# Set remote URL with token in worktree
+# git remote set-url piotereks_pages "https://x-access-token:${DEPLOY_TOKEN}@github.com/piotereks/piotereks.git"
+
+git sparse-checkout init --cone
+git sparse-checkout set docs/html/parking
+echo "✓ Sparse checkout configured"
+cd ..
+
+echo ""
+echo "=== BUILDING ==="
+npm ci
+npm run build
+echo "✓ Build complete"
+
+echo ""
+echo "=== DEPLOYING ==="
+cd ./parking-deploy/
+echo "$(date '+%Y-%m-%d %H:%M:%S')" > docs/html/parking/date.txt
+
+git add .
+git commit -m "Deploy $(date '+%Y-%m-%d %H:%M:%S')"
+echo "✓ Changes committed"
+
+echo ""
+echo "=== PUSHING ==="
+git push piotereks_pages HEAD:main
+echo "✓ Push main successful!"
+# git push --force piotereks_pages HEAD:refs/heads/gh-pages-deploy
+# echo "✓ Push gh-pages-deploy successful!"
+
+echo ""
+echo "=== CLEANUP ==="
+cd ..
+git worktree remove ./parking-deploy
+echo "✓ Worktree removed"
+
+echo ""
+echo "=== DEPLOYMENT COMPLETE ==="
+

@@ -1,0 +1,128 @@
+[
+    {
+        "id": "52f17e2ca027f52c",
+        "type": "tab",
+        "label": "Google Sheets Logging",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "a0ddf57eaefa0be3",
+        "type": "link in",
+        "z": "52f17e2ca027f52c",
+        "name": "Input from Parking Flow",
+        "links": [
+            "c40f34071186a4b1"
+        ],
+        "x": 150,
+        "y": 100,
+        "wires": [
+            [
+                "60df242656fbe1e6"
+            ]
+        ]
+    },
+    {
+        "id": "cd692875b48b5745",
+        "type": "inject",
+        "z": "52f17e2ca027f52c",
+        "name": "Test Data",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"temperature\": 100, \"timestamp1\":\"11:11\", \"humidity\": 50, \"timestamp2\":\"12:12\"}",
+        "payloadType": "json",
+        "x": 150,
+        "y": 180,
+        "wires": [
+            [
+                "60df242656fbe1e6"
+            ]
+        ]
+    },
+    {
+        "id": "60df242656fbe1e6",
+        "type": "function",
+        "z": "52f17e2ca027f52c",
+        "name": "Prepare Form Data",
+        "func": "// REPLACE THESE WITH YOUR FORM ENTRY IDs\nvar ENTRY_ID_GREEN = \"entry.2026993163\";\nvar ENTRY_TIME_GREEN = \"entry.51469670\";\nvar ENTRY_ID_UNI = \"entry.1412144904\";\nvar ENTRY_TIME_UNI = \"entry.364658642\";\n\n// Get values from the incoming message\n// (Assuming msg.payload.temperature is GreenDay, msg.payload.humidity is Uni)\nvar valUni = msg.payload.temperature;\nvar timeUni = msg.payload.timestamp2;\nvar valGreen = msg.payload.setpoint;\nvar timeGreen = msg.payload.timestamp1;\n\n// Construct Form Payload\nmsg.payload = {};\nmsg.payload[ENTRY_ID_GREEN] = valGreen;\nmsg.payload[ENTRY_TIME_GREEN] = timeGreen;\nmsg.payload[ENTRY_ID_UNI] = valUni;\nmsg.payload[ENTRY_TIME_UNI] = timeUni;\n\n// Set Headers for Form Submission\nmsg.headers = {\n    \"Content-Type\": \"application/x-www-form-urlencoded\"\n};\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 100,
+        "wires": [
+            [
+                "5ec5c482fc6551fb",
+                "66baaa8d86bc9dc6"
+            ]
+        ]
+    },
+    {
+        "id": "5ec5c482fc6551fb",
+        "type": "http request",
+        "z": "52f17e2ca027f52c",
+        "name": "POST to Google Form",
+        "method": "POST",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "https://docs.google.com/forms/d/e/1FAIpQLSdeQ-rmw_VfOidGmtSNb9DLkt1RfPdduu-jH898sf3lhj17LA/formResponse",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 650,
+        "y": 100,
+        "wires": [
+            [
+                "845296b9837b8163"
+            ]
+        ]
+    },
+    {
+        "id": "845296b9837b8163",
+        "type": "debug",
+        "z": "52f17e2ca027f52c",
+        "name": "Log Success",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 850,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "66baaa8d86bc9dc6",
+        "type": "debug",
+        "z": "52f17e2ca027f52c",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 360,
+        "y": 220,
+        "wires": []
+    }
+]
