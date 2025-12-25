@@ -2,11 +2,13 @@ name: Deploy to GitHub Pages (Branch-Specific)
 
 on:
   push:
-    branches:
+    branches-ignore:
       - main
-      - 'feature/**'
-      - 'fix/**'
-      - 'dev/**'
+    # branches:
+    #   - main
+    #   - 'feature/**'
+    #   - 'fix/**'
+    #   - 'dev/**'
   workflow_dispatch:
 
 permissions:
@@ -33,14 +35,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
-      - name: Verify DEPLOY_TOKEN secret
-        run: |
-          if [ -z "${{ secrets.DEPLOY_TOKEN }}" ]; then
-            echo "::error::DEPLOY_TOKEN secret is not set. Please configure it in repository settings."
-            echo "::error::Go to: Settings → Secrets and variables → Actions → New repository secret"
-            exit 1
-          fi
-          echo "✓ DEPLOY_TOKEN is configured"
+      # - name: Verify DEPLOY_TOKEN secret
+      #   run: |
+      #     if [ -z "${{ secrets.DEPLOY_TOKEN }}" ]; then
+      #       echo "::error::DEPLOY_TOKEN secret is not set. Please configure it in repository settings."
+      #       echo "::error::Go to: Settings → Secrets and variables → Actions → New repository secret"
+      #       exit 1
+      #     fi
+      #     echo "✓ DEPLOY_TOKEN is configured"
       
       - name: Determine deployment path and base URL
         id: deployment-config
@@ -48,6 +50,10 @@ jobs:
           # Get the branch name
           BRANCH_NAME="${GITHUB_REF#refs/heads/}"
           echo "Branch name: $BRANCH_NAME"
+          # Repository owner and name
+          OWNER="${GITHUB_REPOSITORY%%/*}"
+          REPO="${GITHUB_REPOSITORY#*/}"
+          echo "Repository: ${OWNER}/${REPO}"
           
           # Normalize branch name for use in paths
           # Replace: / (slash), . (dot), _ (underscore) with - (hyphen), then convert to lowercase
@@ -58,13 +64,13 @@ jobs:
           # Determine destination directory and base path
           if [ "$BRANCH_NAME" = "main" ]; then
             # Main branch deploys to the primary location
-            DEST_DIR="docs/html/parking"
-            BASE_PATH="/piotereks/html/parking/"
+            DEST_DIR="./"
+            BASE_PATH="/${REPO}/"
             echo "Deploying main branch to primary location"
           else
             # Other branches deploy to branch-specific subfolders
-            DEST_DIR="docs/html/parking-${NORMALIZED_BRANCH}"
-            BASE_PATH="/piotereks/html/parking-${NORMALIZED_BRANCH}/"
+            DEST_DIR="${NORMALIZED_BRANCH}/"
+            BASE_PATH="/${REPO}/${NORMALIZED_BRANCH}/"
             echo "Deploying branch '$BRANCH_NAME' to subfolder: $DEST_DIR"
           fi
           
@@ -85,6 +91,22 @@ jobs:
           echo "Building with base path: $VITE_BASE_PATH"
           npm run build
       
+      - name: Prepare publish directory
+        run: |
+          DEST_DIR="${{ steps.deployment-config.outputs.dest_dir }}"
+          # SUBDIR is the tail after docs/html/ (e.g. parking or parking-feature-x)
+          SUBDIR="${DEST_DIR}"
+          mkdir -p "parking-deploy/docs/html/${SUBDIR}"
+          # Move built files into the branch-specific subfolder
+          mv -v parking-deploy/docs/html/parking/* "parking-deploy/docs/html/${SUBDIR}/" || true
+          # Remove the (now-empty) default parking folder if present
+          rm -rf parking-deploy/docs/html/parking || true
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./parking-deploy/docs/html
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
