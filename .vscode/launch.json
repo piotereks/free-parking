@@ -1,55 +1,41 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Launch Browser (Codespaces) - Chrome",
-            "type": "pwa-chrome",
-            "request": "launch",
-            "url": "http://localhost:5173",
-            "webRoot": "${workspaceFolder}",
-            "preLaunchTask": "npm: dev"
-        },
-        {
-            "name": "Launch Browser (Codespaces) - Edge",
-            "type": "pwa-msedge",
-            "request": "launch",
-            "url": "http://localhost:5173",
-            "webRoot": "${workspaceFolder}",
-            "preLaunchTask": "npm: dev"
-        },
-        {
-            "name": "Attach to Vite (Inspect)",
-            "type": "pwa-node",
-            "request": "attach",
-            "port": 9229,
-            "address": "0.0.0.0",
-            "localRoot": "${workspaceFolder}",
-            "remoteRoot": "/workspaces/free_parking_sensor",
-            "restart": false
-        }
-    ],
-    "compounds": [
-        {
-            "name": "Launch Chrome and Attach",
-            "configurations": [
-                "Launch Browser (Codespaces) - Chrome",
-                "Attach to Vite (Inspect)"
-            ]
-        },
-        {
-            "name": "Launch Edge and Attach",
-            "configurations": [
-                "Launch Browser (Codespaces) - Edge",
-                "Attach to Vite (Inspect)"
-            ]
-        },
-        {
-            "name": "Launch Chrome Only",
-            "configurations": ["Launch Browser (Codespaces) - Chrome"]
-        },
-        {
-            "name": "Launch Edge Only",
-            "configurations": ["Launch Browser (Codespaces) - Edge"]
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch Chrome (Dev)",
+      "type": "pwa-chrome",
+      "request": "launch",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}",
+      "preLaunchTask": "npm: dev"
+    },
+    {
+      "name": "Launch Chrome (Inspect)",
+      "type": "pwa-chrome",
+      "request": "launch",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}",
+      "preLaunchTask": "npm: dev:inspect"
+    },
+    {
+      "name": "Attach to Vite (Inspect)",
+      "type": "pwa-node",
+      "request": "attach",
+      "port": 9229,
+      "address": "0.0.0.0",
+      "localRoot": "${workspaceFolder}",
+      "remoteRoot": "/workspaces/free_parking_sensor",
+      "restart": true
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Launch Chrome (Inspect) and Attach",
+      "configurations": ["Launch Chrome (Inspect)", "Attach to Vite (Inspect)"]
+    },
+    {
+      "name": "Launch Chrome (Dev Only)",
+      "configurations": ["Launch Chrome (Dev)"]
+    }
+  ]
 }

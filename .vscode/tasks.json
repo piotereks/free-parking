@@ -6,7 +6,17 @@
       "type": "shell",
       "command": "npm run dev",
       "isBackground": true,
-      "problemMatcher": [],
+      "problemMatcher": [
+        {
+          "owner": "vite",
+          "pattern": [],
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": "^",
+            "endsPattern": "Local:\\s+http://localhost:\\d+"
+          }
+        }
+      ],
       "presentation": {
         "reveal": "always",
         "panel": "dedicated"
@@ -15,9 +25,19 @@
     {
       "label": "npm: dev:inspect",
       "type": "shell",
-      "command": "NODE_OPTIONS='--inspect=0.0.0.0:9229' npm run dev",
+      "command": "cross-env NODE_OPTIONS=--inspect=0.0.0.0:9229 npm run dev",
       "isBackground": true,
-      "problemMatcher": [],
+      "problemMatcher": [
+        {
+          "owner": "vite",
+          "pattern": [],
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": "^",
+            "endsPattern": "Local:\\s+http://localhost:\\d+"
+          }
+        }
+      ],
       "presentation": {
         "reveal": "always",
         "panel": "dedicated"
