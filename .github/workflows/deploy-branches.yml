@@ -2,8 +2,8 @@ name: Deploy to GitHub Pages (Branch-Specific)
 
 on:
   push:
-    branches-ignore:
-      - main
+    # branches-ignore:
+    #   - main
     # branches:
     #   - main
     #   - 'feature/**'
@@ -112,7 +112,7 @@ jobs:
         with:
           personal_token: ${{ secrets.DEPLOY_TOKEN }}
           # external_repository: piotereks/piotereks
-          publish_branch: main
+          publish_branch: gh-pages
           publish_dir: ./
           destination_dir: ${{ steps.deployment-config.outputs.dest_dir }}
           keep_files: true
