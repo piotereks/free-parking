@@ -256,7 +256,7 @@ const Dashboard = ({ setView }) => {
                 role="status"
                 aria-live="polite"
               >
-                {realtimeLoading ? 'LOADING' : (realtimeError ? 'OFFLINE' : (hasApproximation ? 'APPROXIMATE' : 'ONLINE'))}
+                {realtimeLoading ? 'LOADING' : (realtimeError ? 'OFFLINE' : (hasApproximation ? 'APPROX' : 'ONLINE'))}
               </div>
             </div>
           </div>
