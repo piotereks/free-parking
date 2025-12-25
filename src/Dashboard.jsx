@@ -6,36 +6,42 @@ import { applyApproximations, calculateDataAge } from './utils/parkingUtils';
 
 const ParkingCard = ({ data, now, allOffline }) => {
   const ts = new Date(data.Timestamp.replace(' ', 'T'));
-  const age = Math.max(0, Math.floor((now - ts) / 1000 / 60));
+  const age = calculateDataAge(data.Timestamp, now);
 
   let ageClass = '';
   let statusIcon = null;
   let statusLabel = '';
   
-  // Determine status: online, warning, error, offline
-  // offline icon only when ALL data is offline
-  if (allOffline) {
-    ageClass = 'age-old';
-    statusIcon = '📵';
-    statusLabel = 'Offline';
-  } else if (age >= 15) { // 15 minutes or more - error
-    ageClass = 'age-old';
-    statusIcon = '🚨';
-    statusLabel = 'Error - data outdated';
-  } else if (age > 5) { // 5-15 minutes - warning
-    ageClass = 'age-medium';
-    statusIcon = '⚠️';
-    statusLabel = 'Warning - data slightly outdated';
-  }
-  // No icon for fresh data (< 5 minutes) - online status
-
   let name = data.ParkingGroupName;
   if (name === 'Bank_1') name = 'Uni Wroc';
 
   const approximationInfo = data.approximationInfo || {};
-  const isApproximated = approximationInfo.isApproximated;
+  const isApproximated = Boolean(approximationInfo.isApproximated);
   const freeSpots = isApproximated ? approximationInfo.approximated : (data.CurrentFreeGroupCounterValue || 0);
   const originalSpots = approximationInfo.original || data.CurrentFreeGroupCounterValue || 0;
+
+  // Determine status: online, warning, error, offline; icons shown only for non-approximated data
+  // offline icon only when ALL data is offline
+  if (!isApproximated) {
+    if (allOffline) {
+      ageClass = 'age-old';
+      statusIcon = '📵';
+      statusLabel = 'Offline';
+    } else if (age >= 15) {
+      ageClass = 'age-old';
+      statusIcon = '🚨';
+      statusLabel = 'Error - data outdated';
+    } else if (age > 5) {
+      ageClass = 'age-medium';
+      statusIcon = '⚠️';
+      statusLabel = 'Warning - data slightly outdated';
+    }
+  } else if (age >= 15) {
+    ageClass = 'age-old';
+  } else if (age > 5) {
+    ageClass = 'age-medium';
+  }
+  // No icon for fresh data (< 5 minutes) - online status
 
 
   return (
@@ -130,9 +136,9 @@ const Dashboard = ({ setView }) => {
   });
 
   // Calculate worst-case color for aggregated total based on data freshness
-  const getAggregatedStatus = () => {
+  const getAggregatedStatus = ({ allowIcons = true } = {}) => {
     if (processedData.length === 0) {
-      return { colorClass: '', statusMessage: 'No data available' };
+      return { colorClass: '', statusMessage: 'No data available', statusIcon: null, statusLabel: '' };
     }
 
     let maxAge = 0;
@@ -141,26 +147,46 @@ const Dashboard = ({ setView }) => {
       maxAge = Math.max(maxAge, age);
     });
 
-    // Apply worst-case logic: green (< 5 min) → orange (5-15 min) → red (>= 15 min)
-    if (maxAge >= 15) {
-      return {
-        colorClass: 'age-old',
-        statusMessage: 'Data outdated - figures may not reflect actual free spaces'
-      };
+    let statusIcon = null;
+    let statusLabel = '';
+    let colorClass = '';
+    let statusMessage = '';
+
+    if (allOffline) {
+      colorClass = 'age-old';
+      statusMessage = 'All parking feeds appear offline';
+      if (allowIcons) {
+        statusIcon = '📵';
+        statusLabel = 'Offline';
+      }
+    } else if (maxAge >= 15) {
+      colorClass = 'age-old';
+      statusMessage = 'Data outdated - figures may not reflect actual free spaces';
+      if (allowIcons) {
+        statusIcon = '🚨';
+        statusLabel = 'Error - data outdated';
+      }
     } else if (maxAge > 5) {
-      return {
-        colorClass: 'age-medium',
-        statusMessage: 'Data slightly outdated - refresh recommended'
-      };
+      colorClass = 'age-medium';
+      statusMessage = 'Data slightly outdated - refresh recommended';
+      if (allowIcons) {
+        statusIcon = '⚠️';
+        statusLabel = 'Warning - data slightly outdated';
+      }
     } else {
-      return {
-        colorClass: '',
-        statusMessage: 'Data is current and reliable'
-      };
+      colorClass = '';
+      statusMessage = 'Data is current and reliable';
     }
+
+    return { colorClass, statusMessage, statusIcon, statusLabel };
   };
 
-  const { colorClass: totalColorClass, statusMessage } = getAggregatedStatus();
+  const {
+    colorClass: totalColorClass,
+    statusMessage,
+    statusIcon: totalStatusIcon,
+    statusLabel: totalStatusLabel
+  } = getAggregatedStatus({ allowIcons: !hasApproximation });
 
   return (
     <>
@@ -186,7 +212,7 @@ const Dashboard = ({ setView }) => {
           {realtimeLoading && realtimeData.length === 0 ? (
             <div className="loader" role="status" aria-live="polite">Loading parking data...</div>
           ) : (
-            realtimeData.map((d, i) => <ParkingCard key={i} data={d} now={now} allOffline={allOffline} />)
+            processedData.map((d, i) => <ParkingCard key={i} data={d} now={now} allOffline={allOffline} />)
           )}
         </div>
         <div className={`status-description ${totalColorClass}`} aria-label="Status description">{statusMessage}</div>
@@ -195,6 +221,16 @@ const Dashboard = ({ setView }) => {
             <div className="panel-section">
               <div className="status-label">Total Spaces</div>
               <div className={`status-value big-value ${totalColorClass}`} aria-label={`Total free spaces: ${realtimeLoading ? 'loading' : totalSpaces}`}>
+                {totalStatusIcon && (
+                  <span
+                    className="status-icon-number"
+                    role="img"
+                    aria-label={totalStatusLabel}
+                    title={totalStatusLabel}
+                  >
+                    {totalStatusIcon}
+                  </span>
+                )}
                 {hasApproximation && !realtimeLoading && <span className="approx-indicator-small" title="Includes approximated values">≈</span>}
                 {realtimeLoading ? '---' : totalSpaces}
               </div>
