@@ -25,7 +25,7 @@
     },
     {
       "name": "Launch Chrome (Dev)",
-      "type": "pwa-chrome",
+      "type": "chrome",
       "request": "launch",
       "url": "http://localhost:5173",
       "webRoot": "${workspaceFolder}",
