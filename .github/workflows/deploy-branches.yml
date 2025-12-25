@@ -51,7 +51,8 @@ jobs:
           
           # Normalize branch name for use in paths
           # Replace: / (slash), . (dot), _ (underscore) with - (hyphen), then convert to lowercase
-          NORMALIZED_BRANCH=$(echo "$BRANCH_NAME" | sed 's/[/\._]/-/g' | tr '[:upper:]' '[:lower:]')
+          # NORMALIZED_BRANCH=$(echo "$BRANCH_NAME" | sed 's/[/\._]/-/g' | tr '[:upper:]' '[:lower:]')
+          NORMALIZED_BRANCH=$(echo "$BRANCH_NAME" | tr '[:upper:]' '[:lower:]')
           echo "Normalized branch: $NORMALIZED_BRANCH"
           
           # Determine destination directory and base path
@@ -88,9 +89,9 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           personal_token: ${{ secrets.DEPLOY_TOKEN }}
-          external_repository: piotereks/piotereks
+          # external_repository: piotereks/piotereks
           publish_branch: main
-          publish_dir: ./parking-deploy/docs/html/parking
+          publish_dir: ./
           destination_dir: ${{ steps.deployment-config.outputs.dest_dir }}
           keep_files: true
           user_name: 'github-actions[bot]'
@@ -102,10 +103,13 @@ jobs:
           DEST_DIR="${{ steps.deployment-config.outputs.dest_dir }}"
           BRANCH_NAME="${{ steps.deployment-config.outputs.branch_name }}"
           
-          if [ "$BRANCH_NAME" = "main" ]; then
-            URL="https://piotereks.github.io/piotereks/html/parking/"
-          else
-            URL="https://piotereks.github.io/piotereks/html/parking-${{ steps.deployment-config.outputs.normalized_branch }}/"
+            if [ "$BRANCH_NAME" = "main" ]; then
+            REPO_NAME="${GITHUB_REPOSITORY##*/}"
+            URL="https://piotereks.github.io/${REPO_NAME}/"
+            else
+            REPO_NAME="${GITHUB_REPOSITORY##*/}"
+            URL="https://piotereks.github.io/${REPO_NAME}/${{ steps.deployment-config.outputs.normalized_branch }}/"
+            fi
           fi
           
           echo "::notice::✅ Deployment successful!"
