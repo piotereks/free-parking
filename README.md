@@ -155,7 +155,7 @@ For manual or local deployments:
 npm run build
 ```
 
-Output will be in `parking-deploy/docs/html/parking/`. Deploy this directory to any static hosting service:
+Output will be in `parking-deploy/docs/html/parking/` directory. The contents of this directory can be deployed to any static hosting service:
 
 - GitHub Pages
 - Netlify
