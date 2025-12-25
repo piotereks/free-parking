@@ -64,7 +64,7 @@ jobs:
           # Determine destination directory and base path
           if [ "$BRANCH_NAME" = "main" ]; then
             # Main branch deploys to the primary location
-            DEST_DIR="./"
+            DEST_DIR="${NORMALIZED_BRANCH}/"
             BASE_PATH="/${REPO}/"
             echo "Deploying main branch to primary location"
           else
