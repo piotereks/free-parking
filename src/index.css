@@ -226,6 +226,7 @@
 
   .free-spots {
     @apply text-spot-number font-bold text-success-dark;
+    @apply flex items-center justify-center gap-1;
   }
 
   body:not(.dark) .free-spots {
@@ -248,13 +249,15 @@
     @apply text-warning-medium-light;
   }
 
-  .age-indicator-small,
-  .timestamp-small {
+  .status-icon-number {
+    @apply inline-block text-2xl;
+  }
+
+  .age-indicator-small {
     @apply text-xs mt-1 text-text-secondary-light;
   }
 
-  .dark .age-indicator-small,
-  .dark .timestamp-small {
+  .dark .age-indicator-small {
     @apply text-text-secondary-dark;
   }
 

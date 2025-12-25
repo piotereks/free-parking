@@ -2,24 +2,47 @@ import { useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import Header from './Header';
 import { useParkingStore, refreshParkingData } from './store/parkingStore';
-import { applyApproximations, calculateDataAge } from './utils/parkingUtils';
+import { applyApproximations, calculateDataAge, formatAgeLabel } from './utils/parkingUtils';
 
-const ParkingCard = ({ data, now }) => {
+const ParkingCard = ({ data, now, allOffline }) => {
   const age = calculateDataAge(data.Timestamp, now);
+  const { display: ageDisplay, aria: ageAria } = formatAgeLabel(age);
 
   let ageClass = '';
-  if (age >= 15) ageClass = 'age-old';
-  else if (age > 5) ageClass = 'age-medium';
-
+  let statusIcon = null;
+  let statusLabel = '';
+  
   let name = data.ParkingGroupName;
   if (name === 'Bank_1') name = 'Uni Wroc';
 
   const approximationInfo = data.approximationInfo || {};
-  const isApproximated = approximationInfo.isApproximated;
+  const isApproximated = Boolean(approximationInfo.isApproximated);
   const freeSpots = isApproximated ? approximationInfo.approximated : (data.CurrentFreeGroupCounterValue || 0);
   const originalSpots = approximationInfo.original || data.CurrentFreeGroupCounterValue || 0;
 
-  const ts = new Date(data.Timestamp.replace(' ', 'T'));
+  // Determine status: online, warning, error, offline; icons shown only for non-approximated data
+  // offline icon only when ALL data is offline
+  if (!isApproximated) {
+    if (allOffline) {
+      ageClass = 'age-old';
+      statusIcon = '📵';
+      statusLabel = 'Offline';
+    } else if (age >= 15) {
+      ageClass = 'age-old';
+      statusIcon = '🚨';
+      statusLabel = 'Error - data outdated';
+    } else if (age > 5) {
+      ageClass = 'age-medium';
+      statusIcon = '⚠️';
+      statusLabel = 'Warning - data slightly outdated';
+    }
+  } else if (age >= 15) {
+    ageClass = 'age-old';
+  } else if (age > 5) {
+    ageClass = 'age-medium';
+  }
+  // No icon for fresh data (< 5 minutes) - online status
+
 
   return (
     <div
@@ -32,6 +55,16 @@ const ParkingCard = ({ data, now }) => {
         className={`free-spots ${ageClass}`}
         aria-label={`${freeSpots} free parking spaces${isApproximated ? ' (approximated)' : ''}`}
       >
+        {statusIcon && (
+          <span 
+            className="status-icon-number" 
+            role="img" 
+            aria-label={statusLabel}
+            title={statusLabel}
+          >
+            {statusIcon}
+          </span>
+        )}
         {isApproximated && <span className="approx-indicator" title="Approximated value">≈</span>}
         {freeSpots}
       </div>
@@ -40,11 +73,8 @@ const ParkingCard = ({ data, now }) => {
           (orig: {originalSpots})
         </div>
       )}
-      <div className="age-indicator-small" aria-label={`Data from ${age} minutes ago`}>
-        {age} min ago
-      </div>
-      <div className="timestamp-small" aria-label={`Timestamp at ${ts.toLocaleTimeString('pl-PL')}`}>
-        @{ts.toLocaleTimeString('pl-PL')}
+      <div className="age-indicator-small" aria-label={ageAria}>
+        {ageDisplay}
       </div>
     </div>
   );
@@ -61,7 +91,8 @@ ParkingCard.propTypes = {
       original: PropTypes.number
     })
   }).isRequired,
-  now: PropTypes.instanceOf(Date).isRequired
+  now: PropTypes.instanceOf(Date).isRequired,
+  allOffline: PropTypes.bool.isRequired
 };
 
 const Dashboard = ({ setView }) => {
@@ -94,10 +125,17 @@ const Dashboard = ({ setView }) => {
 
   const updateStatus = lastRealtimeUpdate ? `Last update: ${lastRealtimeUpdate.toLocaleTimeString('pl-PL')}` : 'Loading...';
 
+  // Check if all data is offline (24+ hours old)
+  const allOffline = realtimeData.length > 0 && realtimeData.every((d) => {
+    const ts = new Date(d.Timestamp.replace(' ', 'T'));
+    const age = Math.max(0, Math.floor((now - ts) / 1000 / 60));
+    return age >= 1440; // 24 hours
+  });
+
   // Calculate worst-case color for aggregated total based on data freshness
-  const getAggregatedStatus = () => {
+  const getAggregatedStatus = ({ allowIcons = true } = {}) => {
     if (processedData.length === 0) {
-      return { colorClass: '', statusMessage: 'No data available' };
+      return { colorClass: '', statusMessage: 'No data available', statusIcon: null, statusLabel: '' };
     }
 
     let maxAge = 0;
@@ -106,26 +144,46 @@ const Dashboard = ({ setView }) => {
       maxAge = Math.max(maxAge, age);
     });
 
-    // Apply worst-case logic: green (< 5 min) → orange (5-15 min) → red (>= 15 min)
-    if (maxAge >= 15) {
-      return {
-        colorClass: 'age-old',
-        statusMessage: 'Data outdated - figures may not reflect actual free spaces'
-      };
+    let statusIcon = null;
+    let statusLabel = '';
+    let colorClass = '';
+    let statusMessage = '';
+
+    if (allOffline) {
+      colorClass = 'age-old';
+      statusMessage = 'All parking feeds appear offline';
+      if (allowIcons) {
+        statusIcon = '📵';
+        statusLabel = 'Offline';
+      }
+    } else if (maxAge >= 15) {
+      colorClass = 'age-old';
+      statusMessage = 'Data outdated - figures may not reflect actual free spaces';
+      if (allowIcons) {
+        statusIcon = '🚨';
+        statusLabel = 'Error - data outdated';
+      }
     } else if (maxAge > 5) {
-      return {
-        colorClass: 'age-medium',
-        statusMessage: 'Data slightly outdated - refresh recommended'
-      };
+      colorClass = 'age-medium';
+      statusMessage = 'Data slightly outdated - refresh recommended';
+      if (allowIcons) {
+        statusIcon = '⚠️';
+        statusLabel = 'Warning - data slightly outdated';
+      }
     } else {
-      return {
-        colorClass: '',
-        statusMessage: 'Data is current and reliable'
-      };
+      colorClass = '';
+      statusMessage = 'Data is current and reliable';
     }
+
+    return { colorClass, statusMessage, statusIcon, statusLabel };
   };
 
-  const { colorClass: totalColorClass, statusMessage } = getAggregatedStatus();
+  const {
+    colorClass: totalColorClass,
+    statusMessage,
+    statusIcon: totalStatusIcon,
+    statusLabel: totalStatusLabel
+  } = getAggregatedStatus({ allowIcons: !hasApproximation });
 
   return (
     <>
@@ -151,7 +209,7 @@ const Dashboard = ({ setView }) => {
           {realtimeLoading && realtimeData.length === 0 ? (
             <div className="loader" role="status" aria-live="polite">Loading parking data...</div>
           ) : (
-            processedData.map((d, i) => <ParkingCard key={i} data={d} now={now} />)
+            processedData.map((d, i) => <ParkingCard key={i} data={d} now={now} allOffline={allOffline} />)
           )}
         </div>
         <div className={`status-description ${totalColorClass}`} aria-label="Status description">{statusMessage}</div>
@@ -160,6 +218,16 @@ const Dashboard = ({ setView }) => {
             <div className="panel-section">
               <div className="status-label">Total Spaces</div>
               <div className={`status-value big-value ${totalColorClass}`} aria-label={`Total free spaces: ${realtimeLoading ? 'loading' : totalSpaces}`}>
+                {totalStatusIcon && (
+                  <span
+                    className="status-icon-number"
+                    role="img"
+                    aria-label={totalStatusLabel}
+                    title={totalStatusLabel}
+                  >
+                    {totalStatusIcon}
+                  </span>
+                )}
                 {hasApproximation && !realtimeLoading && <span className="approx-indicator-small" title="Includes approximated values">≈</span>}
                 {realtimeLoading ? '---' : totalSpaces}
               </div>
@@ -188,7 +256,7 @@ const Dashboard = ({ setView }) => {
                 role="status"
                 aria-live="polite"
               >
-                {realtimeLoading ? 'LOADING' : (realtimeError ? 'OFFLINE' : (hasApproximation ? 'APPROXIMATE' : 'ONLINE'))}
+                {realtimeLoading ? 'LOADING' : (realtimeError ? 'OFFLINE' : (hasApproximation ? 'APPROX' : 'ONLINE'))}
               </div>
             </div>
           </div>

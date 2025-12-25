@@ -74,6 +74,40 @@ export const calculateDataAge = (timestamp, now = new Date()) => {
 };
 
 /**
+ * Format age value into human-readable text with minutes/hours/days granularity
+ * @param {number} ageMinutes - Age in minutes
+ * @returns {{display: string, aria: string}} Formatted strings for UI and aria labels
+ */
+export const formatAgeLabel = (ageMinutes) => {
+  if (!Number.isFinite(ageMinutes)) {
+    return { display: '--', aria: 'Data age unavailable' };
+  }
+
+  const minutes = Math.max(0, Math.round(ageMinutes));
+
+  if (minutes < 60) {
+    const label = `${minutes} min ago`;
+    const aria = `Data from ${minutes} minute${minutes === 1 ? '' : 's'} ago`;
+    return { display: label, aria };
+  }
+
+  if (minutes < 1440) {
+    const hours = Math.round(minutes / 60);
+    const label = `${hours} h ago`;
+    const aria = `Data from ${hours} hour${hours === 1 ? '' : 's'} ago`;
+    return { display: label, aria };
+  }
+
+  const daysRaw = minutes / 1440;
+  const daysRounded = Math.round(daysRaw * 2) / 2;
+  const isWholeDay = Number.isInteger(daysRounded);
+  const dayValue = isWholeDay ? daysRounded.toString() : daysRounded.toFixed(1);
+  const label = `${dayValue} d ago`;
+  const aria = `Data from ${dayValue} day${dayValue === '1' ? '' : 's'} ago`;
+  return { display: label, aria };
+};
+
+/**
  * Get maximum capacity for a parking area
  * @param {string} parkingName - Name of the parking area
  * @returns {number|undefined} Maximum capacity or undefined if unknown
@@ -115,12 +149,9 @@ export const calculateApproximation = (staleData, freshData, now = new Date()) =
   const staleMax = getMaxCapacity(staleData.ParkingGroupName);
   const freshMax = getMaxCapacity(freshData.ParkingGroupName);
   
-  console.log('[Approximation] Stale parking:', staleData.ParkingGroupName, 'max:', staleMax);
-  console.log('[Approximation] Fresh parking:', freshData.ParkingGroupName, 'max:', freshMax);
   
   // Cannot approximate if we don't know the maximum capacity of either parking area
   if (!staleMax || !freshMax) {
-    console.log('[Approximation] Skipping - unknown capacity');
     return {
       approximated: staleData.CurrentFreeGroupCounterValue || 0,
       original: staleData.CurrentFreeGroupCounterValue || 0,
@@ -134,12 +165,10 @@ export const calculateApproximation = (staleData, freshData, now = new Date()) =
   const freshFree = freshData.CurrentFreeGroupCounterValue || 0;
   const freshRatio = freshFree / freshMax;
   
-  console.log('[Approximation] Fresh free spaces:', freshFree, 'ratio:', freshRatio.toFixed(3));
   
   // Apply ratio to stale area's maximum
   const approximated = Math.round(freshRatio * staleMax);
   
-  console.log('[Approximation] Calculated approximation:', approximated);
   
   return {
     approximated,

@@ -11,7 +11,6 @@ const ParkingCardSkeleton = () => {
       <div className="skeleton-name skeleton-shimmer"></div>
       <div className="skeleton-spots skeleton-shimmer"></div>
       <div className="skeleton-age skeleton-shimmer"></div>
-      <div className="skeleton-timestamp skeleton-shimmer"></div>
     </div>
   );
 };
