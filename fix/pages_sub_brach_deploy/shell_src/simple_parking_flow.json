@@ -1,0 +1,135 @@
+[
+    {
+        "id": "tab_simple",
+        "type": "tab",
+        "label": "Simple Parking Test",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "nora_switch_node",
+        "type": "noraf-switch",
+        "z": "tab_simple",
+        "devicename": "Parking",
+        "topic": "parking/trigger",
+        "passthru": false,
+        "nora": "nora_config_id",
+        "room": "Living Room",
+        "onvalue": "true",
+        "onvalueType": "bool",
+        "offvalue": "false",
+        "offvalueType": "bool",
+        "x": 150,
+        "y": 140,
+        "wires": [
+            [
+                "reset_switch",
+                "delay_node"
+            ]
+        ]
+    },
+    {
+        "id": "reset_switch",
+        "type": "change",
+        "z": "tab_simple",
+        "name": "Turn Switch Off",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "false",
+                "tot": "bool"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 150,
+        "y": 220,
+        "wires": [
+            [
+                "nora_switch_node"
+            ]
+        ]
+    },
+    {
+        "id": "delay_node",
+        "type": "delay",
+        "z": "tab_simple",
+        "name": "Wait for Google",
+        "pauseType": "delay",
+        "timeout": "3",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "x": 350,
+        "y": 140,
+        "wires": [
+            [
+                "set_text"
+            ]
+        ]
+    },
+    {
+        "id": "set_text",
+        "type": "change",
+        "z": "tab_simple",
+        "name": "Set Static Text",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "Your parking 127 spaces free",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 550,
+        "y": 140,
+        "wires": [
+            [
+                "cast_node"
+            ]
+        ]
+    },
+    {
+        "id": "cast_node",
+        "type": "cast-to-client",
+        "z": "tab_simple",
+        "name": "Speak on Google Home",
+        "url": "",
+        "contentType": "audio/mp3",
+        "message": "",
+        "language": "en",
+        "ip": "",
+        "port": "8009",
+        "volume": "50",
+        "x": 750,
+        "y": 140,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "nora_config_id",
+        "type": "noraf-config",
+        "name": "NORA Config",
+        "group": "My Group",
+        "twofactor": "off",
+        "twofactorpin": "",
+        "token": "YOUR_NORA_TOKEN_HERE"
+    }
+]
