@@ -32,8 +32,8 @@ const ParkingCard = ({ data, now }) => {
         className={`free-spots ${ageClass}`}
         aria-label={`${freeSpots} free parking spaces${isApproximated ? ' (approximated)' : ''}`}
       >
-        {freeSpots}
         {isApproximated && <span className="approx-indicator" title="Approximated value">≈</span>}
+        {freeSpots}
       </div>
       {isApproximated && (
         <div className="original-value" aria-label={`Original value: ${originalSpots}`}>
@@ -160,8 +160,8 @@ const Dashboard = ({ setView }) => {
             <div className="panel-section">
               <div className="status-label">Total Spaces</div>
               <div className={`status-value big-value ${totalColorClass}`} aria-label={`Total free spaces: ${realtimeLoading ? 'loading' : totalSpaces}`}>
-                {realtimeLoading ? '---' : totalSpaces}
                 {hasApproximation && !realtimeLoading && <span className="approx-indicator-small" title="Includes approximated values">≈</span>}
+                {realtimeLoading ? '---' : totalSpaces}
               </div>
               {hasApproximation && !realtimeLoading && (
                 <div className="original-total" aria-label={`Original total: ${originalTotalSpaces}`}>

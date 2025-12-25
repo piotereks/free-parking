@@ -260,8 +260,10 @@
 
   /* Approximation indicators */
   .approx-indicator {
-    @apply ml-1 text-warning-medium-light font-normal text-base;
-    vertical-align: super;
+    @apply ml-1 text-warning-medium-light font-normal;
+    font-size: inherit;
+    line-height: 1;
+    vertical-align: baseline;
   }
 
   .dark .approx-indicator {
@@ -269,8 +271,10 @@
   }
 
   .approx-indicator-small {
-    @apply ml-1 text-warning-medium-light font-normal text-lg;
-    vertical-align: super;
+    @apply ml-1 text-warning-medium-light font-normal;
+    font-size: inherit;
+    line-height: 1;
+    vertical-align: baseline;
   }
 
   .dark .approx-indicator-small {
