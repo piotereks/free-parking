@@ -8,6 +8,11 @@ vi.mock('../src/Header', () => ({
   default: () => <div>Mock Header</div>
 }));
 
+const formatLocalTimestamp = (date = new Date()) => {
+  const pad = (value) => String(value).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+};
+
 describe('Dashboard - ParkingCard', () => {
   const mockSetView = vi.fn();
 
@@ -20,7 +25,7 @@ describe('Dashboard - ParkingCard', () => {
     const testData = [{
       ParkingGroupName: 'GreenDay',
       CurrentFreeGroupCounterValue: 25,
-      Timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19)
+      Timestamp: formatLocalTimestamp(new Date())
     }];
 
     useParkingStore.getState().setRealtimeData(testData);
@@ -34,7 +39,7 @@ describe('Dashboard - ParkingCard', () => {
     const testData = [{
       ParkingGroupName: 'Bank_1',
       CurrentFreeGroupCounterValue: 15,
-      Timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19)
+      Timestamp: formatLocalTimestamp(new Date())
     }];
 
     useParkingStore.getState().setRealtimeData(testData);
@@ -49,7 +54,7 @@ describe('Dashboard - ParkingCard', () => {
     const testData = [{
       ParkingGroupName: 'Test',
       CurrentFreeGroupCounterValue: 42,
-      Timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19)
+      Timestamp: formatLocalTimestamp(new Date())
     }];
 
     useParkingStore.getState().setRealtimeData(testData);
@@ -64,7 +69,7 @@ describe('Dashboard - ParkingCard', () => {
     const testData = [{
       ParkingGroupName: 'Test',
       CurrentFreeGroupCounterValue: 0,
-      Timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19)
+      Timestamp: formatLocalTimestamp(new Date())
     }];
 
     useParkingStore.getState().setRealtimeData(testData);
@@ -78,7 +83,7 @@ describe('Dashboard - ParkingCard', () => {
   it('shows 0 when CurrentFreeGroupCounterValue is missing', () => {
     const testData = [{
       ParkingGroupName: 'Test',
-      Timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19)
+      Timestamp: formatLocalTimestamp(new Date())
     }];
 
     useParkingStore.getState().setRealtimeData(testData);
@@ -94,7 +99,7 @@ describe('Dashboard - ParkingCard', () => {
     const testData = [{
       ParkingGroupName: 'Test',
       CurrentFreeGroupCounterValue: 10,
-      Timestamp: oldDate.toISOString().replace('T', ' ').substring(0, 19)
+      Timestamp: formatLocalTimestamp(oldDate)
     }];
 
     useParkingStore.getState().setRealtimeData(testData);
@@ -110,7 +115,7 @@ describe('Dashboard - ParkingCard', () => {
     const testData = [{
       ParkingGroupName: 'Test',
       CurrentFreeGroupCounterValue: 10,
-      Timestamp: mediumDate.toISOString().replace('T', ' ').substring(0, 19)
+      Timestamp: formatLocalTimestamp(mediumDate)
     }];
 
     useParkingStore.getState().setRealtimeData(testData);
@@ -130,7 +135,7 @@ describe('Dashboard - ParkingCard', () => {
     const testData = [{
       ParkingGroupName: 'Test',
       CurrentFreeGroupCounterValue: 10,
-      Timestamp: threeMinutesAgo.toISOString().replace('T', ' ').substring(0, 19)
+      Timestamp: formatLocalTimestamp(threeMinutesAgo)
     }];
 
     useParkingStore.getState().setRealtimeData(testData);
@@ -146,7 +151,7 @@ describe('Dashboard - ParkingCard', () => {
     const testData = [{
       ParkingGroupName: 'Test',
       CurrentFreeGroupCounterValue: 10,
-      Timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19)
+      Timestamp: formatLocalTimestamp(new Date())
     }];
 
     useParkingStore.getState().setRealtimeData(testData);
@@ -161,12 +166,12 @@ describe('Dashboard - ParkingCard', () => {
       {
         ParkingGroupName: 'Parking1',
         CurrentFreeGroupCounterValue: 10,
-        Timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19)
+        Timestamp: formatLocalTimestamp(new Date())
       },
       {
         ParkingGroupName: 'Parking2',
         CurrentFreeGroupCounterValue: 20,
-        Timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19)
+        Timestamp: formatLocalTimestamp(new Date())
       }
     ];
 
@@ -202,17 +207,17 @@ describe('Dashboard - ParkingCard', () => {
       {
         ParkingGroupName: 'Parking1',
         CurrentFreeGroupCounterValue: 10,
-        Timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19)
+        Timestamp: formatLocalTimestamp(new Date())
       },
       {
         ParkingGroupName: 'Parking2',
         CurrentFreeGroupCounterValue: 20,
-        Timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19)
+        Timestamp: formatLocalTimestamp(new Date())
       },
       {
         ParkingGroupName: 'Parking3',
         CurrentFreeGroupCounterValue: 30,
-        Timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19)
+        Timestamp: formatLocalTimestamp(new Date())
       }
     ];
 
@@ -229,7 +234,7 @@ describe('Dashboard - ParkingCard', () => {
     const testData = [{
       ParkingGroupName: 'Test Parking',
       CurrentFreeGroupCounterValue: 15,
-      Timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19)
+      Timestamp: formatLocalTimestamp(new Date())
     }];
 
     useParkingStore.getState().setRealtimeData(testData);
@@ -245,14 +250,14 @@ describe('Dashboard - ParkingCard', () => {
     const testData = [{
       ParkingGroupName: 'Test',
       CurrentFreeGroupCounterValue: 10,
-      Timestamp: freshDate.toISOString().replace('T', ' ').substring(0, 19)
+      Timestamp: formatLocalTimestamp(freshDate)
     }];
 
     useParkingStore.getState().setRealtimeData(testData);
     useParkingStore.getState().setRealtimeLoading(false);
 
     const { container } = render(<Dashboard setView={mockSetView} />);
-    const statusIcon = container.querySelector('.status-icon-number');
+    const statusIcon = container.querySelector('.parking-card .status-icon-number');
     expect(statusIcon).not.toBeInTheDocument();
   });
 
@@ -261,14 +266,14 @@ describe('Dashboard - ParkingCard', () => {
     const testData = [{
       ParkingGroupName: 'Test',
       CurrentFreeGroupCounterValue: 10,
-      Timestamp: mediumDate.toISOString().replace('T', ' ').substring(0, 19)
+      Timestamp: formatLocalTimestamp(mediumDate)
     }];
 
     useParkingStore.getState().setRealtimeData(testData);
     useParkingStore.getState().setRealtimeLoading(false);
 
     const { container } = render(<Dashboard setView={mockSetView} />);
-    const statusIcon = container.querySelector('.status-icon-number');
+    const statusIcon = container.querySelector('.parking-card .status-icon-number');
     expect(statusIcon).toBeInTheDocument();
     expect(statusIcon?.textContent).toBe('⚠️');
     expect(statusIcon?.getAttribute('aria-label')).toBe('Warning - data slightly outdated');
@@ -279,16 +284,16 @@ describe('Dashboard - ParkingCard', () => {
     const testData = [{
       ParkingGroupName: 'Test',
       CurrentFreeGroupCounterValue: 10,
-      Timestamp: oldDate.toISOString().replace('T', ' ').substring(0, 19)
+      Timestamp: formatLocalTimestamp(oldDate)
     }];
 
     useParkingStore.getState().setRealtimeData(testData);
     useParkingStore.getState().setRealtimeLoading(false);
 
     const { container } = render(<Dashboard setView={mockSetView} />);
-    const statusIcon = container.querySelector('.status-icon-number');
+    const statusIcon = container.querySelector('.parking-card .status-icon-number');
     expect(statusIcon).toBeInTheDocument();
-    expect(statusIcon?.textContent).toBe('❌');
+    expect(statusIcon?.textContent).toBe('🚨');
     expect(statusIcon?.getAttribute('aria-label')).toBe('Error - data outdated');
   });
 
@@ -298,12 +303,12 @@ describe('Dashboard - ParkingCard', () => {
       {
         ParkingGroupName: 'Test1',
         CurrentFreeGroupCounterValue: 10,
-        Timestamp: veryOldDate.toISOString().replace('T', ' ').substring(0, 19)
+        Timestamp: formatLocalTimestamp(veryOldDate)
       },
       {
         ParkingGroupName: 'Test2',
         CurrentFreeGroupCounterValue: 5,
-        Timestamp: veryOldDate.toISOString().replace('T', ' ').substring(0, 19)
+        Timestamp: formatLocalTimestamp(veryOldDate)
       }
     ];
 
@@ -311,7 +316,7 @@ describe('Dashboard - ParkingCard', () => {
     useParkingStore.getState().setRealtimeLoading(false);
 
     const { container } = render(<Dashboard setView={mockSetView} />);
-    const statusIcons = container.querySelectorAll('.status-icon-number');
+    const statusIcons = container.querySelectorAll('.parking-card .status-icon-number');
     expect(statusIcons.length).toBe(2);
     statusIcons.forEach(icon => {
       expect(icon.textContent).toBe('📵');
@@ -326,12 +331,12 @@ describe('Dashboard - ParkingCard', () => {
       {
         ParkingGroupName: 'Test1',
         CurrentFreeGroupCounterValue: 10,
-        Timestamp: veryOldDate.toISOString().replace('T', ' ').substring(0, 19)
+        Timestamp: formatLocalTimestamp(veryOldDate)
       },
       {
         ParkingGroupName: 'Test2',
         CurrentFreeGroupCounterValue: 5,
-        Timestamp: recentDate.toISOString().replace('T', ' ').substring(0, 19)
+        Timestamp: formatLocalTimestamp(recentDate)
       }
     ];
 
@@ -339,10 +344,10 @@ describe('Dashboard - ParkingCard', () => {
     useParkingStore.getState().setRealtimeLoading(false);
 
     const { container } = render(<Dashboard setView={mockSetView} />);
-    const statusIcons = container.querySelectorAll('.status-icon-number');
+    const statusIcons = container.querySelectorAll('.parking-card .status-icon-number');
     // First card should show error icon (not offline), second should show warning
     expect(statusIcons.length).toBe(2);
-    expect(statusIcons[0].textContent).toBe('❌'); // error for 24+ hours when not all offline
+    expect(statusIcons[0].textContent).toBe('🚨'); // error for 24+ hours when not all offline
     expect(statusIcons[1].textContent).toBe('⚠️'); // warning for 10 minutes
   });
 });
