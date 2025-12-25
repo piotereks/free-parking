@@ -19,7 +19,7 @@ const ParkingCard = ({ data, now, allOffline }) => {
     statusLabel = 'Offline';
   } else if (age >= 15) { // 15 minutes or more - error
     ageClass = 'age-old';
-    statusIcon = '❌';
+    statusIcon = '🚨';
     statusLabel = 'Error - data outdated';
   } else if (age > 5) { // 5-15 minutes - warning
     ageClass = 'age-medium';
