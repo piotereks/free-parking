@@ -38,6 +38,23 @@ Thank you for your interest in contributing to the Free Parking Monitor project!
    npm run lint
    ```
 
+### Automated Deployment
+
+When you push your feature branch, it will automatically deploy to a branch-specific preview:
+
+- **Branch naming conventions supported:**
+  - `feature/*` → Deploys to `parking-feature-*`
+  - `fix/*` → Deploys to `parking-fix-*`
+  - `dev/*` → Deploys to `parking-dev-*`
+  
+- **Preview URL pattern:** `https://piotereks.github.io/piotereks/html/parking-{normalized-branch-name}/`
+  
+- **Example:**
+  - Branch: `feature/new-dashboard`
+  - Preview: `https://piotereks.github.io/piotereks/html/parking-feature-new-dashboard/`
+
+This allows you to test your changes in a production-like environment before merging to main. Each branch gets its own deployment, and all deployments coexist without overwriting each other.
+
 ### While Developing
 
 - Follow the existing code style and conventions

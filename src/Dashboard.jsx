@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import Header from './Header';
 import { useParkingStore, refreshParkingData } from './store/parkingStore';
+import { applyApproximations, calculateDataAge } from './utils/parkingUtils';
 
 const ParkingCard = ({ data, now, allOffline }) => {
   const ts = new Date(data.Timestamp.replace(' ', 'T'));
@@ -31,7 +32,11 @@ const ParkingCard = ({ data, now, allOffline }) => {
   let name = data.ParkingGroupName;
   if (name === 'Bank_1') name = 'Uni Wroc';
 
-  const freeSpots = data.CurrentFreeGroupCounterValue || 0;
+  const approximationInfo = data.approximationInfo || {};
+  const isApproximated = approximationInfo.isApproximated;
+  const freeSpots = isApproximated ? approximationInfo.approximated : (data.CurrentFreeGroupCounterValue || 0);
+  const originalSpots = approximationInfo.original || data.CurrentFreeGroupCounterValue || 0;
+
 
   return (
     <div
@@ -42,7 +47,7 @@ const ParkingCard = ({ data, now, allOffline }) => {
       <div className="parking-name">{name}</div>
       <div
         className={`free-spots ${ageClass}`}
-        aria-label={`${freeSpots} free parking spaces`}
+        aria-label={`${freeSpots} free parking spaces${isApproximated ? ' (approximated)' : ''}`}
       >
         {statusIcon && (
           <span 
@@ -54,8 +59,14 @@ const ParkingCard = ({ data, now, allOffline }) => {
             {statusIcon}
           </span>
         )}
+        {isApproximated && <span className="approx-indicator" title="Approximated value">≈</span>}
         {freeSpots}
       </div>
+      {isApproximated && (
+        <div className="original-value" aria-label={`Original value: ${originalSpots}`}>
+          (orig: {originalSpots})
+        </div>
+      )}
       <div className="age-indicator-small" aria-label={`Data from ${age} minutes ago`}>
         {age} min ago
       </div>
@@ -70,7 +81,12 @@ ParkingCard.propTypes = {
   data: PropTypes.shape({
     ParkingGroupName: PropTypes.string.isRequired,
     CurrentFreeGroupCounterValue: PropTypes.number,
-    Timestamp: PropTypes.string.isRequired
+    Timestamp: PropTypes.string.isRequired,
+    approximationInfo: PropTypes.shape({
+      isApproximated: PropTypes.bool,
+      approximated: PropTypes.number,
+      original: PropTypes.number
+    })
   }).isRequired,
   now: PropTypes.instanceOf(Date).isRequired,
   allOffline: PropTypes.bool.isRequired
@@ -88,7 +104,22 @@ const Dashboard = ({ setView }) => {
     return () => clearInterval(timer);
   }, []);
 
-  const totalSpaces = realtimeData.reduce((sum, d) => sum + (d.CurrentFreeGroupCounterValue || 0), 0);
+  // Apply approximations to the data
+  const processedData = useMemo(() => {
+    return applyApproximations(realtimeData, now);
+  }, [realtimeData, now]);
+
+  // Check if any data is approximated
+  const hasApproximation = processedData.some(d => d.approximationInfo?.isApproximated);
+
+  const totalSpaces = processedData.reduce((sum, d) => {
+    const info = d.approximationInfo || {};
+    const value = info.isApproximated ? info.approximated : (d.CurrentFreeGroupCounterValue || 0);
+    return sum + value;
+  }, 0);
+
+  const originalTotalSpaces = realtimeData.reduce((sum, d) => sum + (d.CurrentFreeGroupCounterValue || 0), 0);
+
   const updateStatus = lastRealtimeUpdate ? `Last update: ${lastRealtimeUpdate.toLocaleTimeString('pl-PL')}` : 'Loading...';
 
   // Check if all data is offline (24+ hours old)
@@ -100,14 +131,13 @@ const Dashboard = ({ setView }) => {
 
   // Calculate worst-case color for aggregated total based on data freshness
   const getAggregatedStatus = () => {
-    if (realtimeData.length === 0) {
+    if (processedData.length === 0) {
       return { colorClass: '', statusMessage: 'No data available' };
     }
 
     let maxAge = 0;
-    realtimeData.forEach((d) => {
-      const ts = new Date(d.Timestamp.replace(' ', 'T'));
-      const age = Math.max(0, Math.floor((now - ts) / 1000 / 60));
+    processedData.forEach((d) => {
+      const age = calculateDataAge(d.Timestamp, now);
       maxAge = Math.max(maxAge, age);
     });
 
@@ -161,35 +191,42 @@ const Dashboard = ({ setView }) => {
         </div>
         <div className={`status-description ${totalColorClass}`} aria-label="Status description">{statusMessage}</div>
         <div className="status-panel" role="complementary" aria-label="Status information">
-          <div className="panel-section">
-            <div className="status-label">Total Spaces</div>
-            <div className={`status-value big-value ${totalColorClass}`} aria-label={`Total free spaces: ${realtimeLoading ? 'loading' : totalSpaces}`}>
-              {realtimeLoading ? '---' : totalSpaces}
+          <div className="panel-sections-wrapper">
+            <div className="panel-section">
+              <div className="status-label">Total Spaces</div>
+              <div className={`status-value big-value ${totalColorClass}`} aria-label={`Total free spaces: ${realtimeLoading ? 'loading' : totalSpaces}`}>
+                {hasApproximation && !realtimeLoading && <span className="approx-indicator-small" title="Includes approximated values">≈</span>}
+                {realtimeLoading ? '---' : totalSpaces}
+              </div>
+              {hasApproximation && !realtimeLoading && (
+                <div className="original-total" aria-label={`Original total: ${originalTotalSpaces}`}>
+                  (orig: {originalTotalSpaces})
+                </div>
+              )}
+            </div>
+            <div className="panel-section">
+              <div className="status-label">Last Update / Current Time</div>
+              <div className="time-group">
+                <span aria-label={`Last updated at ${lastRealtimeUpdate ? lastRealtimeUpdate.toLocaleTimeString('pl-PL') : 'unknown'}`}>
+                  {lastRealtimeUpdate ? lastRealtimeUpdate.toLocaleTimeString('pl-PL') : '--:--:--'}
+                </span>
+                <span className="status-current-inline" aria-label={`Current time ${now.toLocaleTimeString('pl-PL')}`}>
+                  {now.toLocaleTimeString('pl-PL')}
+                </span>
+              </div>
+            </div>
+            <div className="panel-section">
+              <div className="status-label">Data Status</div>
+              <div
+                className="status-value"
+                style={{ color: realtimeError ? 'var(--warning)' : (hasApproximation ? 'var(--age-medium)' : 'var(--success)') }}
+                role="status"
+                aria-live="polite"
+              >
+                {realtimeLoading ? 'LOADING' : (realtimeError ? 'OFFLINE' : (hasApproximation ? 'APPROXIMATE' : 'ONLINE'))}
+              </div>
             </div>
           </div>
-          <div className="panel-section">
-            <div className="status-label">Last Update / Current Time</div>
-            <div className="time-group">
-              <span aria-label={`Last updated at ${lastRealtimeUpdate ? lastRealtimeUpdate.toLocaleTimeString('pl-PL') : 'unknown'}`}>
-                {lastRealtimeUpdate ? lastRealtimeUpdate.toLocaleTimeString('pl-PL') : '--:--:--'}
-              </span>
-              <span className="status-current-inline" aria-label={`Current time ${now.toLocaleTimeString('pl-PL')}`}>
-                {now.toLocaleTimeString('pl-PL')}
-              </span>
-            </div>
-          </div>
-          <div className="panel-section">
-            <div className="status-label">Data Status</div>
-            <div
-              className="status-value"
-              style={{ color: realtimeError ? 'var(--warning)' : 'var(--success)' }}
-              role="status"
-              aria-live="polite"
-            >
-              {realtimeLoading ? 'LOADING' : (realtimeError ? 'OFFLINE' : 'ONLINE')}
-            </div>
-          </div>
-
         </div>
       </main>
     </>

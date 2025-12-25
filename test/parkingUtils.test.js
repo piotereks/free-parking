@@ -3,7 +3,12 @@ import {
   normalizeParkingName,
   getAgeClass,
   calculateTotalSpaces,
-  isValidParkingData
+  isValidParkingData,
+  calculateDataAge,
+  getMaxCapacity,
+  calculateApproximation,
+  applyApproximations,
+  PARKING_MAX_CAPACITY
 } from '../src/utils/parkingUtils';
 
 describe('parkingUtils', () => {
@@ -184,6 +189,227 @@ describe('parkingUtils', () => {
         CurrentFreeGroupCounterValue: 0
       };
       expect(isValidParkingData(data)).toBe(true);
+    });
+  });
+
+  describe('calculateDataAge', () => {
+    it('calculates age in minutes correctly', () => {
+      const now = new Date('2024-01-15 15:00:00');
+      const timestamp = '2024-01-15 14:30:00';
+      expect(calculateDataAge(timestamp, now)).toBe(30);
+    });
+
+    it('returns 0 for current data', () => {
+      const now = new Date('2024-01-15 15:00:00');
+      const timestamp = '2024-01-15 15:00:00';
+      expect(calculateDataAge(timestamp, now)).toBe(0);
+    });
+
+    it('returns Infinity for missing timestamp', () => {
+      const now = new Date();
+      expect(calculateDataAge(null, now)).toBe(Infinity);
+      expect(calculateDataAge('', now)).toBe(Infinity);
+    });
+
+    it('handles timestamp with T separator', () => {
+      const now = new Date('2024-01-15T15:00:00');
+      const timestamp = '2024-01-15T14:45:00';
+      expect(calculateDataAge(timestamp, now)).toBe(15);
+    });
+  });
+
+  describe('getMaxCapacity', () => {
+    it('returns correct capacity for GreenDay', () => {
+      expect(getMaxCapacity('GreenDay')).toBe(PARKING_MAX_CAPACITY.GreenDay);
+    });
+
+    // it('returns correct capacity for Bank_1', () => {
+    //   expect(getMaxCapacity('Bank_1')).toBe(PARKING_MAX_CAPACITY.Bank_1);
+    // });
+
+    it('returns correct capacity for normalized name', () => {
+      expect(getMaxCapacity('Uni Wroc')).toBe(PARKING_MAX_CAPACITY['Uni Wroc']);
+    });
+
+    it('returns undefined for unknown parking', () => {
+      expect(getMaxCapacity('Unknown')).toBeUndefined();
+    });
+  });
+
+  describe('calculateApproximation', () => {
+    it('returns no approximation when data is fresh', () => {
+      const now = new Date('2024-01-15 15:00:00');
+      const staleData = {
+        ParkingGroupName: 'GreenDay',
+        CurrentFreeGroupCounterValue: 50,
+        Timestamp: '2024-01-15 14:50:00' // 10 minutes old
+      };
+      const freshData = {
+        ParkingGroupName: 'Bank_1',
+        CurrentFreeGroupCounterValue: 30,
+        Timestamp: '2024-01-15 14:58:00'
+      };
+      
+      const result = calculateApproximation(staleData, freshData, now);
+      expect(result.isApproximated).toBe(false);
+      expect(result.approximated).toBe(50);
+      expect(result.original).toBe(50);
+    });
+
+    it('calculates approximation when data is stale', () => {
+      const now = new Date('2024-01-15 15:00:00');
+      const staleData = {
+        ParkingGroupName: 'Green Day',
+        CurrentFreeGroupCounterValue: 50,
+        Timestamp: '2024-01-15 14:00:00' // 60 minutes old
+      };
+      const freshData = {
+        ParkingGroupName: 'Bank_1',
+        CurrentFreeGroupCounterValue: 30,
+        Timestamp: '2024-01-15 14:58:00'
+      };
+      
+      const result = calculateApproximation(staleData, freshData, now);
+      expect(result.isApproximated).toBe(true);
+      expect(result.original).toBe(50);
+      // Fresh ratio: 30/41 = 0.7317, applied to stale max: 0.7317 * 187 = 137 (rounded)
+      expect(result.approximated).toBe(137);
+    });
+
+    it('handles threshold boundary at 30 minutes', () => {
+      const now = new Date('2024-01-15 15:00:00');
+      const staleData = {
+        ParkingGroupName: 'Green Day',
+        CurrentFreeGroupCounterValue: 50,
+        Timestamp: '2024-01-15 14:30:00' // exactly 30 minutes old
+      };
+      const freshData = {
+        ParkingGroupName: 'Bank_1',
+        CurrentFreeGroupCounterValue: 30,
+        Timestamp: '2024-01-15 14:58:00'
+      };
+      
+      const result = calculateApproximation(staleData, freshData, now);
+      expect(result.isApproximated).toBe(true);
+    });
+
+    it('returns null info when data is missing', () => {
+      const result = calculateApproximation(null, null);
+      expect(result.approximated).toBeNull();
+      expect(result.isApproximated).toBe(false);
+      expect(result.reason).toBe('Missing data');
+    });
+  });
+
+  describe('applyApproximations', () => {
+    it('applies approximation to first area when stale', () => {
+      const now = new Date('2024-01-15 15:00:00');
+      const parkingData = [
+        {
+          ParkingGroupName: 'Green Day',
+          CurrentFreeGroupCounterValue: 50,
+          Timestamp: '2024-01-15 14:00:00' // 60 minutes old
+        },
+        {
+          ParkingGroupName: 'Bank_1',
+          CurrentFreeGroupCounterValue: 30,
+          Timestamp: '2024-01-15 14:58:00' // 2 minutes old
+        }
+      ];
+      
+      const result = applyApproximations(parkingData, now);
+      expect(result[0].approximationInfo.isApproximated).toBe(true);
+      expect(result[0].approximationInfo.approximated).toBe(137); // (30/41) * 187
+      expect(result[1].approximationInfo.isApproximated).toBe(false);
+    });
+
+    it('applies approximation to second area when stale', () => {
+      const now = new Date('2024-01-15 15:00:00');
+      const parkingData = [
+        {
+          ParkingGroupName: 'Green Day',
+          CurrentFreeGroupCounterValue: 60,
+          Timestamp: '2024-01-15 14:58:00' // 2 minutes old
+        },
+        {
+          ParkingGroupName: 'Bank_1',
+          CurrentFreeGroupCounterValue: 30,
+          Timestamp: '2024-01-15 14:00:00' // 60 minutes old
+        }
+      ];
+      
+      const result = applyApproximations(parkingData, now);
+      expect(result[0].approximationInfo.isApproximated).toBe(false);
+      expect(result[1].approximationInfo.isApproximated).toBe(true);
+      expect(result[1].approximationInfo.approximated).toBe(13); // (60/187) * 41
+    });
+
+    it('does not approximate when both areas are fresh', () => {
+      const now = new Date('2024-01-15 15:00:00');
+      const parkingData = [
+        {
+          ParkingGroupName: 'GreenDay',
+          CurrentFreeGroupCounterValue: 60,
+          Timestamp: '2024-01-15 14:58:00'
+        },
+        {
+          ParkingGroupName: 'Bank_1',
+          CurrentFreeGroupCounterValue: 30,
+          Timestamp: '2024-01-15 14:57:00'
+        }
+      ];
+      
+      const result = applyApproximations(parkingData, now);
+      expect(result[0].approximationInfo.isApproximated).toBe(false);
+      expect(result[1].approximationInfo.isApproximated).toBe(false);
+    });
+
+    it('handles empty array', () => {
+      const result = applyApproximations([]);
+      expect(result).toEqual([]);
+    });
+
+    it('handles single parking area', () => {
+      const now = new Date('2024-01-15 15:00:00');
+      const parkingData = [
+        {
+          ParkingGroupName: 'GreenDay',
+          CurrentFreeGroupCounterValue: 60,
+          Timestamp: '2024-01-15 14:00:00'
+        }
+      ];
+      
+      const result = applyApproximations(parkingData, now);
+      expect(result.length).toBe(1);
+      expect(result[0].approximationInfo.isApproximated).toBe(false);
+    });
+
+    it('handles more than two parking areas', () => {
+      const now = new Date('2024-01-15 15:00:00');
+      const parkingData = [
+        {
+          ParkingGroupName: 'GreenDay',
+          CurrentFreeGroupCounterValue: 60,
+          Timestamp: '2024-01-15 14:00:00'
+        },
+        {
+          ParkingGroupName: 'Bank_1',
+          CurrentFreeGroupCounterValue: 30,
+          Timestamp: '2024-01-15 14:00:00'
+        },
+        {
+          ParkingGroupName: 'Parking3',
+          CurrentFreeGroupCounterValue: 20,
+          Timestamp: '2024-01-15 14:00:00'
+        }
+      ];
+      
+      const result = applyApproximations(parkingData, now);
+      expect(result.length).toBe(3);
+      // No approximation should happen when there are more than 2 areas
+      expect(result[0].approximationInfo.isApproximated).toBe(false);
+      expect(result[1].approximationInfo.isApproximated).toBe(false);
+      expect(result[2].approximationInfo.isApproximated).toBe(false);
     });
   });
 });

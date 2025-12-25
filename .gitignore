@@ -9,7 +9,7 @@ parking-deploy/
 
 # IDE
 .idea/
-.vscode/
+# .vscode/
 *.sublime-*
 
 # OS
