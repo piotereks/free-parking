@@ -11,7 +11,7 @@ export const PARKING_MAX_CAPACITY = {
 };
 
 // Threshold for approximation (in minutes)
-export const APPROXIMATION_THRESHOLD_MINUTES = 3000;
+export const APPROXIMATION_THRESHOLD_MINUTES = 30;
 
 /**
  * Normalize parking name for display

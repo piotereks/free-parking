@@ -5,7 +5,6 @@ import { useParkingStore, refreshParkingData } from './store/parkingStore';
 import { applyApproximations, calculateDataAge } from './utils/parkingUtils';
 
 const ParkingCard = ({ data, now, allOffline }) => {
-  const ts = new Date(data.Timestamp.replace(' ', 'T'));
   const age = calculateDataAge(data.Timestamp, now);
 
   let ageClass = '';
@@ -75,9 +74,6 @@ const ParkingCard = ({ data, now, allOffline }) => {
       )}
       <div className="age-indicator-small" aria-label={`Data from ${age} minutes ago`}>
         {age} min ago
-      </div>
-      <div className="timestamp-small" aria-label={`Timestamp at ${ts.toLocaleTimeString('pl-PL')}`}>
-        @{ts.toLocaleTimeString('pl-PL')}
       </div>
     </div>
   );

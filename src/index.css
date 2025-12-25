@@ -253,13 +253,11 @@
     @apply inline-block text-2xl;
   }
 
-  .age-indicator-small,
-  .timestamp-small {
+  .age-indicator-small {
     @apply text-xs mt-1 text-text-secondary-light;
   }
 
-  .dark .age-indicator-small,
-  .dark .timestamp-small {
+  .dark .age-indicator-small {
     @apply text-text-secondary-dark;
   }
 
