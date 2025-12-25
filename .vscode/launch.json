@@ -1,86 +1,31 @@
 {
-  "version": "0.2.0",
   "configurations": [
     {
-  "name": "xDebug Vitest",
-  "type": "node",
-  "request": "launch",
-  "program": "${workspaceFolder}/node_modules/vitest/vitest.mjs",
-  "args": ["run", "--watch=false", "--inspect-brk"],
-  "cwd": "${workspaceFolder}",
-  "console": "integratedTerminal",
-  "smartStep": true
-},
-    {
+      "name": "Vite React: Debug",
       "type": "pwa-chrome",
       "request": "launch",
-      "name": "Launch Chrome against Vite (Codespaces)",
-      "url": "http://localhost:5173",
+      "url": "http://localhost:5173/piotereks/html/parking/",
       "webRoot": "${workspaceFolder}/src",
-      "sourceMaps": true,
-      "presentation": {
-        "hidden": false,
-        "group": "browser"
-      }
-    },
-    {
-      "name": "Launch Chrome (Dev)",
-      "type": "chrome",
-      "request": "launch",
-      "url": "http://localhost:5173",
-      "webRoot": "${workspaceFolder}",
       "preLaunchTask": "npm: dev",
-      "presentation": {
-        "hidden": false,
-        "group": "browser"
-      }
+      "runtimeArgs": ["--auto-open-devtools-for-tabs"]
     },
     {
-      "name": "Launch Chrome (Inspect)",
-      "type": "pwa-chrome",
-      "request": "launch",
-      "url": "http://localhost:5173",
-      "webRoot": "${workspaceFolder}",
-      "preLaunchTask": "npm: dev:inspect",
-      "presentation": {
-        "hidden": false,
-        "group": "browser"
-      }
-    },
-    {
-      "name": "Attach to Vite (Inspect)",
+      "name": "Vitest: Debug Tests",
       "type": "node",
-      "request": "attach",
-      "port": 9229,
-      "address": "0.0.0.0",
-      "localRoot": "${workspaceFolder}",
-      "remoteRoot": "/workspaces/free_parking_sensor",
-      "restart": true,
-      "presentation": {
-        "group": "server"
-      }
-    }
-    ,
-    {
-      "name": "x2Debug Vitest",
-      "type": "pwa-node",
       "request": "launch",
       "program": "${workspaceFolder}/node_modules/vitest/vitest.mjs",
-      "args": ["run", "--no-file-parallelism", "--watch=false"],
+      "args": [
+        "watch",
+        "--single-thread"
+      ],
       "cwd": "${workspaceFolder}",
-      "console": "integratedTerminal",
       "autoAttachChildProcesses": true,
-      "skipFiles": ["<node_internals>/**"]
-    }
-  ],
-  "compounds": [
-    {
-      "name": "Launch Chrome (Inspect) and Attach",
-      "configurations": ["Launch Chrome (Inspect)", "Attach to Vite (Inspect)"]
-    },
-    {
-      "name": "Launch Chrome (Dev Only)",
-      "configurations": ["Launch Chrome (Dev)"]
+      "console": "integratedTerminal",
+      "smartStep": true,
+      "skipFiles": [
+        "<node_internals>/**",
+        "${workspaceFolder}/node_modules/**"
+      ]
     }
   ]
 }

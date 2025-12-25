@@ -6,12 +6,12 @@
 // These values are documented in README.md and used in Statistics.jsx
 export const PARKING_MAX_CAPACITY = {
   'Green Day': 187,
-  'Bank_1': 41,  // Uni Wroc
+  // 'Bank_1': 41,  // Uni Wroc
   'Uni Wroc': 41
 };
 
 // Threshold for approximation (in minutes)
-export const APPROXIMATION_THRESHOLD_MINUTES = 3000;
+export const APPROXIMATION_THRESHOLD_MINUTES = 30;
 
 /**
  * Normalize parking name for display
