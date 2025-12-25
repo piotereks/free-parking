@@ -1,9 +1,18 @@
 {
   "version": "0.2.0",
   "configurations": [
+    
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "xLaunch Chrome against Vite (Codespaces)",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}/src",
+      "sourceMaps": true
+    },
     {
       "name": "Launch Chrome (Dev)",
-      "type": "pwa-chrome",
+      "type": "chrome",
       "request": "launch",
       "url": "http://localhost:5173",
       "webRoot": "${workspaceFolder}",
@@ -11,7 +20,7 @@
     },
     {
       "name": "Launch Chrome (Inspect)",
-      "type": "pwa-chrome",
+      "type": "chrome",
       "request": "launch",
       "url": "http://localhost:5173",
       "webRoot": "${workspaceFolder}",
@@ -19,7 +28,7 @@
     },
     {
       "name": "Attach to Vite (Inspect)",
-      "type": "pwa-node",
+      "type": "node",
       "request": "attach",
       "port": 9229,
       "address": "0.0.0.0",

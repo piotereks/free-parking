@@ -9,7 +9,10 @@
       "problemMatcher": [
         {
           "owner": "vite",
-          "pattern": [],
+          "pattern": {
+            "regexp": "^(.*)$",
+            "message": 1
+          },
           "background": {
             "activeOnStart": true,
             "beginsPattern": "^",
@@ -30,7 +33,10 @@
       "problemMatcher": [
         {
           "owner": "vite",
-          "pattern": [],
+          "pattern": {
+            "regexp": "^(.*)$",
+            "message": 1
+          },
           "background": {
             "activeOnStart": true,
             "beginsPattern": "^",
