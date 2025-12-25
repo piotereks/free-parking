@@ -1,0 +1,109 @@
+name: Deploy to GitHub Pages (Branch-Specific)
+
+on:
+  push:
+    branches:
+      - main
+      - 'feature/**'
+      - 'fix/**'
+      - 'dev/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Determine deployment path and base URL
+        id: deployment-config
+        run: |
+          # Get the branch name
+          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+          echo "Branch name: $BRANCH_NAME"
+          
+          # Normalize branch name for use in paths (replace slashes and special chars with hyphens)
+          NORMALIZED_BRANCH=$(echo "$BRANCH_NAME" | sed 's/[\/\._]/-/g' | tr '[:upper:]' '[:lower:]')
+          echo "Normalized branch: $NORMALIZED_BRANCH"
+          
+          # Determine destination directory and base path
+          if [ "$BRANCH_NAME" = "main" ]; then
+            # Main branch deploys to the primary location
+            DEST_DIR="docs/html/parking"
+            BASE_PATH="/piotereks/html/parking/"
+            echo "Deploying main branch to primary location"
+          else
+            # Other branches deploy to branch-specific subfolders
+            DEST_DIR="docs/html/parking-${NORMALIZED_BRANCH}"
+            BASE_PATH="/piotereks/html/parking-${NORMALIZED_BRANCH}/"
+            echo "Deploying branch '$BRANCH_NAME' to subfolder: $DEST_DIR"
+          fi
+          
+          # Set outputs for use in subsequent steps
+          echo "dest_dir=${DEST_DIR}" >> $GITHUB_OUTPUT
+          echo "base_path=${BASE_PATH}" >> $GITHUB_OUTPUT
+          echo "branch_name=${BRANCH_NAME}" >> $GITHUB_OUTPUT
+          echo "normalized_branch=${NORMALIZED_BRANCH}" >> $GITHUB_OUTPUT
+          
+          # Log the configuration
+          echo "::notice::Destination Directory: ${DEST_DIR}"
+          echo "::notice::Base Path: ${BASE_PATH}"
+      
+      - name: Build with branch-specific configuration
+        env:
+          VITE_BASE_PATH: ${{ steps.deployment-config.outputs.base_path }}
+        run: |
+          echo "Building with base path: $VITE_BASE_PATH"
+          npm run build
+      
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          personal_token: ${{ secrets.DEPLOY_TOKEN }}
+          external_repository: piotereks/piotereks
+          publish_branch: main
+          publish_dir: ./parking-deploy/docs/html/parking
+          destination_dir: ${{ steps.deployment-config.outputs.dest_dir }}
+          keep_files: true
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: 'Deploy ${{ steps.deployment-config.outputs.branch_name }} from ${{ github.repository }}@${{ github.sha }}'
+      
+      - name: Display deployment URL
+        run: |
+          DEST_DIR="${{ steps.deployment-config.outputs.dest_dir }}"
+          BRANCH_NAME="${{ steps.deployment-config.outputs.branch_name }}"
+          
+          if [ "$BRANCH_NAME" = "main" ]; then
+            URL="https://piotereks.github.io/piotereks/html/parking/"
+          else
+            URL="https://piotereks.github.io/piotereks/html/parking-${{ steps.deployment-config.outputs.normalized_branch }}/"
+          fi
+          
+          echo "::notice::✅ Deployment successful!"
+          echo "::notice::📍 Deployed to: ${DEST_DIR}"
+          echo "::notice::🔗 URL: ${URL}"
+          echo ""
+          echo "Deployment Summary:"
+          echo "==================="
+          echo "Branch: ${BRANCH_NAME}"
+          echo "Destination: ${DEST_DIR}"
+          echo "URL: ${URL}"

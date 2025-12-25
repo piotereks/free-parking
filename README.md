@@ -123,22 +123,59 @@ Clear local cache by adding `?clear_cache` to the URL, which reveals a "Clear Ca
 
 ## 🌐 Deployment
 
-### Build for Production
+### Automated GitHub Pages Deployment
+
+This project uses GitHub Actions to automatically deploy to GitHub Pages with **branch-specific subfolders**:
+
+- **Main branch** → Deploys to `https://piotereks.github.io/piotereks/html/parking/`
+- **Other branches** → Deploy to `https://piotereks.github.io/piotereks/html/parking-{branch-name}/`
+
+The workflow automatically:
+1. Detects the branch name
+2. Normalizes it for use in URLs (e.g., `feature/new-ui` → `feature-new-ui`)
+3. Builds with the appropriate base path
+4. Deploys to the branch-specific subfolder
+5. Preserves deployments from other branches
+
+**Supported branch patterns:**
+- `main` (primary deployment)
+- `feature/**`
+- `fix/**`
+- `dev/**`
+
+To deploy other branch patterns, update `.github/workflows/deploy-branches.yml`.
+
+### Manual Deployment
+
+For manual or local deployments:
+
+#### Build for Production
 
 ```bash
 npm run build
 ```
 
-Output will be in the `dist/` directory. Deploy this directory to any static hosting service:
+Output will be in `parking-deploy/docs/html/parking/`. Deploy this directory to any static hosting service:
 
 - GitHub Pages
 - Netlify
 - Vercel
 - AWS S3 + CloudFront
 
+#### Build with Custom Base Path
+
+To build for a different base path (e.g., for staging or feature branches):
+
+```bash
+VITE_BASE_PATH="/your/custom/path/" npm run build
+```
+
+The `VITE_BASE_PATH` environment variable controls where the application expects to be hosted.
+
 ### Environment-Specific Builds
 
-Use `vite.config.local.js` for local development with custom base paths if needed.
+- `vite.config.js` - Production builds with dynamic base path support
+- `vite.config.local.js` - Local development with `/free-parking/` base path
 
 ## 🐛 Troubleshooting
 
