@@ -64,12 +64,12 @@ jobs:
           if [ "$BRANCH_NAME" = "main" ]; then
             # Main branch deploys to the primary location
             DEST_DIR="./"
-            BASE_PATH="/${OWNER}/${REPO}/"
+            BASE_PATH="/${REPO}/"
             echo "Deploying main branch to primary location"
           else
             # Other branches deploy to branch-specific subfolders
             DEST_DIR="${NORMALIZED_BRANCH}/"
-            BASE_PATH="/${OWNER}/${REPO}/${NORMALIZED_BRANCH}/"
+            BASE_PATH="/${REPO}/${NORMALIZED_BRANCH}/"
             echo "Deploying branch '$BRANCH_NAME' to subfolder: $DEST_DIR"
           fi
           
