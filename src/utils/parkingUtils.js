@@ -5,13 +5,13 @@
 // Maximum capacity for each parking area
 // These values are documented in README.md and used in Statistics.jsx
 export const PARKING_MAX_CAPACITY = {
-  'GreenDay': 187,
+  'Green Day': 187,
   'Bank_1': 41,  // Uni Wroc
   'Uni Wroc': 41
 };
 
 // Threshold for approximation (in minutes)
-export const APPROXIMATION_THRESHOLD_MINUTES = 3000;
+export const APPROXIMATION_THRESHOLD_MINUTES = 30;
 
 /**
  * Normalize parking name for display
@@ -115,12 +115,19 @@ export const calculateApproximation = (staleData, freshData, now = new Date()) =
   const staleMax = getMaxCapacity(staleData.ParkingGroupName);
   const freshMax = getMaxCapacity(freshData.ParkingGroupName);
   
+  console.log('[Approximation] Stale parking:', staleData.ParkingGroupName, 'max:', staleMax);
+  console.log('[Approximation] Fresh parking:', freshData.ParkingGroupName, 'max:', freshMax);
+  
   // Calculate fresh area ratio
   const freshFree = freshData.CurrentFreeGroupCounterValue || 0;
   const freshRatio = freshFree / freshMax;
   
+  console.log('[Approximation] Fresh free spaces:', freshFree, 'ratio:', freshRatio.toFixed(3));
+  
   // Apply ratio to stale area's maximum
   const approximated = Math.round(freshRatio * staleMax);
+  
+  console.log('[Approximation] Calculated approximation:', approximated);
   
   return {
     approximated,
