@@ -2,10 +2,11 @@ import { useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import Header from './Header';
 import { useParkingStore, refreshParkingData } from './store/parkingStore';
-import { applyApproximations, calculateDataAge } from './utils/parkingUtils';
+import { applyApproximations, calculateDataAge, formatAgeLabel } from './utils/parkingUtils';
 
 const ParkingCard = ({ data, now, allOffline }) => {
   const age = calculateDataAge(data.Timestamp, now);
+  const { display: ageDisplay, aria: ageAria } = formatAgeLabel(age);
 
   let ageClass = '';
   let statusIcon = null;
@@ -72,8 +73,8 @@ const ParkingCard = ({ data, now, allOffline }) => {
           (orig: {originalSpots})
         </div>
       )}
-      <div className="age-indicator-small" aria-label={`Data from ${age} minutes ago`}>
-        {age} min ago
+      <div className="age-indicator-small" aria-label={ageAria}>
+        {ageDisplay}
       </div>
     </div>
   );

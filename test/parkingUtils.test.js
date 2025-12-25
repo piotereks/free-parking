@@ -8,7 +8,8 @@ import {
   getMaxCapacity,
   calculateApproximation,
   applyApproximations,
-  PARKING_MAX_CAPACITY
+  PARKING_MAX_CAPACITY,
+  formatAgeLabel
 } from '../src/utils/parkingUtils';
 
 describe('parkingUtils', () => {
@@ -215,6 +216,32 @@ describe('parkingUtils', () => {
       const now = new Date('2024-01-15T15:00:00');
       const timestamp = '2024-01-15T14:45:00';
       expect(calculateDataAge(timestamp, now)).toBe(15);
+    });
+  });
+
+  describe('formatAgeLabel', () => {
+    it('formats minutes under one hour', () => {
+      const result = formatAgeLabel(42);
+      expect(result.display).toBe('42 min ago');
+      expect(result.aria).toBe('Data from 42 minutes ago');
+    });
+
+    it('rounds to whole hours between 1-24h', () => {
+      const result = formatAgeLabel(95); // ~1.6 hours
+      expect(result.display).toBe('2 h ago');
+      expect(result.aria).toBe('Data from 2 hours ago');
+    });
+
+    it('rounds to half-day increments beyond 24h', () => {
+      const result = formatAgeLabel(36 * 60); // 36 hours
+      expect(result.display).toBe('1.5 d ago');
+      expect(result.aria).toBe('Data from 1.5 days ago');
+    });
+
+    it('returns fallback for invalid age', () => {
+      const result = formatAgeLabel(Infinity);
+      expect(result.display).toBe('--');
+      expect(result.aria).toBe('Data age unavailable');
     });
   });
 
