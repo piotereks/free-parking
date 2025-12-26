@@ -2,6 +2,9 @@
   "name": "parking",
   "version": "0.0.0",
   "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "type": "module",
   "scripts": {
     "lint": "eslint .",
@@ -13,7 +16,6 @@
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
     
-    // Monorepo-prep proxy scripts for web (safe now, future-proof later)
     "lint:web": "npm run lint",
     "build:web": "npm run build",
     "test:web": "npm run test:run"

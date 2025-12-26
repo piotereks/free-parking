@@ -1,0 +1,9 @@
+{
+  "name": "@free-parking/mobile",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "echo 'Expo app scaffolded. Run create-expo-app later.'"
+  }
+}
