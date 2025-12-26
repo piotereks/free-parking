@@ -20,28 +20,33 @@ docker-compose up mobile-dev
 ```
 
 The Expo dev server will be accessible at:
-- **Metro bundler**: http://localhost:8081
+- **Web app**: http://localhost:8081
 - **Expo DevTools**: http://localhost:19002
+- **Metro bundler**: http://localhost:8081
 
-### Connect Your Device
+### Access Your App
 
-#### Option 1: Expo Go (Recommended)
-1. Install Expo Go app on your iOS/Android device
-2. Open Expo Go
-3. Scan the QR code shown in the terminal
-4. App will load on your device
-
-#### Option 2: Android Emulator (via adb)
+#### Option 1: Web Browser (Fastest for Testing)
 ```bash
-# Ensure Android emulator is running on host
-# Forward ports from host to container
-docker exec -it free-parking-mobile-dev-1 adb connect host.docker.internal:5555
+docker-compose up mobile-dev
+# Opens automatically at http://localhost:8081
+# Or visit http://localhost:19002 for DevTools
 ```
 
-#### Option 3: Tunnel Mode (No Port Forwarding Needed)
+#### Option 2: Android Emulator
+1. Start Android Studio emulator on Windows
+2. In the container terminal, press `a` to open on Android
+3. Or run:
 ```bash
-# Use Expo's tunnel service
-docker-compose run mobile-dev npm run dev:tunnel
+docker-compose run mobile-dev npm run dev:android
+```
+
+#### Option 3: iOS Simulator (macOS only)
+1. Start iOS Simulator on macOS
+2. In the container terminal, press `i` to open on iOS
+3. Or run:
+```bash
+docker-compose run mobile-dev npm run dev:ios
 ```
 
 ## Usage Commands
@@ -135,11 +140,39 @@ EAS Build runs in the cloud, so Windows path issues don't apply.
 # Terminal 1: Start Docker dev server
 docker-compose up mobile-dev
 
+# Browser: Opens at http://localhost:8081
+# Your React Native app runs in the browser for quick testing
+
 # Terminal 2 (on Windows): Edit code
 # Changes are automatically synced and hot-reloaded
 
 # Terminal 3 (optional): Run tests
 npm run test:web
+```
+
+## Testing on Different Platforms
+
+### Web (Recommended for Development)
+- Automatically opens at http://localhost:8081
+- Fastest hot reload
+- Full React DevTools support
+- Great for UI development
+
+### Android Emulator
+Requires Android Studio with emulator:
+```bash
+# Start emulator on Windows first
+# Then in container, press 'a' or run:
+docker-compose exec mobile-dev npm run dev:android
+```
+
+### Physical Device (Advanced)
+Use adb over network:
+```bash
+# Connect device to same network
+# Enable USB debugging and wireless debugging
+adb connect <device-ip>:5555
+docker-compose exec mobile-dev npm run dev:android
 ```
 
 ## Stopping Services
