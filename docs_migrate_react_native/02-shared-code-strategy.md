@@ -121,14 +121,8 @@ That keeps RN and web wiring simple.
 
 ## Sharing UI components (optional, later)
 
-If you want to share UI, you have two realistic options:
+
 
 1) **Keep current web UI** and do *not* share UI.
    - Fastest, lowest risk.
 
-2) Build a React Native UI and run it on web via `react-native-web`.
-   - Higher effort.
-   - Would likely replace your existing Tailwind/CSS approach.
-   - You’d need chart strategy changes (web + RN chart parity).
-
-Recommendation: **do option 1 first**, revisit option 2 only if you have a strong reason (shared UI velocity, single design system, etc.).

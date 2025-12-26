@@ -2,127 +2,23 @@
 import { createContext, useContext, useEffect, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
 import Papa from 'papaparse';
-import { useParkingStore } from '@free-parking/shared';
+import {
+  useParkingStore,
+  API_URLS,
+  CORS_PROXY,
+  CSV_URL,
+  CACHE_KEY_REALTIME,
+  CACHE_KEY_HISTORY,
+  GOOGLE_FORM_URL,
+  FORM_ENTRIES,
+  COLUMN_ALIASES,
+  extractLastEntry,
+  dedupeHistoryRows,
+  parseApiEntry
+} from '@free-parking/shared';
+import { storageWeb } from './adapters/storageWeb';
 
 const ParkingDataContext = createContext();
-
-const API_URLS = [
-    'https://gd.zaparkuj.pl/api/freegroupcountervalue.json',
-    'https://gd.zaparkuj.pl/api/freegroupcountervalue-green.json'
-];
-const CORS_PROXY = 'https://corsproxy.io/?';
-const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTwLNDbg8KjlVHsZWj9JUnO_OBIyZaRgZ4gZ8_Gbyly2J3f6rlCW6lDHAihwbuLhxWbBkNMI1wdWRAq/pub?gid=411529798&single=true&output=csv';
-
-// Google Form configuration
-// To find the entry IDs:
-// 1. Open your Google Form in edit mode
-// 2. Right-click on each field and select "Inspect" or "Inspect Element"
-// 3. Look for the input element with name="entry.XXXXXXXXXX"
-// 4. Copy those entry IDs and replace the values below
-//
-// Example: If you see <input name="entry.1234567890" ...>, use 'entry.1234567890'
-//
-// The form should have 4 fields in this order:
-// 1. GreenDay Free Spaces (number)
-// 2. GreenDay Timestamp (text/datetime)
-// 3. Uni Free Spaces (number)
-// 4. Uni Timestamp (text/datetime)
-const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSdeQ-rmw_VfOidGmtSNb9DLkt1RfPdduu-jH898sf3lhj17LA/formResponse';
-const FORM_ENTRIES = {
-    GREENDAY_VALUE: 'entry.2026993163', // TODO: Replace with actual entry ID for GreenDay free spaces
-    GREENDAY_TIME: 'entry.51469670',  // TODO: Replace with actual entry ID for GreenDay timestamp
-    UNI_VALUE: 'entry.1412144904',      // TODO: Replace with actual entry ID for Uni free spaces
-    UNI_TIME: 'entry.364658642'        // TODO: Replace with actual entry ID for Uni timestamp
-
-
-};
-
-const CACHE_KEY_REALTIME = 'parking_realtime_cache';
-const CACHE_KEY_HISTORY = 'parking_history_cache';
-
-const COLUMN_ALIASES = {
-    GD_TIME: 'gd_time',
-    GD_VALUE: 'greenday free',
-    UNI_TIME: 'uni_time',
-    UNI_VALUE: 'uni free'
-};
-
-const normalizeKey = (key) => (key ? key.trim().toLowerCase() : '');
-
-const findColumnKey = (row, target) => {
-    if (!row) return null;
-    const targetKey = normalizeKey(target);
-    return Object.keys(row).find((key) => normalizeKey(key) === targetKey) || null;
-};
-
-const getRowValue = (row, keyName) => {
-    const columnKey = findColumnKey(row, keyName);
-    if (!columnKey) return undefined;
-    const value = row[columnKey];
-    return typeof value === 'string' ? value.trim() : value;
-};
-
-const parseTimestampValue = (raw) => {
-    if (!raw) return null;
-    const normalized = raw.includes('T') ? raw : raw.replace(' ', 'T');
-    const date = new Date(normalized);
-    return Number.isNaN(date.getTime()) ? null : date;
-};
-
-const buildEntryFromRow = (row, timeKey, valueKey) => {
-    if (!row) return null;
-    const raw = getRowValue(row, timeKey);
-    const date = parseTimestampValue(raw);
-    if (!date) return null;
-    const valueRaw = getRowValue(row, valueKey);
-    const valueNumber = valueRaw === undefined || valueRaw === null || valueRaw === '' ? null : Number(valueRaw);
-    return {
-        raw,
-        date,
-        value: Number.isNaN(valueNumber) ? null : valueNumber
-    };
-};
-
-const extractLastEntry = (rows) => {
-    if (!rows || rows.length === 0) {
-        return { gd: null, uni: null };
-    }
-    const lastRow = rows[rows.length - 1];
-    return {
-        gd: buildEntryFromRow(lastRow, COLUMN_ALIASES.GD_TIME, COLUMN_ALIASES.GD_VALUE),
-        uni: buildEntryFromRow(lastRow, COLUMN_ALIASES.UNI_TIME, COLUMN_ALIASES.UNI_VALUE)
-    };
-};
-
-const dedupeHistoryRows = (rows = []) => {
-    const seen = new Set();
-    const result = [];
-    rows.forEach((row) => {
-        const gdKey = getRowValue(row, COLUMN_ALIASES.GD_TIME) || '';
-        const uniKey = getRowValue(row, COLUMN_ALIASES.UNI_TIME) || '';
-        const composite = `${gdKey}|||${uniKey}`;
-        if (!seen.has(composite)) {
-            seen.add(composite);
-            result.push(row);
-        }
-    });
-    return result;
-};
-
-const parseApiEntry = (record) => {
-    if (!record || !record.Timestamp) return null;
-    const raw = record.Timestamp.trim();
-    if (!raw) return null;
-    const iso = raw.includes('T') ? raw : raw.replace(' ', 'T');
-    const date = new Date(iso);
-    if (Number.isNaN(date.getTime())) return null;
-    const valueNumber = Number(record.CurrentFreeGroupCounterValue);
-    return {
-        raw,
-        date,
-        value: Number.isNaN(valueNumber) ? null : valueNumber
-    };
-};
 
 const cloneApiResults = (apiResults = []) => (
     Array.isArray(apiResults) ? apiResults.map((result) => ({ ...(result || {}) })) : []
@@ -135,11 +31,8 @@ const buildCacheRowFromPayload = (gdPayload, uniPayload) => ({
     [COLUMN_ALIASES.UNI_VALUE]: uniPayload?.CurrentFreeGroupCounterValue ?? ''
 });
 
-const readHistoryCacheSnapshot = () => {
-    if (typeof localStorage === 'undefined') {
-        return { rows: [], timestamp: null, last: { gd: null, uni: null } };
-    }
-    const cached = localStorage.getItem(CACHE_KEY_HISTORY);
+const readHistoryCacheSnapshot = async () => {
+    const cached = await storageWeb.getItem(CACHE_KEY_HISTORY);
     if (!cached) {
         return { rows: [], timestamp: null, last: { gd: null, uni: null } };
     }
@@ -176,13 +69,13 @@ export const ParkingDataProvider = ({ children }) => {
     const fetchInProgressRef = useRef(false);
     const cacheCleared = useParkingStore((state) => state.cacheCleared);
 
-    const persistHistorySnapshot = useCallback((rows) => {
+    const persistHistorySnapshot = useCallback(async (rows) => {
         const safeRows = Array.isArray(rows) ? rows : [];
         const updateTime = new Date();
         setHistoryData(safeRows);
         setLastHistoryUpdate(updateTime);
         try {
-            localStorage.setItem(CACHE_KEY_HISTORY, JSON.stringify({
+            await storageWeb.setItem(CACHE_KEY_HISTORY, JSON.stringify({
                 data: safeRows,
                 timestamp: updateTime.toISOString()
             }));
@@ -277,7 +170,7 @@ export const ParkingDataProvider = ({ children }) => {
                 uni: apiUniEntry?.date?.toISOString()
             });
 
-            let snapshot = readHistoryCacheSnapshot();
+            let snapshot = await readHistoryCacheSnapshot();
 
             if (snapshot.rows.length && historyData.length === 0) {
                 setHistoryData(snapshot.rows);
@@ -297,7 +190,7 @@ export const ParkingDataProvider = ({ children }) => {
 
             console.log('Slow path triggered — fetching CSV for reconciliation');
             await fetchHistoryData();
-            snapshot = readHistoryCacheSnapshot();
+            snapshot = await readHistoryCacheSnapshot();
 
             if (snapshot.rows.length) {
                 setHistoryData(snapshot.rows);
@@ -375,7 +268,7 @@ export const ParkingDataProvider = ({ children }) => {
 
         try {
             // Try to load from cache first for instant display
-            const cached = localStorage.getItem(CACHE_KEY_REALTIME);
+            const cached = await storageWeb.getItem(CACHE_KEY_REALTIME);
             if (cached) {
                 try {
                     const cachedData = JSON.parse(cached);
@@ -399,7 +292,7 @@ export const ParkingDataProvider = ({ children }) => {
 
             // Cache the real-time data
             try {
-                localStorage.setItem(CACHE_KEY_REALTIME, JSON.stringify({
+                await storageWeb.setItem(CACHE_KEY_REALTIME, JSON.stringify({
                     data: results,
                     timestamp: updateTime.toISOString()
                 }));
@@ -421,17 +314,20 @@ export const ParkingDataProvider = ({ children }) => {
 
     // Load history cache on mount
     useEffect(() => {
-        const cached = localStorage.getItem(CACHE_KEY_HISTORY);
-        if (cached) {
-            try {
-                const parsedCache = JSON.parse(cached);
-                setHistoryData(parsedCache.data);
-                setLastHistoryUpdate(new Date(parsedCache.timestamp));
-                console.log('History cache loaded on mount');
-            } catch (e) {
-                console.error('Failed to load history cache on mount:', e);
+        const loadHistoryCache = async () => {
+            const cached = await storageWeb.getItem(CACHE_KEY_HISTORY);
+            if (cached) {
+                try {
+                    const parsedCache = JSON.parse(cached);
+                    setHistoryData(parsedCache.data);
+                    setLastHistoryUpdate(new Date(parsedCache.timestamp));
+                    console.log('History cache loaded on mount');
+                } catch (e) {
+                    console.error('Failed to load history cache on mount:', e);
+                }
             }
-        }
+        };
+        loadHistoryCache();
     }, [setHistoryData, setLastHistoryUpdate]);
 
     // Initial fetch and auto-refresh for real-time data
