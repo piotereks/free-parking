@@ -11,7 +11,12 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    
+    // Monorepo-prep proxy scripts for web (safe now, future-proof later)
+    "lint:web": "npm run lint",
+    "build:web": "npm run build",
+    "test:web": "npm run test:run"
   },
   "dependencies": {
     "echarts": "^6.0.0",
