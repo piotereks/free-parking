@@ -6,7 +6,7 @@
 @layer base {
   html,
   body {
-    @apply m-0 p-0 w-full h-full overflow-hidden;
+    @apply m-0 p-0 w-full h-full overflow-auto;
   }
 
   body {
@@ -38,6 +38,8 @@
 
   .container-main {
     @apply max-w-screen-xl mx-auto px-8 py-8 flex-1 overflow-y-auto;
+    /* Ensure main content sits below the fixed header and can scroll */
+    padding-top: 76px;
     @apply flex flex-col items-center;
   }
 
@@ -52,6 +54,15 @@
     @apply bg-bg-secondary-light border-b border-border-light transition-theme duration-300;
     height: 60px;
     box-shadow: 0 1px 10px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Fix header to top so dashboard content scrolls underneath */
+  .header-controls {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
   }
 
   .dark .header-controls {
@@ -433,6 +444,11 @@
   .header-controls {
     @apply px-2;
     height: 54px;
+  }
+
+  .container-main {
+    /* smaller top padding on narrow screens to match reduced header height */
+    padding-top: 70px;
   }
 
   .header-title-group h1 {
