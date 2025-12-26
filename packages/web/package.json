@@ -1,17 +1,17 @@
 {
-  "name": "parking",
-  "version": "0.0.0",
+  "name": "@free-parking/web",
+  "version": "0.0.1",
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
   "type": "module",
   "scripts": {
-    
-    "lint:web": "npm -w packages/web run lint",
-    "build:web": "npm -w packages/web run build",
-    "test:web": "npm -w packages/web run test:run",
-    "dev:web": "npm -w packages/web run dev"
+    "lint": "eslint .",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite build && vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run"
   },
   "dependencies": {
     "echarts": "^6.0.0",
