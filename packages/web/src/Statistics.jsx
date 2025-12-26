@@ -4,7 +4,7 @@ import ReactECharts from 'echarts-for-react';
 import * as echarts from 'echarts';
 import Header from './Header';
 import { useTheme } from './ThemeContext';
-import { useParkingStore, refreshParkingData } from './store/parkingStore';
+import { useParkingStore, refreshParkingData } from '@free-parking/shared';
 
 const PALETTES = {
     neon: { gd: '#05ffa1', uni: '#01beff' },

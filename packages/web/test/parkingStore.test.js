@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { useParkingStore, refreshParkingData, clearCache } from '../src/store/parkingStore';
+import { useParkingStore, refreshParkingData, clearCache } from '@free-parking/shared';
 
 describe('parkingStore', () => {
   beforeEach(() => {

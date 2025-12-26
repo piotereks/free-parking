@@ -2,7 +2,7 @@
 import { createContext, useContext, useEffect, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
 import Papa from 'papaparse';
-import { useParkingStore } from './store/parkingStore';
+import { useParkingStore } from '@free-parking/shared';
 
 const ParkingDataContext = createContext();
 

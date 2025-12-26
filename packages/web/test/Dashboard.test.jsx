@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import Dashboard from '../src/Dashboard';
-import { useParkingStore } from '../src/store/parkingStore';
+import { useParkingStore } from '@free-parking/shared';
 
 // Mock Header component to simplify tests
 vi.mock('../src/Header', () => ({

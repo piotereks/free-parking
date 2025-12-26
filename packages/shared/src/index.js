@@ -1,2 +1,4 @@
-// Shared entry point (to be populated in Phase 2/3)
-export const HELLO_SHARED = 'free-parking shared ready';
+// Shared business logic exports
+export * from './dateUtils.js';
+export * from './parkingUtils.js';
+export { useParkingStore, refreshParkingData, clearCache } from './parkingStore.js';
