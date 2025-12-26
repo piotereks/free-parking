@@ -22,7 +22,7 @@ jobs:
           cache: 'npm'
 
       - run: npm ci
-      - run: npm run build:web -- --config vite.config.local.js
+      - run: npm -w packages/web run build -- --config ./vite.config.local.js
 
       - uses: actions/upload-pages-artifact@v3
         with:
