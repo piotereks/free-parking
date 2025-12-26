@@ -10,7 +10,16 @@
     "lint:web": "npm -w packages/web run lint",
     "build:web": "npm -w packages/web run build",
     "test:web": "npm -w packages/web run test:run",
-    "dev:web": "npm -w packages/web run dev"
+    "dev:web": "npm -w packages/web run dev",
+    "dev:mobile": "npm -w packages/mobile run dev",
+    "dev:mobile:ios": "npm -w packages/mobile run dev:ios",
+    "dev:mobile:android": "npm -w packages/mobile run dev:android",
+    "build:mobile:ios": "npm -w packages/mobile run build:ios",
+    "build:mobile:android": "npm -w packages/mobile run build:android",
+    "build:mobile:preview": "npm -w packages/mobile run build:preview",
+    "submit:mobile:ios": "npm -w packages/mobile run submit:ios",
+    "submit:mobile:android": "npm -w packages/mobile run submit:android",
+    "test:mobile": "npm -w packages/mobile run test"
   },
   "dependencies": {},
   "devDependencies": {}

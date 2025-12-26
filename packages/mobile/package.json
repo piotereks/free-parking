@@ -1,9 +1,62 @@
 {
   "name": "@free-parking/mobile",
-  "version": "1.0.1",
+  "version": "1.0.0",
+  "description": "React Native Expo app for parking availability monitoring (iOS & Android)",
   "private": true,
   "type": "module",
+  "main": "expo-router/entry",
   "scripts": {
-    "start": "echo 'Expo app scaffolded. Run create-expo-app later.'"
+    "dev": "expo start",
+    "dev:ios": "expo start --ios",
+    "dev:android": "expo start --android",
+    "dev:web": "expo start --web",
+    "build:ios": "eas build --platform ios",
+    "build:android": "eas build --platform android",
+    "build:preview": "eas build --platform android --profile preview",
+    "submit:ios": "eas submit --platform ios",
+    "submit:android": "eas submit --platform android",
+    "eject": "expo prebuild",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-native": "0.73.0",
+    "expo": "^50.0.0",
+    "expo-router": "^3.0.0",
+    "expo-splash-screen": "^0.26.0",
+    "expo-status-bar": "^1.11.0",
+    "expo-font": "^12.0.0",
+    "expo-async-storage": "^1.0.0",
+    "@react-navigation/native": "^6.1.0",
+    "@react-navigation/bottom-tabs": "^6.5.0",
+    "react-native-screens": "^3.27.0",
+    "react-native-safe-area-context": "^4.7.0",
+    "react-native-gesture-handler": "^2.14.0",
+    "@react-native-async-storage/async-storage": "^1.21.0",
+    "axios": "^1.6.0",
+    "zustand": "^5.0.0",
+    "@free-parking/shared": "*"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-native": "^0.73.0",
+    "@babel/core": "^7.23.0",
+    "@babel/preset-env": "^7.23.0",
+    "@babel/preset-react": "^7.23.0",
+    "@babel/preset-typescript": "^7.23.0",
+    "babel-jest": "^29.7.0",
+    "jest": "^29.7.0",
+    "jest-environment-node": "^29.7.0",
+    "eslint": "^8.54.0",
+    "eslint-plugin-react": "^7.33.0",
+    "eslint-plugin-react-native": "^4.1.0",
+    "typescript": "^5.2.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
   }
 }
