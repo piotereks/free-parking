@@ -9,8 +9,6 @@ const ParkingCard = ({ data, now, allOffline }) => {
   const { display: ageDisplay, aria: ageAria } = formatAgeLabel(age);
 
   let ageClass = '';
-  let statusIcon = null;
-  let statusLabel = '';
   
   let name = data.ParkingGroupName;
   if (name === 'Bank_1') name = 'Uni Wroc';
@@ -20,28 +18,21 @@ const ParkingCard = ({ data, now, allOffline }) => {
   const freeSpots = isApproximated ? approximationInfo.approximated : (data.CurrentFreeGroupCounterValue || 0);
   const originalSpots = approximationInfo.original || data.CurrentFreeGroupCounterValue || 0;
 
-  // Determine status: online, warning, error, offline; icons shown only for non-approximated data
-  // offline icon only when ALL data is offline
+  // Determine status: online, warning, error, offline
+  // Icons removed; only age-based classes retained
   if (!isApproximated) {
     if (allOffline) {
       ageClass = 'age-old';
-      statusIcon = '📵';
-      statusLabel = 'Offline';
     } else if (age >= 15) {
       ageClass = 'age-old';
-      statusIcon = '🚨';
-      statusLabel = 'Error - data outdated';
     } else if (age > 5) {
       ageClass = 'age-medium';
-      statusIcon = '⚠️';
-      statusLabel = 'Warning - data slightly outdated';
     }
   } else if (age >= 15) {
     ageClass = 'age-old';
   } else if (age > 5) {
     ageClass = 'age-medium';
   }
-  // No icon for fresh data (< 5 minutes) - online status
 
 
   return (
@@ -55,16 +46,7 @@ const ParkingCard = ({ data, now, allOffline }) => {
         className={`free-spots ${ageClass}`}
         aria-label={`${freeSpots} free parking spaces${isApproximated ? ' (approximated)' : ''}`}
       >
-        {statusIcon && (
-          <span 
-            className="status-icon-number" 
-            role="img" 
-            aria-label={statusLabel}
-            title={statusLabel}
-          >
-            {statusIcon}
-          </span>
-        )}
+        {/* status icons removed - approximation sign remains */}
         {isApproximated && <span className="approx-indicator" title="Approximated value">≈</span>}
         {freeSpots}
       </div>
@@ -133,7 +115,7 @@ const Dashboard = ({ setView }) => {
   });
 
   // Calculate worst-case color for aggregated total based on data freshness
-  const getAggregatedStatus = ({ allowIcons = true } = {}) => {
+  const getAggregatedStatus = () => {
     if (processedData.length === 0) {
       return { colorClass: '', statusMessage: 'No data available', statusIcon: null, statusLabel: '' };
     }
@@ -144,46 +126,30 @@ const Dashboard = ({ setView }) => {
       maxAge = Math.max(maxAge, age);
     });
 
-    let statusIcon = null;
-    let statusLabel = '';
     let colorClass = '';
     let statusMessage = '';
 
     if (allOffline) {
       colorClass = 'age-old';
       statusMessage = 'All parking feeds appear offline';
-      if (allowIcons) {
-        statusIcon = '📵';
-        statusLabel = 'Offline';
-      }
     } else if (maxAge >= 15) {
       colorClass = 'age-old';
       statusMessage = 'Data outdated - figures may not reflect actual free spaces';
-      if (allowIcons) {
-        statusIcon = '🚨';
-        statusLabel = 'Error - data outdated';
-      }
     } else if (maxAge > 5) {
       colorClass = 'age-medium';
       statusMessage = 'Data slightly outdated - refresh recommended';
-      if (allowIcons) {
-        statusIcon = '⚠️';
-        statusLabel = 'Warning - data slightly outdated';
-      }
     } else {
       colorClass = '';
       statusMessage = 'Data is current and reliable';
     }
 
-    return { colorClass, statusMessage, statusIcon, statusLabel };
+    return { colorClass, statusMessage };
   };
 
   const {
     colorClass: totalColorClass,
-    statusMessage,
-    statusIcon: totalStatusIcon,
-    statusLabel: totalStatusLabel
-  } = getAggregatedStatus({ allowIcons: !hasApproximation });
+    statusMessage
+  } = getAggregatedStatus();
 
   return (
     <>
@@ -218,16 +184,7 @@ const Dashboard = ({ setView }) => {
             <div className="panel-section">
               <div className="status-label">Total Spaces</div>
               <div className={`status-value big-value ${totalColorClass}`} aria-label={`Total free spaces: ${realtimeLoading ? 'loading' : totalSpaces}`}>
-                {totalStatusIcon && (
-                  <span
-                    className="status-icon-number"
-                    role="img"
-                    aria-label={totalStatusLabel}
-                    title={totalStatusLabel}
-                  >
-                    {totalStatusIcon}
-                  </span>
-                )}
+                {/* aggregated status icons removed */}
                 {hasApproximation && !realtimeLoading && <span className="approx-indicator-small" title="Includes approximated values">≈</span>}
                 {realtimeLoading ? '---' : totalSpaces}
               </div>
