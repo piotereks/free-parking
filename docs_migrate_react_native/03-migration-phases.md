@@ -5,8 +5,8 @@
 Make these decisions up front:
 
 - Keep current web deploy working throughout? **Yes** (recommended)
-- Is Expo Web required, or optional? **Optional** (recommended)
-- Share UI now? **No** (recommended)
+- Is Expo Web / RN Web in scope? **No** (explicitly out of scope)
+- Share UI now? **No** (keep web UI as-is)
 
 Definition of done for Phase 0:
 
@@ -119,17 +119,9 @@ Stop condition:
 
 ## Phase 5 — Optional: Shared UI via React Native Web (bigger step)
 
-Only do this if you want one UI codebase.
+This migration decision explicitly avoids RN Web / shared UI. Do not schedule this phase.
 
-Tradeoffs:
-
-- you’d likely replace Tailwind/CSS with RN styling (or adopt `nativewind`)
-- you’d need web + native compatible charting
-
-Alternative:
-
-- keep web UI as-is
-- share logic only
+If you *ever* revisit UI sharing later, treat it as a separate project with its own scope and timelines.
 
 ---
 

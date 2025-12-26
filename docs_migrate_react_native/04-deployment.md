@@ -1,4 +1,4 @@
-# 04 — Deployment (web + Expo mobile + optional Expo Web)
+# 04 — Deployment (web + Expo mobile)
 
 ## Web deployment (keep your existing pipeline)
 
@@ -44,16 +44,9 @@ npx eas build -p ios
 
 ---
 
-## Expo Web (optional)
+## Expo Web / RN Web
 
-Expo can also target web.
-
-Important: Expo Web is easiest when the UI is written with React Native primitives.
-
-Since your current web app is React DOM + Tailwind + ECharts, you have two choices:
-
-1) Keep web on Vite (recommended) and treat Expo Web as optional/non-goal.
-2) Migrate UI to RN + `react-native-web` later (Phase 5). Then Expo can produce web output too.
+Out of scope for this migration decision.
 
 ---
 

@@ -5,7 +5,7 @@
 Create a monorepo that:
 
 - preserves the existing **Vite web app** deployment (no rewrite required)
-- adds an **Expo** app for Android/iOS (and optionally Expo Web)
+- adds an **Expo** app for **Android + iOS**
 - enables sharing logic through a `shared` package
 
 This guide assumes **npm workspaces**.
@@ -38,7 +38,7 @@ Those don’t port 1:1 to React Native. The lowest-risk path is:
 1) keep the web app deployable
 2) build the mobile app
 3) share business logic
-4) decide later if sharing UI is worth it
+4) keep UIs separate (per the migration decision)
 
 ---
 

@@ -1,6 +1,6 @@
 # 05 — Component sharing options (what’s realistic)
 
-You asked for a monorepo where you can keep deploying the current React web app, and also deploy a React Native app (Android/iOS, optionally web).
+You asked for a monorepo where you can keep deploying the current React web app, and also deploy a React Native app (Android/iOS).
 
 This document explains **what can be shared** and **when it becomes worth it**.
 
@@ -48,10 +48,9 @@ This document explains **what can be shared** and **when it becomes worth it**.
 - Your charting uses ECharts, which is web-only
 - You will likely refactor most UI anyway
 
-### When to consider
+### Status for this migration
 
-- After Phase 3/4 (shared core + mobile stable)
-- Only if UI sharing is a clear productivity win
+Out of scope. Keeping web UI separate is the chosen plan.
 
 ---
 
