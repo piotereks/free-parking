@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  mobile-dev:
+    build:
+      context: ./packages/mobile
+      dockerfile: Dockerfile
+    working_dir: /workspace
+    volumes:
+      # Mount the entire workspace root for npm workspaces
+      - .:/workspace
+      # Cache node_modules for better performance
+      - mobile_node_modules:/workspace/packages/mobile/node_modules
+      - root_node_modules:/workspace/node_modules
+    ports:
+      - "8081:8081"   # Metro bundler
+      - "19000:19000" # Expo dev tools
+      - "19001:19001" # Expo dev tools
+      - "19002:19002" # Expo dev tools
+    environment:
+      - EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0
+      - REACT_NATIVE_PACKAGER_HOSTNAME=host.docker.internal
+    command: sh -c "cd /workspace && npm install && npm run dev:mobile"
+    stdin_open: true
+    tty: true
+
+volumes:
+  mobile_node_modules:
+  root_node_modules:

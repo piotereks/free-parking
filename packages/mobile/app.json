@@ -42,12 +42,6 @@
     },
     "plugins": [
       [
-        "expo-async-storage",
-        {
-          "NSLocationWhenInUseUsageDescription": "This app needs access to your location to show nearby parking availability."
-        }
-      ],
-      [
         "expo-location",
         {
           "locationAlwaysAndWhenInUsePermission": "This app needs access to your location to show nearby parking availability."
