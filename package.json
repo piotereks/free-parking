@@ -12,6 +12,7 @@
     "test:web": "npm -w packages/web run test:run",
     "dev:web": "npm -w packages/web run dev",
     "dev:mobile": "npm -w packages/mobile run dev",
+    "dev:mobile:web": "npm -w packages/mobile run dev:web",
     "dev:mobile:ios": "npm -w packages/mobile run dev:ios",
     "dev:mobile:android": "npm -w packages/mobile run dev:android",
     "build:mobile:ios": "npm -w packages/mobile run build:ios",

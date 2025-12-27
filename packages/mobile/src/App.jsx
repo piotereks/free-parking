@@ -6,10 +6,10 @@ import { StatusBar } from 'expo-status-bar';
 import { ActivityIndicator, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import DashboardScreen from '../screens/DashboardScreen';
-import StatisticsScreen from '../screens/StatisticsScreen';
-import SettingsScreen from '../screens/SettingsScreen';
-import { storageMobile } from '../adapters/storageMobile';
+import DashboardScreen from './screens/DashboardScreen';
+import StatisticsScreen from './screens/StatisticsScreen';
+import SettingsScreen from './screens/SettingsScreen';
+import { storageMobile } from './adapters/storageMobile';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
