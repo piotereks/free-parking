@@ -19,9 +19,15 @@
     "build:mobile:preview": "npm -w packages/mobile run build:preview",
     "submit:mobile:ios": "npm -w packages/mobile run submit:ios",
     "submit:mobile:android": "npm -w packages/mobile run submit:android",
-    "test:mobile": "npm -w packages/mobile run test"
+    "test:mobile": "npm -w packages/mobile run test",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
   "dependencies": {
-    "expo-dev-client": "~3.3.12"
+    "expo": "~50.0.0",
+    "expo-dev-client": "~3.3.12",
+    "expo-modules-core": "^3.0.29",
+    "react": "18.2.0",
+    "react-native": "0.73.6"
   }
 }
