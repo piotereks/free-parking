@@ -19,10 +19,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
 
-      - run: npm ci
-      - run: npm -w packages/web run build -- --config ./vite.config.local.js
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - run: pnpm install
+      - run: pnpm -w packages/web run build -- --config ./vite.config.local.js
 
       - uses: actions/upload-pages-artifact@v3
         with:
