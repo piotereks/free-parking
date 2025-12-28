@@ -151,7 +151,11 @@ importers:
         specifier: ^5.2.0
         version: 5.9.3
 
-  packages/shared: {}
+  packages/shared:
+    dependencies:
+      zustand:
+        specifier: ^5.0.9
+        version: 5.0.9(@types/react@19.2.7)(react@19.1.0)(use-sync-external-store@1.6.0(react@19.1.0))
 
   packages/web:
     dependencies:
@@ -14096,6 +14100,11 @@ snapshots:
       react: 18.3.1
     optional: true
 
+  use-sync-external-store@1.6.0(react@19.1.0):
+    dependencies:
+      react: 19.1.0
+    optional: true
+
   util-deprecate@1.0.2: {}
 
   util@0.12.5:
@@ -14398,3 +14407,9 @@ snapshots:
       '@types/react': 19.2.7
       react: 18.3.1
       use-sync-external-store: 1.6.0(react@18.3.1)
+
+  zustand@5.0.9(@types/react@19.2.7)(react@19.1.0)(use-sync-external-store@1.6.0(react@19.1.0)):
+    optionalDependencies:
+      '@types/react': 19.2.7
+      react: 19.1.0
+      use-sync-external-store: 1.6.0(react@19.1.0)
