@@ -3,7 +3,6 @@
     "name": "parking",
     "slug": "parking",
     "version": "0.0.0",
-    "sdkVersion": "50.0.0",
     "platforms": [
       "ios",
       "android"

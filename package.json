@@ -24,10 +24,8 @@
     "ios": "expo run:ios"
   },
   "dependencies": {
-    "expo": "~50.0.0",
-    "expo-dev-client": "~3.3.12",
-    "expo-modules-core": "^3.0.29",
-    "react": "18.2.0",
-    "react-native": "0.73.6"
+    "expo": "~54.0.30",
+    "react": "19.1.0",
+    "react-native": "0.81.5"
   }
 }

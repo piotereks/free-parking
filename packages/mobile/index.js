@@ -1,6 +1,6 @@
 import 'react-native-url-polyfill/auto';
 import { registerRootComponent } from 'expo';
-import App from './src/App';
+import App from './src/AppMinimal';
 
 // Hermes on Android doesn't expose SharedArrayBuffer; stub to satisfy libs that probe it
 if (typeof global.SharedArrayBuffer === 'undefined') {
