@@ -13,6 +13,8 @@ export default defineConfig(({ command: _command, mode: _mode }) => {
 
     base,
 
+    // (no forced React alias — allow separate React versions for web and mobile)
+
     build: {
       emptyOutDir: true,
       outDir: path.resolve(__dirname, '../../parking-deploy/docs/html/parking'),
