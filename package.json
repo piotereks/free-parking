@@ -21,6 +21,7 @@
     "submit:mobile:android": "npm -w packages/mobile run submit:android",
     "test:mobile": "npm -w packages/mobile run test"
   },
-  "dependencies": {},
-  "devDependencies": {}
+  "dependencies": {
+    "expo-dev-client": "~3.3.12"
+  }
 }
