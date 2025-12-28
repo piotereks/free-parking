@@ -20,6 +20,8 @@ Short guide for AI coding agents to be immediately productive in this repo (a sm
 - Preview production build: `npm run preview` (build then `vite preview`).
 - Lint: `npm run lint` (runs `eslint .`).
 
+Note: When running local dev tasks from Windows, prefer the `cmd.exe`/PowerShell command variants (not `bash`/mingw) for reliability with Windows toolchains (Android SDK, `nvm-windows`, Visual Studio, etc.).
+
 ### Project-specific conventions & patterns
 - Single global data provider: always add/consume parking data via `ParkingDataProvider` and `useParkingData()` rather than ad-hoc fetches.
 - Caching: use the existing `CACHE_KEY_REALTIME` and `CACHE_KEY_HISTORY` keys to keep UI instant on load.

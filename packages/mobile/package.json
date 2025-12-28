@@ -5,9 +5,9 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "dev": "npx expo start",
-    "dev:ios": "npx expo start --ios",
-    "dev:android": "npx expo start --android",
+    "dev": "npx expo start --offline",
+    "dev:ios": "npx expo start --ios --offline",
+    "dev:android": "npx expo start --android --offline",
     "build:ios": "eas build --platform ios",
     "build:android": "eas build --platform android",
     "build:preview": "eas build --platform android --profile preview",
@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.28.4",
-    "@expo/vector-icons": "^15.0.3",
+    "@expo/vector-icons": "^14.0.0",
     
     "@free-parking/shared": "workspace:*",
     "@react-native-async-storage/async-storage": "1.21.0",
