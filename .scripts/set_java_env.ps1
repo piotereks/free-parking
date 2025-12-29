@@ -4,7 +4,7 @@ where.exe java
 java -version
 
 # Set this to your installed JDK folder (use an LTS JDK like 17 or 11)
-$jdk = 'C:\Program Files\Java\jdk-25'
+$jdk = 'C:\Program Files\Java\jdk-17'
 if (-not (Test-Path $jdk)) { Write-Error "JDK not found at $jdk; update $jdk variable and re-run"; return }
 
 # Persist machine-level env vars (requires admin)
