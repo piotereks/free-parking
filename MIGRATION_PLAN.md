@@ -13,7 +13,7 @@ Comprehensive, iterative roadmap to split the current Vite/React web app into th
    - CI/CD: review [.github/workflows/ci.yml](.github/workflows/ci.yml) and other workflows under [.github/workflows](.github/workflows).
    - Output: short Notes entry (deps, tooling, web-only APIs).
 
-2. [ ] **Define shared surface & seams**
+2. [x] **Define shared surface & seams** ✅ _Completed 2025-12-29_
    - List modules to extract (pure logic, no React/DOM): parking utils, date utils, capacity maps, approximation logic, store logic (decouple from window/localStorage first).
    - Identify adapters needed (storage, fetch, time, logging) to keep shared package framework-agnostic.
    - Capture browser-only concerns (localStorage, document theme toggles, echarts) in Potential Blockers.
@@ -105,6 +105,7 @@ Comprehensive, iterative roadmap to split the current Vite/React web app into th
 ### Iteration Log (append entries)
 
 - 2025-12-29 — Phase 1 Step 1 — ✅ Done — **Audit current web app completed** — Full analysis of architecture, dependencies, and migration seams documented below.
+- 2025-12-29 — Phase 1 Step 2 — ✅ Done — **Defined shared surface & seams** — Modules to extract, adapter contracts, and package structure documented below.
 
 ---
 
@@ -228,4 +229,326 @@ Define precise shared surface area:
 - Extract parkingUtils, dateUtils as-is
 - Refactor parkingStore to accept storage adapter injection
 - Design storage/fetch adapter interfaces
+
+---
+
+## Phase 1 Step 2: Shared Surface & Seams Definition
+
+### Modules to Extract (Pure Logic)
+
+#### 1. **parkingUtils.js** - Core Business Logic ✅ Ready
+**File:** [src/utils/parkingUtils.js](src/utils/parkingUtils.js) (288 lines)
+**Status:** Fully extractable, no dependencies on React/DOM/window
+**Exports:**
+- Constants: `PARKING_MAX_CAPACITY`, `APPROXIMATION_THRESHOLD_MINUTES`
+- Functions: `normalizeParkingName()`, `getAgeClass()`, `calculateTotalSpaces()`, `isValidParkingData()`, `calculateDataAge()`, `formatAgeLabel()`, `getMaxCapacity()`, `calculateApproximation()`, `applyApproximations()`
+**Tests:** [test/parkingUtils.test.js](test/parkingUtils.test.js) - migrate as-is
+
+**Notes:** 
+- Uses module-level cache (`lastProcessedData`, `lastParkingDataRef`, `lastApproximationState`) for reference stability
+- Cache is safe for shared package (no side effects)
+- All date operations use passed `now` parameter (no hidden Date.now() calls)
+
+#### 2. **dateUtils.js** - Date/Time Utilities ✅ Ready
+**File:** [src/utils/dateUtils.js](src/utils/dateUtils.js) (52 lines)
+**Status:** Fully extractable, only uses standard Date APIs
+**Exports:**
+- `parseTimestamp(raw)` - handles space-to-T normalization
+- `getAgeInMinutes(from, to)` - simple date math
+- `formatTime(timestamp, locale)` - uses `toLocaleTimeString()`
+- `isStaleTimestamp(timestamp, thresholdMinutes)`
+**Tests:** [test/dateUtils.test.js](test/dateUtils.test.js) - migrate as-is
+
+**Notes:**
+- Locale parameter in `formatTime()` defaults to 'pl-PL' (keep as-is, caller can override)
+- All functions are pure and stateless
+
+#### 3. **Store Logic** - Refactor Required ⚠️
+**Source:** [src/store/parkingStore.js](src/store/parkingStore.js)
+**Status:** Needs adapter injection before extraction
+**Current Issues:**
+- Direct `localStorage` access in `clearCache()` function
+- `window.clearCache` global attachment (lines 97-99)
+- Hard-coded cache key strings
+
+**Extraction Plan:**
+```javascript
+// shared/src/store/createParkingStore.js
+export const createParkingStore = (adapters = {}) => {
+  const { storage, logger = console } = adapters;
+  
+  return create((set) => ({
+    // ... existing state ...
+    
+    // Actions use injected storage adapter
+    clearCache: async () => {
+      if (storage) {
+        await storage.remove('parking_realtime_cache');
+        await storage.remove('parking_history_cache');
+      }
+      set({ cacheCleared: true, fetchInProgress: false });
+      logger.log('Cache cleared');
+    }
+  }));
+};
+```
+
+**Web Adapter Implementation:**
+```javascript
+// repo-web/src/adapters/webStorage.js
+export const webStorageAdapter = {
+  get: (key) => {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : null;
+  },
+  set: (key, value) => {
+    localStorage.setItem(key, JSON.stringify(value));
+  },
+  remove: (key) => {
+    localStorage.removeItem(key);
+  }
+};
+```
+
+#### 4. **Data Transform Logic** - Extract from ParkingDataManager ⚠️
+**Source:** [src/ParkingDataManager.jsx](src/ParkingDataManager.jsx) (lines 48-116, 361-380)
+**Pure functions to extract:**
+- `normalizeKey()` - string normalization
+- `findColumnKey()` - CSV column matching
+- `getRowValue()` - safe row value extraction
+- `parseTimestampValue()` - timestamp parsing (duplicate of dateUtils)
+- `buildEntryFromRow()` - CSV row → data entry
+- `extractLastEntry()` - get last row from history
+- `dedupeHistoryRows()` - remove duplicate history entries
+- `parseApiEntry()` - API response → entry
+- `buildCacheRowFromPayload()` - construct cache row
+
+**New shared module:** `shared/src/dataTransforms.js`
+**Tests:** Extract relevant sections from existing tests or write new ones
+
+**Notes:**
+- These are pure data transformation functions
+- `parseTimestampValue()` can be unified with `dateUtils.parseTimestamp()`
+- No dependencies on React/DOM/localStorage
+
+### Adapter Interfaces
+
+#### Storage Adapter Interface
+```typescript
+interface StorageAdapter {
+  // Async to support both localStorage (sync) and AsyncStorage (async)
+  get(key: string): Promise<any | null>;
+  set(key: string, value: any): Promise<void>;
+  remove(key: string): Promise<void>;
+  clear?(): Promise<void>; // optional
+}
+```
+
+**Web Implementation:** Wraps `localStorage` with async interface
+**Mobile Implementation:** Wraps `@react-native-async-storage/async-storage`
+
+#### Fetch Adapter Interface
+```typescript
+interface FetchAdapter {
+  // Generic fetch abstraction
+  fetch(url: string, options?: RequestInit): Promise<Response>;
+  
+  // Higher-level helpers
+  fetchJSON(url: string, options?: RequestInit): Promise<any>;
+  fetchText(url: string, options?: RequestInit): Promise<string>;
+}
+```
+
+**Web Implementation:**
+- Applies CORS proxy to specific domains (zaparkuj.pl)
+- Adds cache-busting query params
+- Handles retries/timeouts
+
+**Mobile Implementation:**
+- Direct fetch (no CORS proxy needed)
+- Platform-specific timeout handling
+- May need polyfills for older RN versions
+
+#### Logger Adapter Interface
+```typescript
+interface LoggerAdapter {
+  log(...args: any[]): void;
+  warn(...args: any[]): void;
+  error(...args: any[]): void;
+  debug?(...args: any[]): void;
+}
+```
+
+**Default:** `console` (works everywhere)
+**Optional:** Sentry, custom loggers, silent mode for tests
+
+#### Time Adapter Interface (Optional)
+```typescript
+interface TimeAdapter {
+  now(): Date;
+  // Could add timezone/locale overrides if needed
+}
+```
+
+**Default:** `{ now: () => new Date() }` (sufficient for now)
+**Future:** Mock time for testing, server time sync
+
+### Web-Specific Seams (Must Stay in repo-web)
+
+#### 1. **Theme Management** - [src/ThemeContext.jsx](src/ThemeContext.jsx)
+**Why web-only:**
+- `document.body.classList.add('dark')` / `.remove('dark')`
+- Direct `localStorage.getItem/setItem('parking_theme')`
+- React Context (web-specific pattern, mobile uses different context system)
+
+**Mobile equivalent:** React Native Appearance API + AsyncStorage
+```javascript
+// repo-mobile equivalent
+import { useColorScheme } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+```
+
+#### 2. **CORS Proxy Logic** - [src/ParkingDataManager.jsx](src/ParkingDataManager.jsx#L13)
+**Why web-only:**
+```javascript
+const CORS_PROXY = 'https://corsproxy.io/?';
+const proxiedUrl = `${CORS_PROXY}${encodeURIComponent(url)}`;
+```
+Browser CORS restrictions don't apply to React Native - direct fetch works
+
+**Adapter approach:**
+```javascript
+// Web adapter
+fetchAdapter.fetch(url) => fetch(`${CORS_PROXY}${encodeURIComponent(url)}`)
+
+// Mobile adapter
+fetchAdapter.fetch(url) => fetch(url)
+```
+
+#### 3. **Google Forms Submission** - [src/ParkingDataManager.jsx](src/ParkingDataManager.jsx#L192-242)
+**Decision:** Keep in shared with fetch adapter
+- Logic is generic (POST form-encoded data)
+- Form entry IDs can be config/environment
+- Adapter handles CORS/no-cors mode differences
+
+#### 4. **echarts Integration** - [src/Dashboard.jsx](src/Dashboard.jsx)
+**Why web-only:**
+- `echarts` and `echarts-for-react` are DOM/Canvas-based
+- No React Native equivalent
+
+**Mobile alternative:** victory-native or react-native-svg charts (Phase 2)
+
+#### 5. **CSV Parsing** - Uses PapaParse
+**Status:** Can work in shared
+- PapaParse works in Node.js/browser/RN
+- No DOM dependencies
+- Include as peer dependency in shared package
+
+### Shared Package Structure
+
+```
+parking-shared/
+├── package.json
+├── README.md
+├── LICENSE (MIT)
+├── .gitignore
+├── .eslintrc.js
+├── vitest.config.js
+├── src/
+│   ├── index.js                    # Main exports
+│   ├── parkingUtils.js             # From repo-web/src/utils/parkingUtils.js
+│   ├── dateUtils.js                # From repo-web/src/utils/dateUtils.js
+│   ├── dataTransforms.js           # Extracted from ParkingDataManager.jsx
+│   ├── store/
+│   │   └── createParkingStore.js   # Refactored parkingStore.js with adapters
+│   ├── adapters/
+│   │   ├── types.js                # Adapter interface docs (JSDoc)
+│   │   └── defaultAdapters.js      # Console logger, Date.now() timer
+│   └── constants.js                # API URLs, cache keys, form config
+├── test/
+│   ├── parkingUtils.test.js        # Migrated from repo-web
+│   ├── dateUtils.test.js           # Migrated from repo-web
+│   ├── dataTransforms.test.js      # New tests
+│   └── store.test.js               # Adapted from repo-web with mock adapters
+└── dist/                           # Built output (via tsup/rollup)
+    ├── index.js                    # ESM
+    ├── index.cjs                   # CJS (optional)
+    └── index.d.ts                  # TypeScript definitions (JSDoc-generated)
+```
+
+#### package.json Structure
+```json
+{
+  "name": "@piotereks/parking-shared",
+  "version": "0.1.0-alpha.0",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "scripts": {
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "build": "tsup src/index.js --format esm,cjs --dts",
+    "prepublishOnly": "npm run lint && npm run test && npm run build"
+  },
+  "peerDependencies": {
+    "zustand": "^5.0.0",
+    "papaparse": "^5.5.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.0",
+    "vitest": "^4.0.0",
+    "tsup": "^8.0.0",
+    "zustand": "^5.0.9",
+    "papaparse": "^5.5.3"
+  }
+}
+```
+
+### Extraction Dependencies
+
+**Build Tool:** tsup (simple, handles ESM/CJS/DTS)
+**Testing:** Vitest (no jsdom needed - pure logic)
+**Linting:** ESLint (match repo-web config)
+**Peer Dependencies:**
+- `zustand` - for store creation
+- `papaparse` - for CSV parsing (if kept in shared)
+
+### Migration Boundaries Summary
+
+| Module | Status | Location | Dependencies | Notes |
+|--------|--------|----------|-------------|-------|
+| parkingUtils.js | ✅ Ready | shared/src/ | None | Pure logic |
+| dateUtils.js | ✅ Ready | shared/src/ | None | Pure logic |
+| dataTransforms.js | ⚠️ Extract | shared/src/ | None | Extract from ParkingDataManager |
+| parkingStore.js | ⚠️ Refactor | shared/src/store/ | Needs adapters | Inject storage/logger |
+| ThemeContext.jsx | ❌ Stay | repo-web only | document, localStorage | DOM-specific |
+| ParkingDataManager.jsx | ⚠️ Split | Both | React, fetch | Data fetching logic → shared with adapters; React provider → web |
+| Dashboard.jsx | ❌ Stay | repo-web only | echarts, React | UI-specific |
+| Statistics.jsx | ❌ Stay | repo-web only | echarts, React | UI-specific |
+
+### Adapter Injection Points
+
+1. **Store Creation** - `createParkingStore(adapters)` receives storage, logger
+2. **Data Manager** - Will become `createParkingDataManager(adapters)` receiving fetch, storage, logger
+3. **Constants** - API URLs, cache keys exported as config (can override per platform)
+
+### Next Steps (Phase 1 Step 3)
+Begin extraction work:
+1. Create `parking-shared` repo with initial structure
+2. Copy parkingUtils.js and dateUtils.js with tests
+3. Extract data transform functions into dataTransforms.js
+4. Refactor parkingStore.js to accept adapter injection
+5. Write adapter interface documentation
+6. Set up build pipeline (tsup, ESLint, Vitest)
+7. Create initial release 0.1.0-alpha.0
 - Document adapter contracts in shared package README
