@@ -13,12 +13,9 @@ export default defineConfig(({ command: _command, mode: _mode }) => {
   return {
     plugins: [react()],
 
-    // Ensure single React instance and avoid pulling deps from shared/node_modules
+    // Ensure single React instance
     resolve: {
-      dedupe: ['react', 'react-dom'],
-      alias: {
-        zustand: path.resolve(__dirname, 'node_modules/zustand')
-      }
+      dedupe: ['react', 'react-dom']
     },
 
     base,
