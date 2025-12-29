@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import Header from './Header';
 import { useParkingStore, refreshParkingData } from './store/parkingStore';
-import { applyApproximations, calculateDataAge, formatAgeLabel } from './utils/parkingUtils';
+import { applyApproximations, calculateDataAge, formatAgeLabel } from '@piotereks/parking-shared';
 
 const ParkingCard = ({ data, now, allOffline }) => {
   const age = calculateDataAge(data.Timestamp, now);

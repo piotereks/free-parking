@@ -2,7 +2,16 @@
 import { createContext, useContext, useEffect, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
 import Papa from 'papaparse';
+import {
+  buildEntryFromRow,
+  dedupeHistoryRows,
+  parseApiEntry,
+  cloneApiResults,
+  buildCacheRowFromPayload
+} from '@piotereks/parking-shared';
 import { useParkingStore } from './store/parkingStore';
+import { webStorageAdapter } from './adapters/webStorageAdapter';
+import { webFetchAdapter } from './adapters/webFetchAdapter';
 
 const ParkingDataContext = createContext();
 
@@ -10,7 +19,6 @@ const API_URLS = [
     'https://gd.zaparkuj.pl/api/freegroupcountervalue.json',
     'https://gd.zaparkuj.pl/api/freegroupcountervalue-green.json'
 ];
-const CORS_PROXY = 'https://corsproxy.io/?';
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTwLNDbg8KjlVHsZWj9JUnO_OBIyZaRgZ4gZ8_Gbyly2J3f6rlCW6lDHAihwbuLhxWbBkNMI1wdWRAq/pub?gid=411529798&single=true&output=csv';
 
 // Google Form configuration
@@ -47,42 +55,6 @@ const COLUMN_ALIASES = {
     UNI_VALUE: 'uni free'
 };
 
-const normalizeKey = (key) => (key ? key.trim().toLowerCase() : '');
-
-const findColumnKey = (row, target) => {
-    if (!row) return null;
-    const targetKey = normalizeKey(target);
-    return Object.keys(row).find((key) => normalizeKey(key) === targetKey) || null;
-};
-
-const getRowValue = (row, keyName) => {
-    const columnKey = findColumnKey(row, keyName);
-    if (!columnKey) return undefined;
-    const value = row[columnKey];
-    return typeof value === 'string' ? value.trim() : value;
-};
-
-const parseTimestampValue = (raw) => {
-    if (!raw) return null;
-    const normalized = raw.includes('T') ? raw : raw.replace(' ', 'T');
-    const date = new Date(normalized);
-    return Number.isNaN(date.getTime()) ? null : date;
-};
-
-const buildEntryFromRow = (row, timeKey, valueKey) => {
-    if (!row) return null;
-    const raw = getRowValue(row, timeKey);
-    const date = parseTimestampValue(raw);
-    if (!date) return null;
-    const valueRaw = getRowValue(row, valueKey);
-    const valueNumber = valueRaw === undefined || valueRaw === null || valueRaw === '' ? null : Number(valueRaw);
-    return {
-        raw,
-        date,
-        value: Number.isNaN(valueNumber) ? null : valueNumber
-    };
-};
-
 const extractLastEntry = (rows) => {
     if (!rows || rows.length === 0) {
         return { gd: null, uni: null };
@@ -94,61 +66,16 @@ const extractLastEntry = (rows) => {
     };
 };
 
-const dedupeHistoryRows = (rows = []) => {
-    const seen = new Set();
-    const result = [];
-    rows.forEach((row) => {
-        const gdKey = getRowValue(row, COLUMN_ALIASES.GD_TIME) || '';
-        const uniKey = getRowValue(row, COLUMN_ALIASES.UNI_TIME) || '';
-        const composite = `${gdKey}|||${uniKey}`;
-        if (!seen.has(composite)) {
-            seen.add(composite);
-            result.push(row);
-        }
-    });
-    return result;
-};
-
-const parseApiEntry = (record) => {
-    if (!record || !record.Timestamp) return null;
-    const raw = record.Timestamp.trim();
-    if (!raw) return null;
-    const iso = raw.includes('T') ? raw : raw.replace(' ', 'T');
-    const date = new Date(iso);
-    if (Number.isNaN(date.getTime())) return null;
-    const valueNumber = Number(record.CurrentFreeGroupCounterValue);
-    return {
-        raw,
-        date,
-        value: Number.isNaN(valueNumber) ? null : valueNumber
-    };
-};
-
-const cloneApiResults = (apiResults = []) => (
-    Array.isArray(apiResults) ? apiResults.map((result) => ({ ...(result || {}) })) : []
-);
-
-const buildCacheRowFromPayload = (gdPayload, uniPayload) => ({
-    [COLUMN_ALIASES.GD_TIME]: gdPayload?.Timestamp || '',
-    [COLUMN_ALIASES.GD_VALUE]: gdPayload?.CurrentFreeGroupCounterValue ?? '',
-    [COLUMN_ALIASES.UNI_TIME]: uniPayload?.Timestamp || '',
-    [COLUMN_ALIASES.UNI_VALUE]: uniPayload?.CurrentFreeGroupCounterValue ?? ''
-});
-
-const readHistoryCacheSnapshot = () => {
-    if (typeof localStorage === 'undefined') {
-        return { rows: [], timestamp: null, last: { gd: null, uni: null } };
-    }
-    const cached = localStorage.getItem(CACHE_KEY_HISTORY);
+const readHistoryCacheSnapshot = async () => {
+    const cached = await webStorageAdapter.get(CACHE_KEY_HISTORY);
     if (!cached) {
         return { rows: [], timestamp: null, last: { gd: null, uni: null } };
     }
     try {
-        const parsed = JSON.parse(cached);
-        const rows = Array.isArray(parsed.data) ? parsed.data : [];
+        const rows = Array.isArray(cached.data) ? cached.data : [];
         return {
             rows,
-            timestamp: parsed.timestamp || null,
+            timestamp: cached.timestamp || null,
             last: extractLastEntry(rows)
         };
     } catch (error) {
@@ -176,16 +103,16 @@ export const ParkingDataProvider = ({ children }) => {
     const fetchInProgressRef = useRef(false);
     const cacheCleared = useParkingStore((state) => state.cacheCleared);
 
-    const persistHistorySnapshot = useCallback((rows) => {
+    const persistHistorySnapshot = useCallback(async (rows) => {
         const safeRows = Array.isArray(rows) ? rows : [];
         const updateTime = new Date();
         setHistoryData(safeRows);
         setLastHistoryUpdate(updateTime);
         try {
-            localStorage.setItem(CACHE_KEY_HISTORY, JSON.stringify({
+            await webStorageAdapter.set(CACHE_KEY_HISTORY, {
                 data: safeRows,
                 timestamp: updateTime.toISOString()
-            }));
+            });
             console.log('History cache updated');
         } catch (e) {
             console.error('Failed to cache history data:', e);
@@ -245,10 +172,7 @@ export const ParkingDataProvider = ({ children }) => {
         }
         setHistoryLoading(true);
         try {
-            const response = await fetch(`${CSV_URL}&time=${Date.now()}`, {
-                cache: 'no-store'
-            });
-            const csvText = await response.text();
+            const csvText = await webFetchAdapter.fetchText(CSV_URL);
             
             Papa.parse(csvText, {
                 header: true,
@@ -375,12 +299,11 @@ export const ParkingDataProvider = ({ children }) => {
 
         try {
             // Try to load from cache first for instant display
-            const cached = localStorage.getItem(CACHE_KEY_REALTIME);
+            const cached = await webStorageAdapter.get(CACHE_KEY_REALTIME);
             if (cached) {
                 try {
-                    const cachedData = JSON.parse(cached);
-                    setRealtimeData(cachedData.data);
-                    setLastRealtimeUpdate(new Date(cachedData.timestamp));
+                    setRealtimeData(cached.data);
+                    setLastRealtimeUpdate(new Date(cached.timestamp));
                     console.log('Real-time cache loaded');
                 } catch (e) {
                     console.error('Failed to parse real-time cache:', e);
@@ -389,8 +312,7 @@ export const ParkingDataProvider = ({ children }) => {
 
             // Fetch fresh data
             const results = await Promise.all(API_URLS.map(url =>
-                fetch(`${CORS_PROXY}${encodeURIComponent(url + '?time=' + Date.now())}`)
-                    .then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`))
+                webFetchAdapter.fetchJSON(url)
             ));
 
             setRealtimeData(results);
@@ -399,10 +321,10 @@ export const ParkingDataProvider = ({ children }) => {
 
             // Cache the real-time data
             try {
-                localStorage.setItem(CACHE_KEY_REALTIME, JSON.stringify({
+                await webStorageAdapter.set(CACHE_KEY_REALTIME, {
                     data: results,
                     timestamp: updateTime.toISOString()
-                }));
+                });
             } catch (e) {
                 console.error('Failed to cache real-time data:', e);
             }
@@ -421,17 +343,19 @@ export const ParkingDataProvider = ({ children }) => {
 
     // Load history cache on mount
     useEffect(() => {
-        const cached = localStorage.getItem(CACHE_KEY_HISTORY);
-        if (cached) {
-            try {
-                const parsedCache = JSON.parse(cached);
-                setHistoryData(parsedCache.data);
-                setLastHistoryUpdate(new Date(parsedCache.timestamp));
-                console.log('History cache loaded on mount');
-            } catch (e) {
-                console.error('Failed to load history cache on mount:', e);
+        const loadCacheOnMount = async () => {
+            const cached = await webStorageAdapter.get(CACHE_KEY_HISTORY);
+            if (cached) {
+                try {
+                    setHistoryData(cached.data);
+                    setLastHistoryUpdate(new Date(cached.timestamp));
+                    console.log('History cache loaded on mount');
+                } catch (e) {
+                    console.error('Failed to load history cache on mount:', e);
+                }
             }
-        }
+        };
+        loadCacheOnMount();
     }, [setHistoryData, setLastHistoryUpdate]);
 
     // Initial fetch and auto-refresh for real-time data

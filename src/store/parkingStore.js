@@ -1,65 +1,10 @@
-import { create } from 'zustand';
+import { createParkingStore as createSharedStore } from '@piotereks/parking-shared';
+import { webStorageAdapter } from '../adapters/webStorageAdapter';
 
-export const useParkingStore = create((set) => {
-    const store = {
-        // Real-time data state
-        realtimeData: [],
-        realtimeLoading: true,
-        realtimeError: null,
-        lastRealtimeUpdate: null,
-
-        // Historical data state
-        historyData: [],
-        historyLoading: false,
-        lastHistoryUpdate: null,
-
-        // Fetch in progress flag
-        fetchInProgress: false,
-
-        // Refresh callback (set by ParkingDataProvider)
-        refreshCallback: null,
-        // Stop auto-refresh callback (set by ParkingDataProvider)
-        stopAutoRefresh: null,
-        // Cache-cleared flag to prevent further automatic fetches
-        cacheCleared: false,
-
-        // Actions
-        setRealtimeData: (data) => set({ realtimeData: data }),
-        setRealtimeLoading: (loading) => set({ realtimeLoading: loading }),
-        setRealtimeError: (error) => set({ realtimeError: error }),
-        setLastRealtimeUpdate: (timestamp) => set({ lastRealtimeUpdate: timestamp }),
-
-        setHistoryData: (data) => set({ historyData: data }),
-        setHistoryLoading: (loading) => set({ historyLoading: loading }),
-        setLastHistoryUpdate: (timestamp) => set({ lastHistoryUpdate: timestamp }),
-
-        setFetchInProgress: (inProgress) => set({ fetchInProgress: inProgress }),
-
-        setRefreshCallback: (callback) => set({ refreshCallback: callback }),
-        setStopAutoRefresh: (cb) => set({ stopAutoRefresh: cb }),
-        setCacheCleared: (v) => set({ cacheCleared: v }),
-
-        // Convenience action to update all realtime fields at once
-        updateRealtimeState: (updates) => set(updates),
-
-        // Convenience action to update all history fields at once
-        updateHistoryState: (updates) => set(updates),
-
-        // Reset store for testing
-        resetStore: () => set({
-            realtimeData: [],
-            realtimeLoading: true,
-            realtimeError: null,
-            lastRealtimeUpdate: null,
-            historyData: [],
-            historyLoading: false,
-            lastHistoryUpdate: null,
-            fetchInProgress: false,
-            refreshCallback: null
-        })
-    };
-    
-    return store;
+// Create store with web adapters
+export const useParkingStore = createSharedStore({
+  storage: webStorageAdapter,
+  logger: console
 });
 
 // Export refresh function that can be called from components
@@ -72,21 +17,14 @@ export const refreshParkingData = async () => {
     }
 };
 
-// Clear local caches and stop auto-refresh. Safe to call from console.
-export const clearCache = () => {
+// Clear cache and stop auto-refresh
+export const clearCache = async () => {
     try {
-        // Remove known cache keys
-        if (typeof localStorage !== 'undefined') {
-            localStorage.removeItem('parking_realtime_cache');
-            localStorage.removeItem('parking_history_cache');
+        // Use the shared clearCache action
+        const clearCacheAction = useParkingStore.getState().clearCache;
+        if (typeof clearCacheAction === 'function') {
+            await clearCacheAction();
         }
-
-        // Mark store as cache-cleared and stop future automatic fetches.
-        // Do NOT wipe in-memory data so the UI remains visible.
-        useParkingStore.setState({
-            fetchInProgress: false,
-            cacheCleared: true
-        });
 
         const stopCb = useParkingStore.getState().stopAutoRefresh;
         if (typeof stopCb === 'function') {
