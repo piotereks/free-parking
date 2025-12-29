@@ -17,6 +17,9 @@ importers:
       expo-dev-client:
         specifier: ~6.0.20
         version: 6.0.20(expo@54.0.30)
+      invariant:
+        specifier: ^2.2.4
+        version: 2.2.4
       react:
         specifier: 19.1.0
         version: 19.1.0

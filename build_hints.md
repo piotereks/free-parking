@@ -73,3 +73,32 @@ adb shell monkey -p com.freeparking.mobile -c android.intent.category.LAUNCHER 1
 - Use EAS only when you need cloud builds (managed credentials, CI, or distribution) — not required for local development.
 
 If you want, I can add platform-specific shortcuts to `package.json` scripts (e.g., `npm run android:install`) — tell me if you want that added.
+
+Run package scripts from repo root (pnpm workspaces)
+
+You can run mobile/web scripts from the repository root using pnpm workspace filters. Examples:
+
+```bash
+# Start mobile dev (Expo) from root
+pnpm run dev:mobile
+
+# Start web dev from root
+pnpm run dev:web
+
+# Build web
+pnpm run build:web
+
+# Run mobile android script (uses package script)
+pnpm run dev:mobile:android
+```
+
+These root scripts use `pnpm --filter` under the hood (see `package.json`) and simply run the package-local scripts in the right workspace.
+
+Notes:
+- If Metro/Expo needs a fresh cache, add `-c` or run `npx expo start -c` inside `packages/mobile`.
+- If you prefer to run directly from the package folder, use:
+	```bash
+	cd packages/mobile
+	npx expo start -c
+	```
+
