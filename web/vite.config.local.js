@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
+import fs from 'fs'
 
 export default defineConfig(({ command: _command, mode: _mode }) => {
 
@@ -17,12 +18,18 @@ export default defineConfig(({ command: _command, mode: _mode }) => {
     plugins: [react()],
 
     // Ensure single React instance and prefer workspace zustand
-    resolve: {
-      alias: {
-        'free-parking': path.resolve(__dirname, '..', 'shared', 'dist', 'index.js')
-      },
-      dedupe: ['react', 'react-dom', 'zustand']
-    },
+    // Resolve `free-parking` to built `dist` when available, otherwise use `src` for dev.
+    resolve: (() => {
+      const sharedDist = path.resolve(__dirname, '..', 'shared', 'dist', 'index.js')
+      const sharedSrc = path.resolve(__dirname, '..', 'shared', 'src', 'index.js')
+      const entry = fs.existsSync(sharedDist) ? sharedDist : sharedSrc
+      return {
+        alias: {
+          'free-parking': entry
+        },
+        dedupe: ['react', 'react-dom', 'zustand']
+      }
+    })(),
 
     // Ensure vite pre-bundles zustand so imports from shared/src resolve
     optimizeDeps: {
