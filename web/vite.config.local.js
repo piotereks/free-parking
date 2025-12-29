@@ -16,9 +16,14 @@ export default defineConfig(({ command: _command, mode: _mode }) => {
   return {
     plugins: [react()],
 
-    // Ensure single React instance
+    // Ensure single React instance and prefer workspace zustand
     resolve: {
-      dedupe: ['react', 'react-dom']
+      dedupe: ['react', 'react-dom', 'zustand']
+    },
+
+    // Ensure vite pre-bundles zustand so imports from shared/src resolve
+    optimizeDeps: {
+      include: ['zustand']
     },
 
     base,
@@ -27,6 +32,10 @@ export default defineConfig(({ command: _command, mode: _mode }) => {
       emptyOutDir: true,
       outDir,
       chunkSizeWarningLimit: 2000,
+      // Allow CommonJS resolution for files inside shared source during dev/build
+      commonjsOptions: {
+        include: [/node_modules/, /shared/]
+      },
       rollupOptions: {
         output: {
           manualChunks: {
