@@ -15,6 +15,9 @@ export default defineConfig(({ command: _command, mode: _mode }) => {
 
     // Ensure single React instance and prefer workspace zustand
     resolve: {
+      alias: {
+        'free-parking': path.resolve(__dirname, '..', 'shared', 'dist', 'index.js')
+      },
       dedupe: ['react', 'react-dom', 'zustand']
     },
 
