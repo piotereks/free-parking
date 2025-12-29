@@ -201,7 +201,7 @@ export const ParkingDataProvider = ({ children }) => {
                 uni: apiUniEntry?.date?.toISOString()
             });
 
-            let snapshot = readHistoryCacheSnapshot();
+            let snapshot = await readHistoryCacheSnapshot();
 
             if (snapshot.rows.length && historyData.length === 0) {
                 setHistoryData(snapshot.rows);
@@ -221,7 +221,7 @@ export const ParkingDataProvider = ({ children }) => {
 
             console.log('Slow path triggered — fetching CSV for reconciliation');
             await fetchHistoryData();
-            snapshot = readHistoryCacheSnapshot();
+            snapshot = await readHistoryCacheSnapshot();
 
             if (snapshot.rows.length) {
                 setHistoryData(snapshot.rows);
