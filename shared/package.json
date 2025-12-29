@@ -9,12 +9,11 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./src/index.js",
+      "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
     "./package.json": "./package.json"
   },
-  "module": "./src/index.js",
   "files": [
     "dist",
     "src",
