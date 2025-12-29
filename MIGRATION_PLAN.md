@@ -23,7 +23,7 @@ Comprehensive, iterative roadmap to split the current Vite/React web app into th
    - Add minimal build step (tsup/rollup or plain `exports` with "type": "module"), include type definitions if adding JSDoc/TS.
    - Add README with usage and adapter contracts (storage, fetch, time).
 
-4. [ ] **Version and publish shared**
+4. [x] **Version and publish shared** ✅ _Completed 2025-12-29_
    - Set semantic versioning, pre-release tag (e.g., `0.1.0-alpha.0`).
    - Configure npm scripts: lint, test, build, release dry-run.
    - Optional: GitHub Actions for lint+test+publish on tag.
@@ -107,6 +107,7 @@ Comprehensive, iterative roadmap to split the current Vite/React web app into th
 - 2025-12-29 — Phase 1 Step 1 — ✅ Done — **Audit current web app completed** — Full analysis of architecture, dependencies, and migration seams documented below.
 - 2025-12-29 — Phase 1 Step 2 — ✅ Done — **Defined shared surface & seams** — Modules to extract, adapter contracts, and package structure documented below.
 - 2025-12-29 — Phase 1 Step 3 — ✅ Done — **Extracted and hardened pure logic** — Created parking-shared package with all core modules, tests, and documentation.
+- 2025-12-29 — Phase 1 Step 4 — ✅ Done — **Versioned and built shared package** — Fixed lint errors, built dist/ artifacts (ESM, CJS, DTS), created git commit and tag v0.1.0-alpha.0.
 
 ---
 
@@ -671,6 +672,57 @@ parking-shared/
 #### README.md ✅
 - Comprehensive documentation
 - Quick start guides for web and mobile
+
+---
+
+## Phase 1 Step 4: Versioning and Build Results
+
+### Package Build Status ✅
+
+**Version:** 0.1.0-alpha.0
+**Build Output:** `parking-shared/dist/`
+
+#### Build Artifacts Generated
+```
+dist/
+├── index.js       ✅ ESM module (modern import)
+├── index.cjs      ✅ CommonJS module (require)
+├── index.d.ts     ✅ TypeScript definitions
+└── index.d.cts    ✅ CJS type definitions
+```
+
+#### Build Quality
+- **ESLint:** ✅ 0 errors (fixed 2 unused variables in test files)
+  - Removed unused `PARKING_MAX_CAPACITY` import from [parking-shared/test/parkingUtils.test.js](parking-shared/test/parkingUtils.test.js)
+  - Removed unused `beforeEach` import from [parking-shared/test/dataTransforms.test.js](parking-shared/test/dataTransforms.test.js)
+- **tsup build:** ✅ Successfully generated dual-format package with type definitions
+- **Package exports:** ✅ Properly configured in package.json (types first, then import, then require)
+
+#### Git Commit & Tagging
+- **Commit:** `438729c` — "Phase 1 Step 4: parking-shared v0.1.0-alpha.0 - lint, test, and build complete"
+- **Tag:** `v0.1.0-alpha.0` — Created and committed to feature/separate_repos branch
+
+#### npm Scripts Verified
+- `npm run lint` — ESLint checks source and tests (✅ 0 errors)
+- `npm run test` — Vitest runs all test suites (✅ All tests passing)
+- `npm run test:coverage` — Coverage reporting enabled
+- `npm run build` — tsup generates dist/ with ESM, CJS, and type definitions (✅ All artifacts created)
+- `npm run prepublishOnly` — Pre-publish checks configured (lint → test → build)
+
+#### Distribution Ready
+The parking-shared package is now ready for distribution:
+- **Local testing:** Can be installed via `npm link` or `file:` protocol from web repo
+- **npm publishing:** Pre-flight checks configured via prepublishOnly script
+- **GitHub:** Can be published to npm on tagged releases via GitHub Actions (Phase 1 Step 5)
+
+### Next Steps (Phase 1 Step 5)
+Integrate parking-shared into repo-web:
+1. Create web adapters (storage, fetch) in [src/adapters/](src/adapters/)
+2. Update [src/ParkingDataManager.jsx](src/ParkingDataManager.jsx) to use shared transforms and adapters
+3. Update [src/store/parkingStore.js](src/store/parkingStore.js) to import from shared
+4. Replace utility imports with shared package imports
+5. Run lint/test/build to validate integration
+6. Update documentation in README
 - Full API reference
 - Adapter interface documentation
 - Examples for localStorage and AsyncStorage
