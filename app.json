@@ -7,8 +7,12 @@
       "ios",
       "android"
     ],
+    "icon": "packages/mobile/assets/icon.png",
     "android": {
       "package": "com.anonymous.parking"
+    },
+    "ios": {
+      "bundleIdentifier": "com.anonymous.parking"
     }
   }
 }
