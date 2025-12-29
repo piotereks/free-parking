@@ -4,9 +4,14 @@ import path from 'path'
 
 export default defineConfig(({ command: _command, mode: _mode }) => {
 
-  const base = '/free-parking/'
+  // Allow overriding base path via env like the main config
+  const base = process.env.VITE_BASE_PATH || '/free-parking/'
 
   console.log('Using base:', base)
+
+  // Build output path: compute relative to this config file (which lives in `web/`)
+  // This resolves to <repo-root>/parking-deploy/docs/html/parking
+  const outDir = path.resolve(__dirname, '..', 'parking-deploy', 'docs', 'html', 'parking')
 
   return {
     plugins: [react()],
@@ -20,7 +25,7 @@ export default defineConfig(({ command: _command, mode: _mode }) => {
 
     build: {
       emptyOutDir: true,
-      outDir: path.resolve(__dirname, '../parking-deploy/docs/html/parking'),
+      outDir,
       chunkSizeWarningLimit: 2000,
       rollupOptions: {
         output: {
