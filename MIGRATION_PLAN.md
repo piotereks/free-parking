@@ -36,9 +36,10 @@ Comprehensive, iterative roadmap to organize the parking app into three project 
    - Remove duplicated logic left in web project.
    - Ensure lint/test/build still pass with local package dependency.
 
-6. Run lint/test/build (per [.github/workflows/ci.yml](.github/workflows/ci.yml)).
-   - Update docs/README to describe dependency on `shared`.
-   - Record iteration outcome and remaining gaps in Iteration Log.
+6. [x] Run lint/test/build (per [.github/workflows/ci.yml](.github/workflows/ci.yml)) ✅ _Completed 2025-12-29_
+  - Local: `npm install` in `shared/` then `npm run build`; `npm install` in `web/` then `npm run lint && npm run test:run && npm run build` (all green).
+  - CI: workflow run confirmed green (lint/test/build) on branch `feature/separate_repos` / PR #68.
+  - Docs/notes: pending doc refresh and Iteration Log update.
 
 ---
 
