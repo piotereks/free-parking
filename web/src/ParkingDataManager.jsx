@@ -8,7 +8,7 @@ import {
   parseApiEntry,
   cloneApiResults,
   buildCacheRowFromPayload
-} from '@piotereks/parking-shared';
+} from 'free-parking';
 import { useParkingStore } from './store/parkingStore';
 import { webStorageAdapter } from './adapters/webStorageAdapter';
 import { webFetchAdapter } from './adapters/webFetchAdapter';

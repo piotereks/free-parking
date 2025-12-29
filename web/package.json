@@ -14,7 +14,7 @@
     "test:run": "vitest run"
   },
   "dependencies": {
-    "@piotereks/parking-shared": "file:./parking-shared",
+    "free-parking": "file:../shared",
     "echarts": "^6.0.0",
     "echarts-for-react": "^3.0.5",
     "lucide-react": "^0.562.0",

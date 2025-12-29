@@ -1,4 +1,4 @@
-import { createParkingStore as createSharedStore } from '@piotereks/parking-shared';
+import { createParkingStore as createSharedStore } from 'free-parking';
 import { webStorageAdapter } from '../adapters/webStorageAdapter';
 
 // Create store with web adapters

@@ -1,5 +1,5 @@
 {
-  "name": "@piotereks/parking-shared",
+  "name": "free-parking",
   "version": "0.1.0-alpha.0",
   "description": "Shared parking data logic for web and mobile applications",
   "type": "module",

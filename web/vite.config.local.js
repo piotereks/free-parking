@@ -11,11 +11,19 @@ export default defineConfig(({ command: _command, mode: _mode }) => {
   return {
     plugins: [react()],
 
+    // Ensure single React instance and avoid pulling deps from shared/node_modules
+    resolve: {
+      dedupe: ['react', 'react-dom'],
+      alias: {
+        zustand: path.resolve(__dirname, 'node_modules/zustand')
+      }
+    },
+
     base,
 
     build: {
       emptyOutDir: true,
-      outDir: path.resolve(__dirname, 'parking-deploy/docs/html/parking'),
+      outDir: path.resolve(__dirname, '../parking-deploy/docs/html/parking'),
       chunkSizeWarningLimit: 2000,
       rollupOptions: {
         output: {

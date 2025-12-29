@@ -4,7 +4,7 @@ import {
   getAgeInMinutes,
   formatTime,
   isStaleTimestamp
-} from '../src/utils/dateUtils';
+} from 'free-parking';
 
 describe('dateUtils', () => {
   describe('parseTimestamp', () => {

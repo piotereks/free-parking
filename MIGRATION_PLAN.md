@@ -1,10 +1,10 @@
-## MIGRATION_PLAN.md — Web→Mobile Multi-Repo Roadmap
+## MIGRATION_PLAN.md — Web→Mobile Multi-Project Roadmap
 
-Comprehensive, iterative roadmap to split the current Vite/React web app into three independent repos: `repo-web` (existing web), `shared` (framework-agnostic npm package), and `repo-mobile` (new Expo app). Steps are small, testable, and trackable with checkboxes; progress can pause/resume without losing context.
+Comprehensive, iterative roadmap to organize the parking app into three project folders within a single git repository: `web/` (Vite/React web app), `shared/` (framework-agnostic logic package), and `mobile/` (Expo mobile app). Each folder is treated as an independent project with its own package.json, but all share one git history. Steps are small, testable, and trackable with checkboxes; progress can pause/resume without losing context.
 
 ---
 
-### Phase 1 — Reposition Web Repo & Create Shared Package
+### Phase 1 — Extract Shared Package (Same Repo)
 
 1. [x] **Audit current web app** ✅ _Completed 2025-12-29_
    - Map entry and providers: [src/main.jsx](src/main.jsx), [src/App.jsx](src/App.jsx), [src/ThemeContext.jsx](src/ThemeContext.jsx).
@@ -23,18 +23,18 @@ Comprehensive, iterative roadmap to split the current Vite/React web app into th
    - Add minimal build step (tsup/rollup or plain `exports` with "type": "module"), include type definitions if adding JSDoc/TS.
    - Add README with usage and adapter contracts (storage, fetch, time).
 
-4. [x] **Version and publish shared** ✅ _Completed 2025-12-29_
+4. [x] **Version and build shared** ✅ _Completed 2025-12-29_
    - Set semantic versioning, pre-release tag (e.g., `0.1.0-alpha.0`).
-   - Configure npm scripts: lint, test, build, release dry-run.
-   - Optional: GitHub Actions for lint+test+publish on tag.
+   - Configure npm scripts: lint, test, build.
+   - Build distributable artifacts for local consumption.
 
-5. [x] **Integrate shared into repo-web** ✅ _Completed 2025-12-29_
-   - Replace local imports with `shared` package; add lightweight web adapters:
+5. [x] **Integrate shared into web app** ✅ _Completed 2025-12-29_
+   - Replace local imports with `shared` package (via `file:` dependency); add lightweight web adapters:
      - Storage adapter wrapping localStorage.
      - Fetch adapter preserving CORS proxy pattern from [src/ParkingDataManager.jsx](src/ParkingDataManager.jsx).
      - Theme adapter for document/body class toggles from [src/ThemeContext.jsx](src/ThemeContext.jsx).
-   - Remove duplicated logic left in web repo.
-   - Update web CI to install published `shared` (or use `npm link`/tarball while unpublished); ensure lint/test/build still pass.
+   - Remove duplicated logic left in web project.
+   - Ensure lint/test/build still pass with local package dependency.
 
 6. Run lint/test/build (per [.github/workflows/ci.yml](.github/workflows/ci.yml)).
    - Update docs/README to describe dependency on `shared`.
@@ -69,7 +69,7 @@ Comprehensive, iterative roadmap to split the current Vite/React web app into th
 - `cloneApiResults()` - Deep cloning results
 - `buildCacheRowFromPayload()` - Cache row construction
 
-All imports switched to: `import { ... } from '@piotereks/parking-shared'`
+All imports switched to: `import { ... } from 'parking-shared'`
 
 **Dashboard.jsx** - Shared Functions
 - `applyApproximations()` - Data approximation
@@ -87,9 +87,9 @@ All imports switched to: `import { ... } from '@piotereks/parking-shared'`
 - ✅ Deleted [src/utils/dateUtils.js](src/utils/dateUtils.js) (now in shared)
 
 ### Web Package Configuration
-- Added `@piotereks/parking-shared` to dependencies with `file:` protocol
-- Allows local development with instant updates
-- Can be switched to npm registry or GitHub URL for production
+- Added `parking-shared` to dependencies with `file:./parking-shared` protocol
+- Allows local development with instant updates across projects
+- All projects share same git repository - no external publishing needed
 
 ### Build Validation ✅
 
@@ -139,14 +139,16 @@ Stabilize web after split:
 
 ---
 
-### Phase 2 — Mobile App MVP (Expo, separate repo)
+### Phase 2 — Mobile App MVP (Expo, mobile/ folder)
 
-1. [ ] **Scaffold repo-mobile**
-   - Create Expo app (TypeScript) with ESLint/Prettier and Jest/Expo Testing Library baseline.
+1. [ ] **Scaffold mobile/ folder**
+   - Create `mobile/` directory in root with Expo app (TypeScript).
+   - Set up ESLint/Prettier and Jest/Expo Testing Library baseline.
    - Add scripts: `expo start`, `expo run:ios`, `expo run:android`, `lint`, `test`.
 
 2. [ ] **Wire shared package**
-   - Install `shared` from npm (or git tag), ensure ESM compatibility.
+   - Add `parking-shared` dependency via `file:../parking-shared` in mobile/package.json.
+   - Ensure ESM/CJS compatibility with React Native bundler (Metro).
    - Implement platform adapters:
      - Storage via `@react-native-async-storage/async-storage`.
      - Fetch without CORS proxy; handle timeouts/retries.
@@ -172,13 +174,13 @@ Stabilize web after split:
 
 ---
 
-### Best Practices for `shared` Package
+### Best Practices for `parking-shared` Package
 
 - No React/DOM/node-specific APIs; inject adapters for storage, fetch, time, logging.
 - Ship ESM (and optionally CJS) with `exports` map; include types (JSDoc or d.ts).
 - Tests live with package; keep high coverage on parsing, transforms, store reducers.
-- Semantic versioning; changelog per release; use dist-tags for pre-release.
-- Automated CI: lint, test, build on PR; publish on tagged main.
+- Semantic versioning for tracking changes; changelog per version bump.
+- Automated CI: lint, test, build shared package as part of monorepo CI pipeline.
 
 ---
 
@@ -578,7 +580,7 @@ parking-shared/
 #### package.json Structure
 ```json
 {
-  "name": "@piotereks/parking-shared",
+  "name": "parking-shared",
   "version": "0.1.0-alpha.0",
   "type": "module",
   "main": "./dist/index.cjs",
