@@ -25,6 +25,13 @@ jobs:
           cache: 'npm'
           cache-dependency-path: web/package-lock.json
 
+      - name: Prebuild shared package
+        working-directory: ./
+        run: |
+          cd shared
+          npm ci
+          npm run build
+
       - run: npm ci
       - run: npm run build -- --config vite.config.local.js
 
