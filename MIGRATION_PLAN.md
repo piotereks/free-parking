@@ -47,14 +47,14 @@ Comprehensive, iterative roadmap to organize the parking app into three project 
 
 ### Web Adapters Created ✅
 
-#### Storage Adapter - [src/adapters/webStorageAdapter.js](src/adapters/webStorageAdapter.js)
-- Wraps `localStorage` with async interface compatible with parking-shared `StorageAdapter`
+#### Storage Adapter - [web/src/adapters/webStorageAdapter.js](web/src/adapters/webStorageAdapter.js)
+- Wraps `localStorage` with async interface compatible with shared `StorageAdapter`
 - Methods: `get()`, `set()`, `remove()`, `clear()`
 - All operations are async (return Promises) for compatibility with mobile adapters
 - Error handling: catches and logs localStorage exceptions
 - Status: **Production ready** ✅
 
-#### Fetch Adapter - [src/adapters/webFetchAdapter.js](src/adapters/webFetchAdapter.js)
+#### Fetch Adapter - [web/src/adapters/webFetchAdapter.js](web/src/adapters/webFetchAdapter.js)
 - Applies CORS proxy to specific domains (zaparkuj.pl, docs.google.com)
 - Adds cache-busting timestamp to all requests
 - Methods: `fetch()`, `fetchJSON()`, `fetchText()`
@@ -63,7 +63,7 @@ Comprehensive, iterative roadmap to organize the parking app into three project 
 
 ### Updated Imports
 
-**ParkingDataManager.jsx** - Shared Functions
+[web/src/ParkingDataManager.jsx](web/src/ParkingDataManager.jsx) — Shared Functions
 - `buildEntryFromRow()` - CSV row parsing
 - `dedupeHistoryRows()` - History deduplication
 - `parseApiEntry()` - API response parsing
@@ -72,23 +72,23 @@ Comprehensive, iterative roadmap to organize the parking app into three project 
 
 All imports switched to: `import { ... } from 'parking-shared'`
 
-**Dashboard.jsx** - Shared Functions
+[web/src/Dashboard.jsx](web/src/Dashboard.jsx) — Shared Functions
 - `applyApproximations()` - Data approximation
 - `calculateDataAge()` - Age calculation
 - `formatAgeLabel()` - Age formatting
 
-**parkingStore.js** - Complete Refactor
+[web/src/store/parkingStore.js](web/src/store/parkingStore.js) — Complete Refactor
 - Replaced manual Zustand store with `createParkingStore()` factory
 - Injects web adapters: `webStorageAdapter`, `console`
 - Exports: `useParkingStore`, `refreshParkingData()`, `clearCache()`
 - All store state and actions now from shared package
 
 ### Removed Duplicated Modules
-- ✅ Deleted [src/utils/parkingUtils.js](src/utils/parkingUtils.js) (now in shared)
-- ✅ Deleted [src/utils/dateUtils.js](src/utils/dateUtils.js) (now in shared)
+- ✅ Deleted [web/src/utils/parkingUtils.js](web/src/utils/parkingUtils.js) (now in shared)
+- ✅ Deleted [web/src/utils/dateUtils.js](web/src/utils/dateUtils.js) (now in shared)
 
 ### Web Package Configuration
-- Added `parking-shared` to dependencies with `file:./parking-shared` protocol
+- Added `parking-shared` to dependencies with `file:../shared` protocol
 - Allows local development with instant updates across projects
 - All projects share same git repository - no external publishing needed
 
@@ -121,63 +121,41 @@ updated imports, build success
 ### Key Changes Summary
 | File | Change | Status |
 |------|--------|--------|
-| [package.json](package.json) | Added parking-shared dependency | ✅ |
-| [src/adapters/webStorageAdapter.js](src/adapters/webStorageAdapter.js) | New file | ✅ |
-| [src/adapters/webFetchAdapter.js](src/adapters/webFetchAdapter.js) | New file | ✅ |
-| [src/ParkingDataManager.jsx](src/ParkingDataManager.jsx) | Refactored to use shared functions and adapters | ✅ |
-| [src/Dashboard.jsx](src/Dashboard.jsx) | Updated imports to use shared | ✅ |
-| [src/store/parkingStore.js](src/store/parkingStore.js) | Complete refactor to use shared factory | ✅ |
-| [src/utils/parkingUtils.js](src/utils/parkingUtils.js) | Deleted (moved to shared) | ✅ |
-| [src/utils/dateUtils.js](src/utils/dateUtils.js) | Deleted (moved to shared) | ✅ |
+| [web/package.json](web/package.json) | Added parking-shared dependency (file:../shared) | ✅ |
+| [web/src/adapters/webStorageAdapter.js](web/src/adapters/webStorageAdapter.js) | New file | ✅ |
+| [web/src/adapters/webFetchAdapter.js](web/src/adapters/webFetchAdapter.js) | New file | ✅ |
+| [web/src/ParkingDataManager.jsx](web/src/ParkingDataManager.jsx) | Refactored to use shared functions and adapters | ✅ |
+| [web/src/Dashboard.jsx](web/src/Dashboard.jsx) | Updated imports to use shared | ✅ |
+| [web/src/store/parkingStore.js](web/src/store/parkingStore.js) | Complete refactor to use shared factory | ✅ |
+| [web/src/utils/parkingUtils.js](web/src/utils/parkingUtils.js) | Deleted (moved to shared) | ✅ |
+| [web/src/utils/dateUtils.js](web/src/utils/dateUtils.js) | Deleted (moved to shared) | ✅ |
 
 ### Next Steps (Phase 1 Step 6)
+5. [x] **Integrate shared into web app** ✅ _Completed 2025-12-29_
+   - Replace local imports with `parking-shared` package (via `file:../shared` dependency); add lightweight web adapters:
+     - Storage adapter wrapping localStorage.
+     - Fetch adapter preserving CORS proxy pattern from [web/src/ParkingDataManager.jsx](web/src/ParkingDataManager.jsx).
+     - Theme adapter for document/body class toggles from [web/src/ThemeContext.jsx](web/src/ThemeContext.jsx).
 Stabilize web after split:
 1. Run full test suite (if available)
 2. Verify CI/CD pipelines still work
 3. Test live deployment to GH Pages
-4. Update README documentation
-5. Record final iteration outcomes
-
----
-
 ### Phase 2 — Mobile App MVP (Expo, mobile/ folder)
 
-1. [ ] **Scaffold mobile/ folder**
-   - Create `mobile/` directory in root with Expo app (TypeScript).
-   - Set up ESLint/Prettier and Jest/Expo Testing Library baseline.
-   - Add scripts: `expo start`, `expo run:ios`, `expo run:android`, `lint`, `test`.
-
 2. [ ] **Wire shared package**
-   - Add `parking-shared` dependency via `file:../parking-shared` in mobile/package.json.
+   - Add `parking-shared` dependency via `file:../shared` in mobile/package.json.
    - Ensure ESM/CJS compatibility with React Native bundler (Metro).
    - Implement platform adapters:
-     - Storage via `@react-native-async-storage/async-storage`.
-     - Fetch without CORS proxy; handle timeouts/retries.
-     - Time utilities (Date works; ensure polyfills if needed).
-
-3. [ ] **Port minimal data flow**
    - Reuse shared fetch/transform logic; build a thin data manager suited for React Native (no document/localStorage).
    - Implement Zustand or React Query store using shared data shapes.
 
 4. [ ] **Build MVP UI slices**
-   - Basic availability list view (no echarts) using shared data.
-   - Manual refresh and loading/error states.
-   - Light/dark theming using React Native Appearance API.
 
 5. [ ] **Device/run validation**
-   - Validate on iOS simulator and Android emulator.
-   - Capture any platform-specific fetch or TLS issues; log in Potential Blockers.
-
-6. [ ] **Iterate features**
    - Add charts via RN-compatible lib (e.g., `victory-native`/`react-native-svg`).
    - Add offline cache hydration using shared cache shapes.
-   - Expand navigation and parity features incrementally; log each iteration.
-
 ---
 
-### Best Practices for `parking-shared` Package
-
-- No React/DOM/node-specific APIs; inject adapters for storage, fetch, time, logging.
 - Ship ESM (and optionally CJS) with `exports` map; include types (JSDoc or d.ts).
 - Tests live with package; keep high coverage on parsing, transforms, store reducers.
 - Semantic versioning for tracking changes; changelog per version bump.
@@ -225,7 +203,6 @@ Stabilize web after split:
 - Must stay in web adapter layer (mobile needs React Native Appearance API)
 
 **Data Management:** [src/ParkingDataManager.jsx](src/ParkingDataManager.jsx)
-- Provides `ParkingDataContext` wrapping Zustand store
 - Fetches real-time JSON from 2 API endpoints via CORS proxy (`https://corsproxy.io/?`)
 - Fetches/parses CSV history from Google Sheets (using PapaParse library)
 - Caches to localStorage keys: `parking_realtime_cache`, `parking_history_cache`
