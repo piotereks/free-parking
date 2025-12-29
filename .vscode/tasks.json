@@ -5,6 +5,16 @@
       "label": "npm: dev",
       "type": "shell",
       "command": "bash -lc 'export NVM_DIR=\"$HOME/.nvm\"; [ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\"; nvm use 20.19.0 >/dev/null 2>&1 || true; npm run dev'",
+      "windows": {
+        // Force cmd.exe on Windows; assumes PATH has node/npm
+        "command": "npm run dev",
+        "options": {
+          "shell": {
+            "executable": "C:/Windows/System32/cmd.exe",
+            "args": ["/d", "/c"]
+          }
+        }
+      },
       "isBackground": true,
       "problemMatcher": [
         {
@@ -29,6 +39,16 @@
       "label": "npm: dev:inspect",
       "type": "shell",
       "command": "bash -lc 'export NVM_DIR=\"$HOME/.nvm\"; [ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\"; nvm use 20.19.0 >/dev/null 2>&1 || true; npx cross-env NODE_OPTIONS=--inspect=0.0.0.0:9229 npm run dev'",
+      "windows": {
+        // Force cmd.exe on Windows; assumes PATH has node/npm
+        "command": "npx cross-env NODE_OPTIONS=--inspect=0.0.0.0:9229 npm run dev",
+        "options": {
+          "shell": {
+            "executable": "C:/Windows/System32/cmd.exe",
+            "args": ["/d", "/c"]
+          }
+        }
+      },
       "isBackground": true,
       "problemMatcher": [
         {

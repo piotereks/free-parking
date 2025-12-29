@@ -1,50 +1,43 @@
+## Copilot Guide (fresh)
+
 ### Purpose
-Short guide for AI coding agents to be immediately productive in this repo (a small Vite + React SPA showing parking availability).
+Give Copilot the minimal context to work safely and productively in this React/Vite parking availability app, and to follow the ongoing migration toward `repo-web`, `shared`, and `repo-mobile`.
 
-### Big picture
-- Frontend-only single-page app built with React + Vite. Entry: [src/main.jsx](src/main.jsx#L1-L20) -> [src/App.jsx](src/App.jsx#L1-L40).
-- Two main domains:
-  - Real-time dashboard UI: [src/Dashboard.jsx](src/Dashboard.jsx#L1-L200)
-  - Historical/statistics views: [src/Statistics.jsx](src/Statistics.jsx)
-- Data provider: `ParkingDataProvider` centralizes fetching, caching and submission logic ([src/ParkingDataManager.jsx](src/ParkingDataManager.jsx#L1-L60)). UI components consume via `useParkingData()`.
+### Quick start
+- Install Node 22.12.0 (see `.nvmrc`).
+- Install deps: `npm install`
+- Dev server: `npm run dev`
+- Lint: `npm run lint`
+- Build: `npm run build`
 
-### Key flows & integration points
-- Real-time API endpoints are defined in `API_URLS` inside [src/ParkingDataManager.jsx](src/ParkingDataManager.jsx#L1-L40). Responses are cached to `localStorage` keys `parking_realtime_cache` and `parking_history_cache`.
-- Historical data is fetched from a published Google Sheets CSV (`CSV_URL`) and parsed with `papaparse`.
-- New API samples are submitted to a Google Form (`GOOGLE_FORM_URL`) using `FORM_ENTRIES` mapping; the code currently contains placeholder entry IDs and `TODO` comments — do not assume these are valid.
-- A CORS proxy constant (`CORS_PROXY`) is applied to API fetches inside `ParkingDataManager` — maintain this pattern when adding external fetches.
+### Architecture snapshot
+- Entry: `src/main.jsx` -> `src/App.jsx`; theme via `src/ThemeContext.jsx`.
+- Data layer: `src/ParkingDataManager.jsx` fetches real-time (API_URLS with CORS proxy), parses CSV history (PapaParse), caches to localStorage keys `parking_realtime_cache` and `parking_history_cache`, and can POST to Google Forms (FORM_ENTRIES are placeholders).
+- State: `src/store/parkingStore.js` (Zustand); utilities in `src/utils/parkingUtils.js`, `dateUtils.js`, `storageUtils.js`.
+- UI: `src/Dashboard.jsx` (real-time + echarts), `src/Statistics.jsx` (historical), styles in `src/index.css` and `src/App.css`.
+- Tests: Vitest + Testing Library under `test/` (jsdom).
 
-### Developer workflows (concrete commands)
-- Start dev server: `npm run dev` (runs `vite`) — serves the SPA with HMR.
-- Build production bundle: `npm run build` (runs `vite build`).
-- Preview production build: `npm run preview` (build then `vite preview`).
-- Lint: `npm run lint` (runs `eslint .`).
+### Conventions
+- Use `ParkingDataProvider`/`useParkingData()` instead of ad-hoc fetches.
+- Keep CORS proxy usage when adding external fetches.
+- Normalize timestamps with `replace(' ', 'T')` before `new Date(...)`.
+- Theme state stored in localStorage key `parking_theme`; body class toggles live in ThemeContext.
+- Do not hardcode Google Form IDs or secrets; `FORM_ENTRIES` are placeholders.
 
-### Project-specific conventions & patterns
-- Single global data provider: always add/consume parking data via `ParkingDataProvider` and `useParkingData()` rather than ad-hoc fetches.
-- Caching: use the existing `CACHE_KEY_REALTIME` and `CACHE_KEY_HISTORY` keys to keep UI instant on load.
-- Timestamp parsing: code expects API Timestamp fields like `"YYYY-MM-DD HH:MM:SS"` and normalizes with `replace(' ', 'T')` before `new Date(...)`.
-- Theme handling: global theme state is controlled by [src/ThemeContext.jsx](src/ThemeContext.jsx#L1-L80) and stored under `parking_theme` in `localStorage`.
-- Naming: `Bank_1` is normalized to `Uni Wroc` in the UI (see `Dashboard`), so be careful when matching parking group names.
+### Migration guidance
+- Roadmap lives in `MIGRATION_PLAN.md`; update the Iteration Log when completing steps.
+- Goal: separate repos: `repo-web` (current app), `shared` (plain JS, no React/DOM), `repo-mobile` (Expo RN).
+- Extract only framework-agnostic logic into `shared`; require adapters for storage, fetch, time, logging.
+- Web adapters own `localStorage`/`document` usage; mobile adapters own AsyncStorage/fetch without CORS proxy.
+- Preserve web CI (lint/test/build, GH Pages) when adopting `shared`.
 
-### Files noteworthy for changes/PRs
-- Data & sync: [src/ParkingDataManager.jsx](src/ParkingDataManager.jsx#L1-L400)
-- UI entry & routing: [src/main.jsx](src/main.jsx#L1-L20), [src/App.jsx](src/App.jsx#L1-L40)
-- Dashboard view: [src/Dashboard.jsx](src/Dashboard.jsx#L1-L300)
-- Theme and small utilities: [src/ThemeContext.jsx](src/ThemeContext.jsx#L1-L80)
-- Styles: `index.css` and `App.css` are present at repo root `src/` for layout and Tailwind integration (`tailwind.config.js` present).
+### Safety and PR checklist
+- Run lint/tests before PRs (`npm run lint`, `npm test` if added).
+- If changing fetch URLs or CSV headers, adjust `ParkingDataManager` helpers (e.g., `getLastTimestamps`).
+- Avoid DOM-only libs in shared/mobile paths; echarts is web-only.
+- Keep credentials out of source; prefer env or secrets.
 
-### Safety, secrets, and TODOs
-- `FORM_ENTRIES` contains placeholder Google Form entry IDs and should never be hardcoded with private credentials — prefer environment variables or a secure secret store if real IDs are needed.
-- No backend: all network calls are done client-side; adding server-side code changes deployment expectations and CI.
-- There are no tests in the repo; add tests to `src/` when creating complex logic (focus on `ParkingDataManager` functions for unit tests).
-
-### When you edit code — quick checklist for PRs
-- Run `npm run lint` and `npm run dev` locally to validate UI behavior.
-- When changing fetch URLs, preserve the `CORS_PROXY` pattern or explain why it's removed.
-- If you change CSV headers or timestamp keys, update `getLastTimestamps()` in `ParkingDataManager`.
-
-### If something's unclear
-- Ask for the Google Form entry mapping before modifying `FORM_ENTRIES` or automatic submission paths.
-- Confirm whether the deployed static files under `parking-deploy/docs/html/parking/` are authoritative before changing build outputs.
+### If unclear
+- Confirm Google Form entry mapping before submission changes.
+- Check whether `parking-deploy/docs/html/parking/` artifacts are authoritative before modifying build outputs.
 

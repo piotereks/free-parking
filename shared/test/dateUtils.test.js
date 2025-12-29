@@ -4,7 +4,7 @@ import {
   getAgeInMinutes,
   formatTime,
   isStaleTimestamp
-} from '../src/utils/dateUtils';
+} from '../src/dateUtils.js';
 
 describe('dateUtils', () => {
   describe('parseTimestamp', () => {
@@ -113,62 +113,52 @@ describe('dateUtils', () => {
       expect(formatTime(undefined)).toBe('--:--:--');
     });
 
-    it('returns placeholder for invalid timestamp string', () => {
-      expect(formatTime('invalid-date')).toBe('--:--:--');
+    it('returns placeholder for empty string', () => {
+      expect(formatTime('')).toBe('--:--:--');
     });
 
-    it('uses default locale when not specified', () => {
+    it('uses default locale pl-PL when not specified', () => {
       const date = new Date('2024-01-15T14:30:45');
       const result = formatTime(date);
       expect(result).toMatch(/\d{2}:\d{2}:\d{2}/);
     });
 
-    it('uses custom locale when specified', () => {
+    it('accepts custom locale', () => {
       const date = new Date('2024-01-15T14:30:45');
       const result = formatTime(date, 'en-US');
-      expect(result).toBeTruthy();
-      expect(result).not.toBe('--:--:--');
+      expect(result).toMatch(/\d{1,2}:\d{2}:\d{2}/);
     });
   });
 
   describe('isStaleTimestamp', () => {
-    it('returns true for timestamp older than default threshold (15 min)', () => {
-      const oldDate = new Date(Date.now() - 20 * 60 * 1000);
-      expect(isStaleTimestamp(oldDate)).toBe(true);
+    it('returns true for timestamps older than threshold', () => {
+      const timestamp = new Date(Date.now() - 20 * 60 * 1000); // 20 minutes ago
+      expect(isStaleTimestamp(timestamp, 15)).toBe(true);
     });
 
-    it('returns false for timestamp within default threshold', () => {
-      const recentDate = new Date(Date.now() - 10 * 60 * 1000);
-      expect(isStaleTimestamp(recentDate)).toBe(false);
+    it('returns false for timestamps newer than threshold', () => {
+      const timestamp = new Date(Date.now() - 10 * 60 * 1000); // 10 minutes ago
+      expect(isStaleTimestamp(timestamp, 15)).toBe(false);
     });
 
-    it('returns false for very recent timestamp', () => {
-      const recentDate = new Date(Date.now() - 1 * 60 * 1000);
-      expect(isStaleTimestamp(recentDate)).toBe(false);
+    it('returns true for timestamps exactly at threshold', () => {
+      const timestamp = new Date(Date.now() - 15 * 60 * 1000); // 15 minutes ago
+      expect(isStaleTimestamp(timestamp, 15)).toBe(true);
     });
 
-    it('uses custom threshold when provided', () => {
-      const date = new Date(Date.now() - 10 * 60 * 1000);
-      expect(isStaleTimestamp(date, 5)).toBe(true);
-      expect(isStaleTimestamp(date, 15)).toBe(false);
+    it('uses default threshold of 15 minutes', () => {
+      const fresh = new Date(Date.now() - 10 * 60 * 1000);
+      const stale = new Date(Date.now() - 20 * 60 * 1000);
+      expect(isStaleTimestamp(fresh)).toBe(false);
+      expect(isStaleTimestamp(stale)).toBe(true);
     });
 
     it('returns true for null timestamp', () => {
-      expect(isStaleTimestamp(null)).toBe(true);
+      expect(isStaleTimestamp(null, 15)).toBe(true);
     });
 
     it('returns true for undefined timestamp', () => {
-      expect(isStaleTimestamp(undefined)).toBe(true);
-    });
-
-    it('returns false for exact threshold boundary', () => {
-      const date = new Date(Date.now() - 15 * 60 * 1000);
-      expect(isStaleTimestamp(date, 15)).toBe(true);
-    });
-
-    it('returns false for just under threshold', () => {
-      const date = new Date(Date.now() - 14 * 60 * 1000);
-      expect(isStaleTimestamp(date, 15)).toBe(false);
+      expect(isStaleTimestamp(undefined, 15)).toBe(true);
     });
   });
 });

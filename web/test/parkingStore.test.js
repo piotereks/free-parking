@@ -145,46 +145,46 @@ describe('parkingStore', () => {
   });
 
   describe('clearCache', () => {
-    it('removes cache keys from localStorage', () => {
+    it('removes cache keys from localStorage', async () => {
       localStorage.setItem('parking_realtime_cache', 'data1');
       localStorage.setItem('parking_history_cache', 'data2');
       
-      clearCache();
+      await clearCache();
       
       expect(localStorage.getItem('parking_realtime_cache')).toBeNull();
       expect(localStorage.getItem('parking_history_cache')).toBeNull();
     });
 
-    it('sets cacheCleared flag', () => {
-      clearCache();
+    it('sets cacheCleared flag', async () => {
+      await clearCache();
       expect(useParkingStore.getState().cacheCleared).toBe(true);
     });
 
-    it('resets fetchInProgress flag', () => {
+    it('resets fetchInProgress flag', async () => {
       useParkingStore.getState().setFetchInProgress(true);
-      clearCache();
+      await clearCache();
       expect(useParkingStore.getState().fetchInProgress).toBe(false);
     });
 
-    it('calls stop auto-refresh callback if set', () => {
+    it('calls stop auto-refresh callback if set', async () => {
       let called = false;
       const mockStop = () => { called = true; };
       
       useParkingStore.getState().setStopAutoRefresh(mockStop);
-      clearCache();
+      await clearCache();
       
       expect(called).toBe(true);
     });
 
-    it('does not throw if stop callback is not set', () => {
-      expect(() => clearCache()).not.toThrow();
+    it('does not throw if stop callback is not set', async () => {
+      await expect(clearCache()).resolves.not.toThrow();
     });
 
-    it('preserves in-memory data', () => {
+    it('preserves in-memory data', async () => {
       const testData = [{ ParkingGroupName: 'Test', CurrentFreeGroupCounterValue: 10 }];
       useParkingStore.getState().setRealtimeData(testData);
       
-      clearCache();
+      await clearCache();
       
       expect(useParkingStore.getState().realtimeData).toEqual(testData);
     });

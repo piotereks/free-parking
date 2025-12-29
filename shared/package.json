@@ -1,0 +1,52 @@
+{
+  "name": "free-parking",
+  "version": "0.1.0-alpha.0",
+  "description": "Shared parking data logic for web and mobile applications",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "build": "tsup src/index.js --format esm,cjs --dts",
+    "prepublishOnly": "npm run lint && npm run test && npm run build"
+  },
+  "keywords": [
+    "parking",
+    "data",
+    "shared",
+    "framework-agnostic"
+  ],
+  "author": "piotereks",
+  "license": "MIT",
+  "peerDependencies": {
+    "zustand": "^5.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.7.2",
+    "vitest": "^4.0.0",
+    "zustand": "^5.0.9"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

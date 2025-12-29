@@ -16,6 +16,7 @@
   "dependencies": {
     "echarts": "^6.0.0",
     "echarts-for-react": "^3.0.5",
+    "free-parking": "file:../shared",
     "lucide-react": "^0.562.0",
     "papaparse": "^5.5.3",
     "prop-types": "^15.8.1",

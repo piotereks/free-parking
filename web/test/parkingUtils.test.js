@@ -10,7 +10,7 @@ import {
   applyApproximations,
   PARKING_MAX_CAPACITY,
   formatAgeLabel
-} from '../src/utils/parkingUtils';
+} from 'free-parking';
 
 describe('parkingUtils', () => {
   describe('normalizeParkingName', () => {
