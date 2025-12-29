@@ -8,7 +8,6 @@ import {
   getMaxCapacity,
   calculateApproximation,
   applyApproximations,
-  PARKING_MAX_CAPACITY,
   formatAgeLabel
 } from '../src/parkingUtils.js';
 
