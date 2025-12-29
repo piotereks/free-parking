@@ -47,4 +47,21 @@ Short guide for AI coding agents to be immediately productive in this repo (a sm
 ### If something's unclear
 - Ask for the Google Form entry mapping before modifying `FORM_ENTRIES` or automatic submission paths.
 - Confirm whether the deployed static files under `parking-deploy/docs/html/parking/` are authoritative before changing build outputs.
+ 
+### Migration plan (multi-repo guidance)
+- See the repository-level migration roadmap at [MIGRATION_PLAN.md](MIGRATION_PLAN.md) for the full phase-based plan to split this project into `repo-web`, `shared`, and `repo-mobile`.
+- When implementing migration tasks, follow these rules:
+  - Keep `repo-web`, `shared`, and `repo-mobile` fully separate repositories with independent CI/CD pipelines.
+  - Extract only framework-agnostic logic into `shared` (parsing, transforms, reducers); avoid moving React components, Tailwind styles, or DOM-dependent code.
+  - Require adapters in `shared` for `storage`, `fetch`, `time`, and `logging` so platform-specific behavior is injected by each consumer repo.
+  - Use small, testable commits and update the Iteration Log in `MIGRATION_PLAN.md` for every completed step so work can be paused/resumed without losing context.
+  - Preserve existing web CI behavior: after replacing local modules with `shared`, ensure `.github/workflows` still run lint/test/build and GH Pages deploys remain unchanged unless explicitly replaced.
+  - Add or update an `.nvmrc` in the root to pin Node for contributors; use Node `22.12.0` for compatibility with current package engines.
+  - Do NOT hardcode secrets (Google Form IDs, API keys) in `shared`; use environment variables or per-repo secret stores.
+
+Additions to verify in PRs that touch migration areas:
+- `shared` package has no React or DOM imports.
+- `repo-web` adapters wrap `localStorage`/`document` only inside the web adapter layer.
+- `repo-mobile` adapters use `@react-native-async-storage/async-storage` and fetch without CORS proxies.
+- CI workflows in each repo include steps to install `shared` (via npm tag or tarball) and run the same linters/tests as before.
 
