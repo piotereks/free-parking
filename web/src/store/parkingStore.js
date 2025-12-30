@@ -1,4 +1,4 @@
-import { createParkingStore as createSharedStore } from 'free-parking';
+import { createParkingStore as createSharedStore } from 'parking-shared';
 import { webStorageAdapter } from '../adapters/webStorageAdapter';
 
 // Create store with web adapters

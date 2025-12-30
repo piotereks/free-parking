@@ -18,14 +18,14 @@ export default defineConfig(({ command: _command, mode: _mode }) => {
     plugins: [react()],
 
     // Ensure single React instance and prefer workspace zustand
-    // Resolve `free-parking` to built `dist` when available, otherwise use `src` for dev.
+    // Resolve `parking-shared` to built `dist` when available, otherwise use `src` for dev.
     resolve: (() => {
       const sharedDist = path.resolve(__dirname, '..', 'shared', 'dist', 'index.js')
       const sharedSrc = path.resolve(__dirname, '..', 'shared', 'src', 'index.js')
       const entry = fs.existsSync(sharedDist) ? sharedDist : sharedSrc
       return {
         alias: {
-          'free-parking': entry
+          'parking-shared': entry
         },
         dedupe: ['react', 'react-dom', 'zustand']
       }
