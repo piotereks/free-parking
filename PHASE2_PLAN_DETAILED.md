@@ -13,6 +13,11 @@
 **Tasks:**
 
 1. ✅ **Project scaffold** — `npx create-expo-app parking-mobile`, move to `mobile/` folder, run `npm install` — **COMPLETED 2025-12-31**
+   - Added offline mode: `--offline` flag to all npm scripts (start, android, ios, web)
+   - Added `prebuild` script: `expo prebuild` for native project generation
+   - Added Android build scripts: `android:build` (gradlew assembleDebug), `android:install` (adb install), `android:deploy` (gradlew installDebug)
+   - Configured Android SDK via `local.properties`
+   - Verified: APK builds successfully, installs on emulator, Gradle deprecation warnings are expected and safe
 2. **Configure Metro bundler** — Add `metro.config.js`: resolve alias for `parking-shared`, enable ESM in bundle, test `require` fallback
 3. **Install core dependencies**:
    - Zustand 5.x (shared peerDep)
