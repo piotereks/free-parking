@@ -12,7 +12,7 @@
 
 **Tasks:**
 
-1. **Project scaffold** — `npx create-expo-app parking-mobile`, move to `mobile/` folder, run `npm install`
+1. ✅ **Project scaffold** — `npx create-expo-app parking-mobile`, move to `mobile/` folder, run `npm install` — **COMPLETED 2025-12-31**
 2. **Configure Metro bundler** — Add `metro.config.js`: resolve alias for `parking-shared`, enable ESM in bundle, test `require` fallback
 3. **Install core dependencies**:
    - Zustand 5.x (shared peerDep)

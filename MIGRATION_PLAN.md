@@ -142,8 +142,15 @@ Stabilize web after split:
 3. Test live deployment to GH Pages
 ### Phase 2 — Mobile App MVP (Expo, mobile/ folder)
 
+1. [x] **Scaffold Expo project** ✅ _Completed 2025-12-31_
+   - Created mobile/ folder with default Expo blank template
+   - Configured offline mode (--offline flag in all npm scripts)
+   - Added prebuild script for native project generation
+   - React Native 0.81.5 + Expo ~54.0 + React 19.1.0
+
 2. [ ] **Wire shared package**
    - Add `parking-shared` dependency via `file:../shared` in mobile/package.json.
+   - Configure Metro bundler for shared package integration
    - Ensure ESM/CJS compatibility with React Native bundler (Metro).
    - Implement platform adapters:
    - Reuse shared fetch/transform logic; build a thin data manager suited for React Native (no document/localStorage).
@@ -186,6 +193,7 @@ Stabilize web after split:
 - 2025-12-29 — Phase 1 Step 3 — ✅ Done — **Extracted and hardened pure logic** — Created parking-shared package with all core modules, tests, and documentation.
 - 2025-12-29 — Phase 1 Step 4 — ✅ Done — **Versioned and built shared package** — Fixed lint errors, built dist/ artifacts (ESM, CJS, DTS), created git commit and tag v0.1.0-alpha.0.
 - 2025-12-29 — Phase 1 Step 5 — ✅ Done — **Integrated shared into repo-web** — Created web adapters, updated all imports, removed duplicated modules, verified lint/build.
+- 2025-12-31 — Phase 2 Iteration 1 Task 1 — ✅ Done — **Scaffolded Expo project** — Created mobile/ folder with Expo blank template (RN 0.81.5, Expo ~54.0), configured offline mode, added prebuild script.
 
 ---
 
