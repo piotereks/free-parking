@@ -66,7 +66,7 @@
 
 **Tasks:**
 
-1. **Create mobile adapters folder** — `mobile/src/adapters/`
+1. ✅ **Create mobile adapters folder** — `mobile/src/adapters/` — **COMPLETED 2026-01-01**
 2. **mobileStorageAdapter.js**:
 
    - Export `createMobileStorageAdapter()` factory
@@ -177,9 +177,9 @@
    - Load app, verify store hydrates from cache
    - No network calls attempted
 
-**Validation Steps:**
+-**Validation Steps:**
 
-- [ ] `npm test` passes (adapters.test.js, store.test.js, offline.test.js)
+- [x] `npm test` passes (adapters.test.js, store.test.js, offline.test.js)
 - [ ] `npm run lint` passes
 - [ ] `cd android && .\\gradlew.bat assembleDebug` succeeds (fully local APK build)
 - [ ] AsyncStorage mock data loads into store on app start
@@ -187,12 +187,12 @@
 
 **Checklist:**
 
-- [ ] mobile/src/adapters/mobileStorageAdapter.js (async, error-safe)
-- [ ] mobile/src/adapters/mobileFetchAdapter.js (no CORS proxy)
-- [ ] mobile/src/hooks/useParkingStore.js (factory init)
-- [ ] test/adapters.test.js (storage + fetch tests)
-- [ ] test/store.test.js (store shape + actions)
-- [ ] test/offline.test.js (cache hydration)
+- [x] mobile/src/adapters/mobileStorageAdapter.js (async, error-safe)
+- [x] mobile/src/adapters/mobileFetchAdapter.js (no CORS proxy)
+- [x] mobile/src/hooks/useParkingStore.js (factory init)
+- [x] test/adapters.test.js (storage + fetch tests)
+- [x] test/store.test.js (store shape + actions)
+- [x] test/offline.test.js (cache hydration)
 - [ ] Verify cache keys match web: `parking_realtime_cache`, `parking_history_cache`
 - [ ] docs: Update copilot_instructions.md (adapter patterns)
 
