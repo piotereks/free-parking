@@ -29,15 +29,15 @@
 4. ✅ **Verify shared import** — **COMPLETED 2026-01-01** 
    — Create test file: `src/testShared.js` importing `parkingUtils`, `dateUtils`, `createParkingStore` from `parking-shared`; run `npm test`
 5. ✅ **Create app skeleton** — mobile/src/App.js: minimal component tree with `View` + `Text` — **COMPLETED 2026-01-01**
-6. **Set up vitest config** — Copy pattern from shared, configure for RN environment (preset: `react-native`)
-7. **Initial tests** — `test/shared.test.js`: verify exports load, store factory initializes
-8. **Lint setup** — ESLint config from shared + RN-specific rules (no DOM refs)
+6. ✅ **Set up vitest config** — Copy pattern from shared, configure for RN environment (preset: `react-native`) — **COMPLETED 2026-01-01**
+7. ✅ **Initial tests** — `test/shared.test.js`: verify exports load, store factory initializes — **COMPLETED 2026-01-01**
+8. ✅ **Lint setup** — ESLint config from shared + RN-specific rules (no DOM refs) — **COMPLETED 2026-01-01**
 9. **Build validation** — `npm run build` (Expo prebuild), confirm no errors
 
 **Validation Steps:**
 
-- [ ] `npm test` passes (testShared.test.js)
-- [ ] `npm run lint` passes (0 errors)
+- [x] `npm test` passes (testShared.test.js)
+- [x] `npm run lint` passes (0 errors)
 - [ ] `npx eas build --platform android --local` succeeds (offline, no EAS account)
 - [ ] Expo Prebuild generates native files without warnings
 - [ ] All shared exports resolving in Metro debugger
@@ -46,11 +46,12 @@
 
 - [ ] metro.config.js with alias for shared + ESM fallback
 - [ ] package.json with shared: file:../shared
-- [ ] vitest.config.js (react-native preset)
-- [ ] eslint.config.js (RN rules, no DOM)
+- [x] vitest.config.js (react-native preset)
+- [x] eslint.config.js (RN rules, no DOM)
 - [ ] src/App.js (minimal tree)
-- [ ] src/testShared.js (import + basic test)
-- [ ] test/shared.test.js (store factory test)
+ - [ ] src/App.js (minimal tree)
+ - [x] src/testShared.js (import + basic test)
+ - [x] test/shared.test.js (store factory test)
 - [ ] docs: Update MIGRATION_PLAN.md Iteration Log
 
 **Documentation Updates:**
