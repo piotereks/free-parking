@@ -20,7 +20,15 @@ export default [
         describe: 'readonly',
         it: 'readonly',
         expect: 'readonly',
-        jest: 'readonly'
+        jest: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+        test: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
+        global: 'readonly',
+        setImmediate: 'readonly',
+        fetch: 'readonly'
       },
       parserOptions: {
         ecmaFeatures: { jsx: true }

@@ -11,7 +11,7 @@
     "test": "jest",
     "test:vitest": "vitest",
     "test:watch": "jest --watch",
-    "lint": "eslint . --ext .js,.jsx",
+    "lint": "eslint \"**/*.{js,jsx}\"",
     "prebuild": "expo prebuild",
     "android:build": "cd android && gradlew assembleRelease",
     "android:install": "adb install android/app/build/outputs/apk/release/app-release.apk",

@@ -60,14 +60,14 @@
 
 ---
 
-#### **Iteration 2: Mobile Adapters & Store Integration**
+#### **Iteration 2: Mobile Adapters & Store Integration** — ✅ Mostly completed (adapters & tests done; cache-key verification and docs pending)
 
 **Objectives:** Implement AsyncStorage and fetch adapters, inject into shared store, test store initialization offline, validate cache shapes match web.
 
 **Tasks:**
 
 1. ✅ **Create mobile adapters folder** — `mobile/src/adapters/` — **COMPLETED 2026-01-01**
-2. **mobileStorageAdapter.js**:
+2. ✅ **mobileStorageAdapter.js**:
 
    - Export `createMobileStorageAdapter()` factory
    - Implement: `get(key)`, `set(key, value)`, `remove(key)`, `clear()`
@@ -113,7 +113,7 @@
      });
      ```
 
-3. **mobileFetchAdapter.js**:
+3. ✅ **mobileFetchAdapter.js**:
    - Export `createMobileFetchAdapter()` factory
    - Implement: `fetch(url, options)`, `fetchJSON(url, options)`, `fetchText(url, options)`
    - NO CORS proxy (mobile native, no browser restrictions)
@@ -142,7 +142,7 @@
        },
      });
      ```
-4. **Create useStore hook** — `mobile/src/hooks/useParkingStore.js`:
+4. ✅ **Create useStore hook** — `mobile/src/hooks/useParkingStore.js`:
 
    - Call shared's `createParkingStore()` with mobile adapters
    - Export `useStoreName` (Zustand hook)
@@ -163,16 +163,16 @@
      export const useParkingStore = createParkingStore(adapters);
      ```
 
-5. **Unit tests for adapters** — `test/adapters.test.js`:
+5. ✅ **Unit tests for adapters** — `test/adapters.test.js`:
    - Test AsyncStorage get/set/remove/clear (mock AsyncStorage)
    - Test fetch adapter (mock fetch, verify cache-busting param)
    - Verify error handling (non-blocking)
    - Test store initialization with adapters
-6. **Store initialization test** — `test/store.test.js`:
+6. ✅ **Store initialization test** — `test/store.test.js`:
    - Verify store state shape matches web version (realtimeData, historyData, etc.)
    - Test that clearCache() calls storage.clear()
    - Test resetStore() returns to initial state
-7. **Offline mode test** — `test/offline.test.js`:
+7. ✅ **Offline mode test** — `test/offline.test.js`:
    - Mock AsyncStorage with cached data
    - Load app, verify store hydrates from cache
    - No network calls attempted
@@ -180,7 +180,7 @@
 -**Validation Steps:**
 
 - [x] `npm test` passes (adapters.test.js, store.test.js, offline.test.js)
-- [ ] `npm run lint` passes
+- [x] `npm run lint` passes
 - [ ] `cd android && .\\gradlew.bat assembleDebug` succeeds (fully local APK build)
 - [ ] AsyncStorage mock data loads into store on app start
 - [ ] Store state shape verified against web version
