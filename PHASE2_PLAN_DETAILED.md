@@ -28,7 +28,7 @@
    - Vitest + React Native Testing Library (test runner)
 4. ✅ **Verify shared import** — **COMPLETED 2026-01-01** 
    — Create test file: `src/testShared.js` importing `parkingUtils`, `dateUtils`, `createParkingStore` from `parking-shared`; run `npm test`
-5. **Create app skeleton** — mobile/src/App.js: minimal component tree with `View` + `Text`
+5. ✅ **Create app skeleton** — mobile/src/App.js: minimal component tree with `View` + `Text` — **COMPLETED 2026-01-01**
 6. **Set up vitest config** — Copy pattern from shared, configure for RN environment (preset: `react-native`)
 7. **Initial tests** — `test/shared.test.js`: verify exports load, store factory initializes
 8. **Lint setup** — ESLint config from shared + RN-specific rules (no DOM refs)

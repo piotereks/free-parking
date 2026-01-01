@@ -1,15 +1,17 @@
 {
   // Prefer Command Prompt on Windows and Bash on Linux for both interactive
   // terminals and automated terminals used by extensions (tasks, Copilot, etc.).
-  "terminal.integrated.defaultProfile.windows": "Command Prompt",
+  "terminal.integrated.defaultProfile.windows": null,
   "terminal.integrated.automationProfile.windows": "Command Prompt",
   "terminal.integrated.profiles.windows": {
     "Command Prompt": {
       "path": "C:\\Windows\\System32\\cmd.exe"
     },
     "PowerShell": {
-      "path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
-    }
+      "source": "PowerShell",
+      "icon": "terminal-powershell",
+      "path": "C:\\Program Files\\PowerShell\\7\\pwsh.exe"
+    },
   },
 
   // For Linux, prefer bash
