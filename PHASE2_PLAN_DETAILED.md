@@ -18,7 +18,7 @@
    - Added Android build scripts: `android:build` (gradlew assembleDebug), `android:install` (adb install), `android:deploy` (gradlew installDebug)
    - Configured Android SDK via `local.properties`
    - Verified: APK builds successfully, installs on emulator, Gradle deprecation warnings are expected and safe
-2. **Configure Metro bundler** — Add `metro.config.js`: resolve alias for `parking-shared`, enable ESM in bundle, test `require` fallback
+2. ✅ **Configure Metro bundler** — Add `metro.config.js`: resolve alias for `parking-shared`, enable ESM in bundle, test `require` fallback — **COMPLETED 2026-01-01**
 3. **Install core dependencies**:
    - Zustand 5.x (shared peerDep)
    - React Native defaults (already in Expo)
