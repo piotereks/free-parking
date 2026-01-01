@@ -195,6 +195,8 @@ Stabilize web after split:
 - 2025-12-29 — Phase 1 Step 5 — ✅ Done — **Integrated shared into repo-web** — Created web adapters, updated all imports, removed duplicated modules, verified lint/build.
 - 2025-12-31 — Phase 2 Iteration 1 Task 1 — ✅ Done — **Scaffolded Expo project** — Created mobile/ folder with Expo blank template (RN 0.81.5, Expo ~54.0), configured offline mode (--offline flags in all npm scripts), added prebuild script, added android:build/android:install/android:deploy scripts for Gradle builds, configured Android SDK (local.properties), verified APK builds and installs on emulator successfully.
 
+- 2026-01-01 — Phase 2 Iteration 1 — ✅ Done — **Mobile scaffold & shared integration** — Completed Iteration 1: added `mobile/` Expo app, wired `parking-shared` via `file:../shared` in `mobile/package.json`, added Vitest config and initial tests, added ESLint config, created minimal `mobile/src/App.js`, added `prebuild` and Gradle scripts, created Metro/Babel/Vitest aliases to resolve `parking-shared`, and verified `npm test`, `npm run lint`, `expo prebuild`, and local Gradle assemble (assembleDebug) succeeded. Metro runtime resolution check was intentionally skipped and deferred to runtime validation or CI.
+
 ---
 
 ## Phase 1 Step 1: Audit Results

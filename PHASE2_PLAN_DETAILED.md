@@ -26,33 +26,32 @@
    - AsyncStorage 1.x (async storage)
    - React Native Vector Icons (icons; Expo-compatible)
    - Vitest + React Native Testing Library (test runner)
-4. ✅ **Verify shared import** — **COMPLETED 2026-01-01** 
+4. ✅ **Verify shared import** — **COMPLETED 2026-01-01**
    — Create test file: `src/testShared.js` importing `parkingUtils`, `dateUtils`, `createParkingStore` from `parking-shared`; run `npm test`
 5. ✅ **Create app skeleton** — mobile/src/App.js: minimal component tree with `View` + `Text` — **COMPLETED 2026-01-01**
 6. ✅ **Set up vitest config** — Copy pattern from shared, configure for RN environment (preset: `react-native`) — **COMPLETED 2026-01-01**
 7. ✅ **Initial tests** — `test/shared.test.js`: verify exports load, store factory initializes — **COMPLETED 2026-01-01**
 8. ✅ **Lint setup** — ESLint config from shared + RN-specific rules (no DOM refs) — **COMPLETED 2026-01-01**
-9. **Build validation** — `npm run build` (Expo prebuild), confirm no errors
+9. ✅ **Build validation** — `npm run build` (Expo prebuild), confirm no errors — **COMPLETED 2026-01-01**
 
 **Validation Steps:**
 
 - [x] `npm test` passes (testShared.test.js)
 - [x] `npm run lint` passes (0 errors)
-- [ ] `npx eas build --platform android --local` succeeds (offline, no EAS account)
-- [ ] Expo Prebuild generates native files without warnings
-- [ ] All shared exports resolving in Metro debugger
+- [x] `cd android && .\\gradlew.bat assembleDebug` succeeds (fully local APK build)
+- [x] Expo Prebuild generates native files without warnings
+- [ ] SKIPPED: All shared exports resolving in Metro debugger —  (deferred; unit tests validate imports)
 
 **Checklist:**
 
-- [ ] metro.config.js with alias for shared + ESM fallback
-- [ ] package.json with shared: file:../shared
+- [x] metro.config.js with alias for shared + ESM fallback
+- [x] package.json with shared: file:../shared
 - [x] vitest.config.js (react-native preset)
 - [x] eslint.config.js (RN rules, no DOM)
-- [ ] src/App.js (minimal tree)
- - [ ] src/App.js (minimal tree)
- - [x] src/testShared.js (import + basic test)
- - [x] test/shared.test.js (store factory test)
-- [ ] docs: Update MIGRATION_PLAN.md Iteration Log
+- [x] src/App.js (minimal tree)
+- [x] src/testShared.js (import + basic test)
+- [x] test/shared.test.js (store factory test)
+- [x] docs: Update MIGRATION_PLAN.md Iteration Log
 
 **Documentation Updates:**
 
@@ -182,7 +181,7 @@
 
 - [ ] `npm test` passes (adapters.test.js, store.test.js, offline.test.js)
 - [ ] `npm run lint` passes
-- [ ] `npx eas build --platform android --local` succeeds
+- [ ] `cd android && .\\gradlew.bat assembleDebug` succeeds (fully local APK build)
 - [ ] AsyncStorage mock data loads into store on app start
 - [ ] Store state shape verified against web version
 
@@ -443,7 +442,7 @@
    - **Job: build-expo**
      - Runs after lint-and-test passes
      - Install EAS CLI
-     - Build APK via `eas build --platform android --local` (no EAS account, local only)
+   - Build APK via Gradle on a self-hosted runner: `cd android && ./gradlew assembleRelease` (fully local, requires Android SDK/JDK on runner)
      - Upload APK as artifact
      - (iOS optional: requires macOS runner)
    - **Trigger:** Push to `feature/mobile` or PR to `main`
