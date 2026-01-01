@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, SafeAreaView, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 
 export default function App() {

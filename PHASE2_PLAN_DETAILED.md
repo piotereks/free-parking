@@ -181,9 +181,9 @@
 
 - [x] `npm test` passes (adapters.test.js, store.test.js, offline.test.js)
 - [x] `npm run lint` passes
-- [ ] `cd android && .\\gradlew.bat assembleDebug` succeeds (fully local APK build)
-- [ ] AsyncStorage mock data loads into store on app start
-- [ ] Store state shape verified against web version
+- [x] `cd android && .\\gradlew.bat assembleDebug` succeeds (fully local APK build)
+- [x] AsyncStorage mock data loads into store on app start
+- [x] Store state shape verified against web version
 
 **Checklist:**
 
@@ -193,8 +193,8 @@
 - [x] test/adapters.test.js (storage + fetch tests)
 - [x] test/store.test.js (store shape + actions)
 - [x] test/offline.test.js (cache hydration)
-- [ ] Verify cache keys match web: `parking_realtime_cache`, `parking_history_cache`
-- [ ] docs: Update copilot_instructions.md (adapter patterns)
+- [x] Verify cache keys match web: `parking_realtime_cache`, `parking_history_cache`
+- [x] docs: Update copilot_instructions.md (adapter patterns)
 
 **Documentation Updates:**
 

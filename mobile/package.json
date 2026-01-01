@@ -23,6 +23,7 @@
     "expo": "~54.0.30",
     "expo-status-bar": "~3.0.9",
     "papaparse": "^5.5.3",
+    "react-native-safe-area-context": "^4.4.1",
     "parking-shared": "file:../shared",
     "react": "19.1.0",
     "react-native": "0.81.5",
