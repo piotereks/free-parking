@@ -4,6 +4,7 @@ import { View, Text, FlatList, StyleSheet, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useColorScheme } from 'react-native';
 import useParkingStore from '../hooks/useParkingStore';
+import { applyApproximations } from 'parking-shared';
 import ParkingCard from '../components/ParkingCard';
 import LoadingSkeletonCard from '../components/LoadingSkeletonCard';
 
@@ -21,6 +22,26 @@ const DashboardScreen = () => {
     return () => clearInterval(id);
   }, []);
 
+  // Trigger a refresh on mount if a refreshCallback is registered by the
+  // DataManager (this is a no-op if not provided).
+  useEffect(() => {
+    let cancelled = false;
+    const doRefresh = async () => {
+      if (typeof refreshCallback === 'function') {
+        try {
+          await refreshCallback();
+        } catch (e) {
+          // store surfaces errors; ignore here
+        }
+      }
+    };
+    // call after mount
+    void doRefresh();
+    return () => {
+      cancelled = true;
+    };
+  }, [refreshCallback]);
+
   const onRefresh = async () => {
     if (typeof refreshCallback === 'function') {
       try {
@@ -32,6 +53,15 @@ const DashboardScreen = () => {
   };
 
   const data = useMemo(() => Array.isArray(realtimeData) ? realtimeData : [], [realtimeData]);
+
+  // Apply shared approximations to the realtime data for display (age-aware)
+  const processedData = useMemo(() => {
+    try {
+      return applyApproximations(Array.isArray(data) ? data : [], now);
+    } catch (e) {
+      return data;
+    }
+  }, [data, now]);
 
   const renderItem = ({ item }) => (
     <ParkingCard data={item} now={now} />
@@ -64,12 +94,12 @@ const DashboardScreen = () => {
         </View>
       )}
 
-      {!realtimeLoading && data.length > 0 && (
+      {!realtimeLoading && processedData.length > 0 && (
         <FlatList
-          data={data}
+          data={processedData}
           keyExtractor={(item, idx) => item.id ? String(item.id) : String(idx)}
           renderItem={renderItem}
-          refreshControl={<RefreshControl refreshing={false} onRefresh={onRefresh} />}
+          refreshControl={<RefreshControl refreshing={realtimeLoading} onRefresh={onRefresh} />}
         />
       )}
     </SafeAreaView>

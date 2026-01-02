@@ -1,23 +1,13 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+import DashboardScreen from './screens/DashboardScreen';
 
 export default function App() {
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={{ flex: 1 }}>
       <StatusBar style="auto" />
-      <View style={styles.container}>
-        <Text style={styles.title}>Free Parking — Mobile (alpha)</Text>
-        <Text style={styles.subtitle}>Dashboard coming soon</Text>
-      </View>
+      <DashboardScreen />
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#fff' },
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 16 },
-  title: { fontSize: 20, fontWeight: '600', marginBottom: 8 },
-  subtitle: { fontSize: 14, color: '#666' },
-});
