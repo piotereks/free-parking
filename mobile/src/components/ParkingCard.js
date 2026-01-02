@@ -1,16 +1,7 @@
 import React, { useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
-
-const formatAge = (now, timestamp) => {
-  if (!timestamp) return '—';
-  const t = new Date(timestamp);
-  if (Number.isNaN(t.getTime())) return '—';
-  const diffMin = Math.floor((now - t) / 60000);
-  if (diffMin <= 0) return 'just now';
-  if (diffMin === 1) return '1 min ago';
-  return `${diffMin} min ago`;
-};
+import { formatAgeLabel } from 'parking-shared/src/parkingUtils';
 
 const ageColor = (now, timestamp, colors) => {
   if (!timestamp) return colors.textSecondary;
@@ -40,15 +31,18 @@ const tryCopyToClipboard = async (text) => {
 
 const ParkingCard = ({ data = {}, now = new Date(), allOffline = false }) => {
   const { colors } = useTheme();
-  
+
   const name = data.name || data.parkingName || 'Unknown';
   const free = data.freeSpaces ?? data.free ?? '-';
-  const capacity = data.capacity ?? data.max ?? '-';
+  const capacity = data.capacity ?? data.max ?? null; // Allow null for conditional rendering
   const timestamp = data.timestamp || data.lastUpdated || data.updated_at || null;
   const approx = data.approximation || data.approx || false;
 
+  const ageMinutes = timestamp ? Math.floor((now - new Date(timestamp)) / 60000) : null;
+  const { display: ageDisplay } = formatAgeLabel(ageMinutes);
+
   const onPress = useCallback(async () => {
-    const text = `${name} — ${free} / ${capacity}`;
+    const text = `${name} — ${free}${capacity ? ` / ${capacity}` : ''}`;
     const ok = await tryCopyToClipboard(text);
     if (ok) {
       // short feedback
@@ -65,10 +59,10 @@ const ParkingCard = ({ data = {}, now = new Date(), allOffline = false }) => {
       <View style={[styles.card, { borderColor: colors.border, backgroundColor: colors.card }]}>
         <View style={styles.row}>
           <Text style={[styles.name, { color: colors.text }]}>{name}</Text>
-          <Text style={[styles.age, { color: ageColor(now, timestamp, colors) }]}>{formatAge(now, timestamp)}</Text>
+          <Text style={[styles.age, { color: ageColor(now, timestamp, colors) }]}>{ageDisplay}</Text>
         </View>
-        <View style={styles.row}> 
-          <Text style={[styles.spaces, { color: colors.text }]}>{`${free} / ${capacity}`}</Text>
+        <View style={styles.row}>
+          <Text style={[styles.spaces, { color: colors.text }]}>{capacity ? `${free} / ${capacity}` : free}</Text>
           {approx ? (
             <Text style={[styles.badge, { color: colors.text, backgroundColor: colors.surface }]}>Approx</Text>
           ) : null}
