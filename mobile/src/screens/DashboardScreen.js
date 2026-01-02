@@ -2,14 +2,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useColorScheme } from 'react-native';
+import { useTheme } from '../context/ThemeContext';
 import useParkingStore from '../hooks/useParkingStore';
-import { applyApproximations } from 'parking-shared';
+import { applyApproximations, isValidParkingData, normalizeParkingName, calculateDataAge, formatAgeLabel } from 'parking-shared';
 import ParkingCard from '../components/ParkingCard';
 import LoadingSkeletonCard from '../components/LoadingSkeletonCard';
 
 const DashboardScreen = () => {
-  const colorScheme = useColorScheme();
+  const { colors } = useTheme();
   const [now, setNow] = useState(() => new Date());
 
   const realtimeData = useParkingStore((s) => s.realtimeData);
@@ -57,8 +57,24 @@ const DashboardScreen = () => {
   // Apply shared approximations to the realtime data for display (age-aware)
   const processedData = useMemo(() => {
     try {
-      return applyApproximations(Array.isArray(data) ? data : [], now);
+      // Filter valid data
+      const validData = Array.isArray(data) ? data.filter(isValidParkingData) : [];
+
+      // Normalize and format data
+      return validData.map((item) => {
+        const ageMinutes = calculateDataAge(item.Timestamp, now);
+        const { display: ageDisplay } = formatAgeLabel(ageMinutes);
+
+        return {
+          ...item,
+          name: normalizeParkingName(item.ParkingGroupName),
+          freeSpaces: item.CurrentFreeGroupCounterValue,
+          timestamp: item.Timestamp,
+          ageDisplay,
+        };
+      });
     } catch (e) {
+      console.error('Error processing data:', e);
       return data;
     }
   }, [data, now]);
@@ -67,11 +83,15 @@ const DashboardScreen = () => {
     <ParkingCard data={item} now={now} />
   );
 
+  useEffect(() => {
+    console.log('Realtime Data:', realtimeData);
+  }, [realtimeData]);
+
   return (
-    <SafeAreaView style={[styles.container, colorScheme === 'dark' ? styles.dark : styles.light]}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Parking Dashboard</Text>
-        <Text style={styles.subtitle}>{`Updated: ${now.toLocaleTimeString()}`}</Text>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.header, { borderColor: colors.border, backgroundColor: colors.card }]}>
+        <Text style={[styles.title, { color: colors.text }]}>Parking Dashboard</Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>{`Updated: ${now.toLocaleTimeString()}`}</Text>
       </View>
 
       {realtimeLoading && (
@@ -84,13 +104,13 @@ const DashboardScreen = () => {
 
       {realtimeError && !realtimeLoading && (
         <View style={styles.center}> 
-          <Text style={styles.error}>Error loading data. Pull to retry.</Text>
+          <Text style={[styles.error, { color: colors.statusRed }]}>Error loading data. Pull to retry.</Text>
         </View>
       )}
 
       {!realtimeLoading && !realtimeError && data.length === 0 && (
         <View style={styles.center}>
-          <Text style={styles.empty}>No parking data available.</Text>
+          <Text style={[styles.empty, { color: colors.textMuted }]}>No parking data available.</Text>
         </View>
       )}
 
@@ -108,14 +128,12 @@ const DashboardScreen = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { padding: 12, borderBottomWidth: StyleSheet.hairlineWidth, borderColor: '#ddd' },
+  header: { padding: 12, borderBottomWidth: StyleSheet.hairlineWidth },
   title: { fontSize: 18, fontWeight: '700' },
-  subtitle: { fontSize: 12, color: '#666', marginTop: 4 },
+  subtitle: { fontSize: 12, marginTop: 4 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  error: { color: '#b00020' },
-  empty: { color: '#666' },
-  light: { backgroundColor: '#fff' },
-  dark: { backgroundColor: '#0b0b0b' },
+  error: { fontSize: 14 },
+  empty: { fontSize: 14 },
 });
 
 export default DashboardScreen;
