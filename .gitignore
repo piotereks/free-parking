@@ -44,3 +44,6 @@ wrk/
 # Coverage reports (generated)
 coverage/
 
+mobile/
+shared/
+web/

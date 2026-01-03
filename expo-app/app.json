@@ -1,0 +1,10 @@
+{
+  "expo": {
+    "name": "FreeParkingExpo",
+    "slug": "free-parking-expo",
+    "version": "1.0.0",
+    "sdkVersion": "54.0.0",
+    "platforms": ["ios", "android", "web"],
+    "entryPoint": "./App.js"
+  }
+}
