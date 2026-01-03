@@ -55,7 +55,7 @@ function ParkingCard({ data, now, allOffline }) {
   else if (age > 5) ageClass = 'text-amber-600';
 
   return (
-    <SView className="rounded-card p-4 mb-3 flex flex-col items-center justify-center border border-border-dark bg-bg-secondary-dark shadow-custom-dark">
+    <SView className="rounded-xl p-4 mb-3 flex flex-col items-center justify-center border border-border-dark bg-bg-secondary-dark shadow-lg">
       <SText className="text-base font-semibold mb-1 text-center text-text-primary-dark">{name}</SText>
       <SText className={`text-4xl font-bold ${ageClass || 'text-success-dark'} flex items-center justify-center`}>{freeSpots}</SText>
       {isApproximated && (
@@ -101,7 +101,7 @@ export default function App() {
           <ParkingCard key={i} data={d} now={now} allOffline={allOffline} />
         ))}
 
-        <SView className="p-4 rounded-card shadow-custom-dark mt-4 bg-bg-secondary-dark border border-border-dark">
+        <SView className="p-4 rounded-xl shadow-lg mt-4 bg-bg-secondary-dark border border-border-dark">
               <SText className="text-sm text-text-secondary-dark">Total Spaces</SText>
               <SText className="text-2xl font-bold mt-1 text-success-dark">{totalSpaces} {totalSpaces !== originalTotal ? <SText className="text-sm text-text-secondary-dark">(orig: {originalTotal})</SText> : null}</SText>
             </SView>
