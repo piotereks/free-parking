@@ -7,8 +7,10 @@ const API_URLS = [
     'https://gd.zaparkuj.pl/api/freegroupcountervalue.json',
     'https://gd.zaparkuj.pl/api/freegroupcountervalue-green.json'
 ];
-const CORS_PROXY = 'https://corsproxy.io/?';
-// const CORS_PROXY = 'https://corsproxy.io/?';
+
+// Title / icon for header use in native app
+export const TITLE = 'Parking Monitor';
+export const TITLE_ICON = '🅿️';
 
 export const ParkingDataProvider = ({ children }) => {
     const updateRealtimeState = useParkingStore((state) => state.updateRealtimeState);
@@ -19,7 +21,7 @@ export const ParkingDataProvider = ({ children }) => {
             updateRealtimeState({ realtimeLoading: true, realtimeError: null });
 
             const promises = API_URLS.map(url =>
-                fetch(CORS_PROXY + encodeURIComponent(url))
+                fetch(url)
                     .then(res => res.json())
                     .catch(() => null)
             );
@@ -53,7 +55,7 @@ export const ParkingDataProvider = ({ children }) => {
     }, []);
 
     return (
-        <ParkingDataContext.Provider value={{ refresh: fetchRealtimeData }}>
+        <ParkingDataContext.Provider value={{ refresh: fetchRealtimeData, title: TITLE, icon: TITLE_ICON }}>
             {children}
         </ParkingDataContext.Provider>
     );

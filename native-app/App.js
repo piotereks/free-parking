@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Text, View, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styled } from 'nativewind';
-import { ParkingDataProvider } from './ParkingDataManager';
+import { ParkingDataProvider, useParkingData } from './ParkingDataManager';
 import { useParkingStore } from './store/parkingStore';
 import { applyApproximations, calculateDataAge, formatAgeLabel } from './utils/parkingUtils';
 
@@ -47,6 +47,7 @@ function ParkingCard({ data, now, allOffline }) {
 }
 
 function DashboardContent() {
+  const { title, icon } = useParkingData();
   const realtimeData = useParkingStore((state) => state.realtimeData);
   const realtimeLoading = useParkingStore((state) => state.realtimeLoading);
   const realtimeError = useParkingStore((state) => state.realtimeError);
@@ -117,9 +118,12 @@ function DashboardContent() {
       <StatusBar barStyle="light-content" />
 
       {/* Header matching web App.css */}
-      <SView className="w-full bg-bg-secondary-dark items-center justify-center py-3 px-4 border-b border-border-dark">
-        <SText className="text-text-primary-dark text-lg font-semibold">Parking Monitor</SText>
-        <SText className="text-text-secondary-dark text-xs mt-0.5">Real-time • UBS Wrocław</SText>
+      <SView className="w-full bg-bg-secondary-dark flex-row items-center justify-center py-3 px-4 border-b border-border-dark">
+        <SText className="text-2xl mr-3">🅿️</SText>
+        <SView className="items-center">
+          <SText className="text-text-primary-dark text-lg font-semibold">{title || 'Parking Monitor'}</SText>
+          <SText className="text-text-secondary-dark text-xs mt-0.5">Real-time • UBS Wrocław</SText>
+        </SView>
       </SView>
 
       {realtimeLoading && processed.length === 0 ? (
