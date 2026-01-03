@@ -48,20 +48,20 @@ function ParkingCard({ data, now, allOffline }) {
 
   let ageClass = '';
   if (!isApproximated) {
-    if (allOffline) ageClass = 'text-gray-400';
-    else if (age >= 15) ageClass = 'text-rose-600';
-    else if (age > 5) ageClass = 'text-amber-500';
-  } else if (age >= 15) ageClass = 'text-gray-400';
-  else if (age > 5) ageClass = 'text-amber-500';
+    if (allOffline) ageClass = 'text-text-secondary-dark';
+    else if (age >= 15) ageClass = 'text-warning-dark';
+    else if (age > 5) ageClass = 'text-amber-600';
+  } else if (age >= 15) ageClass = 'text-text-secondary-dark';
+  else if (age > 5) ageClass = 'text-amber-600';
 
   return (
-    <SView className="rounded-lg p-4 mb-3 flex flex-col items-center justify-center border border-[#1f2937] bg-[#0b1220] shadow">
-      <SText className="text-base font-semibold mb-1 text-center text-white">{name}</SText>
-      <SText className={`text-4xl font-bold ${ageClass || 'text-white'} flex items-center justify-center`}>{freeSpots}</SText>
+    <SView className="rounded-card p-4 mb-3 flex flex-col items-center justify-center border border-border-dark bg-bg-secondary-dark shadow-custom-dark">
+      <SText className="text-base font-semibold mb-1 text-center text-text-primary-dark">{name}</SText>
+      <SText className={`text-4xl font-bold ${ageClass || 'text-success-dark'} flex items-center justify-center`}>{freeSpots}</SText>
       {isApproximated && (
-        <SText className="text-sm text-gray-400">(orig: {originalSpots})</SText>
+        <SText className="text-sm text-text-secondary-dark">(orig: {originalSpots})</SText>
       )}
-      <SText className="text-sm text-gray-400 mt-2">{ageLabel}</SText>
+      <SText className="text-sm text-text-secondary-dark mt-2">{ageLabel}</SText>
     </SView>
   );
 }
@@ -87,13 +87,13 @@ export default function App() {
   const originalTotal = processed.reduce((sum, d) => sum + (d.CurrentFreeGroupCounterValue || 0), 0);
 
   return (
-    <SSafeArea className="flex-1 bg-[#0f1724]">
+    <SSafeArea className="flex-1 bg-bg-primary-dark">
       <StatusBar barStyle="light-content" />
 
       {/* Header matching web App.css */}
-      <SView className="w-full bg-[#282c34] items-center justify-center p-6">
-        <SText className="text-white text-xl font-semibold">Parking Monitor</SText>
-        <SText className="text-white text-sm mt-1">Real-time parking availability • UBS Wrocław</SText>
+      <SView className="w-full bg-bg-secondary-dark items-center justify-center p-6 border-b border-border-dark">
+        <SText className="text-text-primary-dark text-xl font-semibold">Parking Monitor</SText>
+        <SText className="text-text-secondary-dark text-sm mt-1">Real-time parking availability • UBS Wrocław</SText>
       </SView>
 
       <SScroll contentContainerStyle={{ padding: 16 }}>
@@ -101,14 +101,14 @@ export default function App() {
           <ParkingCard key={i} data={d} now={now} allOffline={allOffline} />
         ))}
 
-        <SView className="p-4 rounded-lg shadow mt-4 bg-[#0b1220] border border-[#1f2937]">
-              <SText className="text-sm text-gray-400">Total Spaces</SText>
-              <SText className="text-2xl font-bold mt-1 text-white">{totalSpaces} {totalSpaces !== originalTotal ? <SText className="text-sm text-gray-400">(orig: {originalTotal})</SText> : null}</SText>
+        <SView className="p-4 rounded-card shadow-custom-dark mt-4 bg-bg-secondary-dark border border-border-dark">
+              <SText className="text-sm text-text-secondary-dark">Total Spaces</SText>
+              <SText className="text-2xl font-bold mt-1 text-success-dark">{totalSpaces} {totalSpaces !== originalTotal ? <SText className="text-sm text-text-secondary-dark">(orig: {originalTotal})</SText> : null}</SText>
             </SView>
 
         {/* Footer link similar to web App.css */}
         <SView className="items-center mt-6">
-          <SText className="text-[#61dafb]">View on web</SText>
+          <SText className="text-accent">View on web</SText>
         </SView>
       </SScroll>
     </SSafeArea>
