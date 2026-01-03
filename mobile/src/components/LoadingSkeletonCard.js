@@ -1,25 +1,15 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { useTheme } from '../context/ThemeContext';
+import { View } from 'react-native';
 
 const LoadingSkeletonCard = () => {
-  const { colors } = useTheme();
-
   return (
-    <View style={[styles.container, { borderColor: colors.border, backgroundColor: colors.card }]}>
-      <View style={[styles.lineShort, { backgroundColor: colors.borderLight }]} />
-      <View style={[styles.lineLong, { backgroundColor: colors.surface }]} />
-      <View style={[styles.lineMedium, { backgroundColor: colors.borderLight }]} />
-      <View style={[styles.lineLong, { backgroundColor: colors.surface }]} />
+    <View className="p-3 border-b border-border-light dark:border-border-dark bg-bg-card-light dark:bg-bg-card-dark">
+      <View className="h-3 w-2/5 rounded bg-border-light dark:bg-border-dark mb-2" />
+      <View className="h-2.5 w-4/5 rounded bg-bg-secondary-light dark:bg-bg-secondary-dark mb-2" />
+      <View className="h-2.5 w-11/20 rounded bg-border-light dark:bg-border-dark mb-2" />
+      <View className="h-2.5 w-4/5 rounded bg-bg-secondary-light dark:bg-bg-secondary-dark" />
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { padding: 12, borderBottomWidth: StyleSheet.hairlineWidth },
-  lineShort: { height: 12, width: '40%', borderRadius: 4, marginBottom: 8 },
-  lineMedium: { height: 10, width: '55%', borderRadius: 4, marginBottom: 8 },
-  lineLong: { height: 10, width: '80%', borderRadius: 4, marginBottom: 0 },
-});
 
 export default LoadingSkeletonCard;

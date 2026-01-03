@@ -1,6 +1,5 @@
 {
   "name": "mobile",
-    "type": "module",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
@@ -18,15 +17,17 @@
     "android:deploy": "cd android && gradlew installRelease"
   },
   "dependencies": {
-    "@expo/vector-icons": "^14.0.0",
+    "@expo/vector-icons": "^15.0.3",
     "@react-native-async-storage/async-storage": "^2.1.0",
     "expo": "~54.0.30",
     "expo-status-bar": "~3.0.9",
+    "nativewind": "^4.2.1",
     "papaparse": "^5.5.3",
-    "react-native-safe-area-context": "^4.4.1",
     "parking-shared": "file:../shared",
     "react": "19.1.0",
     "react-native": "0.81.5",
+    "react-native-safe-area-context": "~5.6.0",
+    "tailwindcss": "^3.4.19",
     "zustand": "^5.0.9"
   },
   "devDependencies": {
@@ -44,7 +45,9 @@
   },
   "jest": {
     "testEnvironment": "node",
-    "setupFilesAfterEnv": ["<rootDir>/test/setup.js"],
+    "setupFilesAfterEnv": [
+      "<rootDir>/test/setup.js"
+    ],
     "transform": {
       "^.+\\.(js|jsx|ts|tsx)$": "babel-jest"
     },

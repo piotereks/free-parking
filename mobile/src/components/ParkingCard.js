@@ -1,16 +1,16 @@
-import React, { useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import React, { useCallback, useEffect } from 'react';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
-import { formatAgeLabel } from 'parking-shared/src/parkingUtils';
+import { formatAgeLabel } from 'parking-shared/parkingUtils';
 
-const ageColor = (now, timestamp, colors) => {
-  if (!timestamp) return colors.textSecondary;
+const getAgeColorClass = (now, timestamp) => {
+  if (!timestamp) return 'text-text-secondary-light dark:text-text-secondary-dark';
   const t = new Date(timestamp);
-  if (Number.isNaN(t.getTime())) return colors.textSecondary;
+  if (Number.isNaN(t.getTime())) return 'text-text-secondary-light dark:text-text-secondary-dark';
   const diffMin = Math.floor((now - t) / 60000);
-  if (diffMin >= 15) return colors.statusRed;
-  if (diffMin >= 5) return colors.statusYellow;
-  return colors.statusGreen;
+  if (diffMin >= 15) return 'text-warning-light dark:text-warning-dark';
+  if (diffMin >= 5) return 'text-warning-medium-light dark:text-warning-medium-dark';
+  return 'text-success-light dark:text-success-dark';
 };
 
 const tryCopyToClipboard = async (text) => {
@@ -30,24 +30,24 @@ const tryCopyToClipboard = async (text) => {
 };
 
 const ParkingCard = ({ data = {}, now = new Date(), allOffline = false }) => {
-  const { colors } = useTheme();
+  const { isDark } = useTheme();
 
   const name = data.name || data.parkingName || 'Unknown';
   const free = data.freeSpaces ?? data.free ?? '-';
-  const capacity = data.capacity ?? data.max ?? null; // Allow null for conditional rendering
+  const capacity = data.capacity ?? data.max ?? null;
   const timestamp = data.timestamp || data.lastUpdated || data.updated_at || null;
   const approx = data.approximation || data.approx || false;
 
   const ageMinutes = timestamp ? Math.floor((now - new Date(timestamp)) / 60000) : null;
   const { display: ageDisplay } = formatAgeLabel(ageMinutes);
+  const ageColorClass = getAgeColorClass(now, timestamp);
 
   const onPress = useCallback(async () => {
     const text = `${name} — ${free}${capacity ? ` / ${capacity}` : ''}`;
     const ok = await tryCopyToClipboard(text);
     if (ok) {
-      // short feedback
       try {
-        Alert.alert('Copied', 'Parking info copied to clipboard');
+        Alert.alert('Copied', 'Parking info copied to clipboard'); // Ensure no invalid Unicode characters
       } catch (err) {
         // ignore clipboard/alert failures in tests or minimal environments
       }
@@ -56,29 +56,20 @@ const ParkingCard = ({ data = {}, now = new Date(), allOffline = false }) => {
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
-      <View style={[styles.card, { borderColor: colors.border, backgroundColor: colors.card }]}>
-        <View style={styles.row}>
-          <Text style={[styles.name, { color: colors.text }]}>{name}</Text>
-          <Text style={[styles.age, { color: ageColor(now, timestamp, colors) }]}>{ageDisplay}</Text>
+      <View className={"p-3 border-b border-border-light dark:border-border-dark bg-bg-card-light dark:bg-bg-card-dark"}>
+        <View className={"flex-row justify-between items-center"}>
+          <Text className={"text-base font-semibold text-text-primary-light dark:text-text-primary-dark"}>{name}</Text>
+          <Text className={`text-xs ${ageColorClass}`}>{ageDisplay}</Text>
         </View>
-        <View style={styles.row}>
-          <Text style={[styles.spaces, { color: colors.text }]}>{capacity ? `${free} / ${capacity}` : free}</Text>
+        <View className={"flex-row justify-between items-center mt-1.5"}>
+          <Text className={"text-sm text-text-primary-light dark:text-text-primary-dark"}>{capacity ? `${free} / ${capacity}` : free}</Text>
           {approx ? (
-            <Text style={[styles.badge, { color: colors.text, backgroundColor: colors.surface }]}>Approx</Text>
+            <Text className={"text-xs px-1.5 py-0.5 rounded-md bg-bg-secondary-light dark:bg-bg-secondary-dark text-text-primary-light dark:text-text-primary-dark"}>Approx</Text>
           ) : null}
         </View>
       </View>
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  card: { padding: 12, borderBottomWidth: StyleSheet.hairlineWidth },
-  row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  name: { fontSize: 16, fontWeight: '600' },
-  age: { fontSize: 12 },
-  spaces: { fontSize: 14, marginTop: 6 },
-  badge: { fontSize: 12, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 },
-});
 
 export default ParkingCard;

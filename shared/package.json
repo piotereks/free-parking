@@ -12,6 +12,7 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./parkingUtils": "./src/parkingUtils.js",
     "./package.json": "./package.json"
   },
   "files": [

@@ -1,7 +1,6 @@
 /* global setInterval, clearInterval */
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, RefreshControl } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, FlatList, RefreshControl } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import useParkingStore from '../hooks/useParkingStore';
 import { applyApproximations, isValidParkingData, normalizeParkingName, calculateDataAge, formatAgeLabel } from 'parking-shared';
@@ -9,8 +8,13 @@ import ParkingCard from '../components/ParkingCard';
 import LoadingSkeletonCard from '../components/LoadingSkeletonCard';
 
 const DashboardScreen = () => {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const [now, setNow] = useState(() => new Date());
+
+  // Debug: Log theme colors
+  useEffect(() => {
+    console.log('Theme applied:', { isDark, background: colors.background, text: colors.text });
+  }, [isDark, colors]);
 
   const realtimeData = useParkingStore((s) => s.realtimeData);
   const realtimeLoading = useParkingStore((s) => s.realtimeLoading);
@@ -88,10 +92,10 @@ const DashboardScreen = () => {
   }, [realtimeData]);
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={[styles.header, { borderColor: colors.border, backgroundColor: colors.card }]}>
-        <Text style={[styles.title, { color: colors.text }]}>Parking Dashboard</Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>{`Updated: ${now.toLocaleTimeString()}`}</Text>
+    <View className="flex-1 bg-bg-primary-light dark:bg-bg-primary-dark">
+      <View className="p-3 border-b border-border-light dark:border-border-dark bg-bg-card-light dark:bg-bg-card-dark">
+        <Text className="text-lg font-bold text-text-primary-light dark:text-text-primary-dark">Parking Dashboard</Text>
+        <Text className="text-xs mt-1 text-text-secondary-light dark:text-text-secondary-dark">{`Updated: ${now.toLocaleTimeString()}`}</Text>
       </View>
 
       {realtimeLoading && (
@@ -103,14 +107,14 @@ const DashboardScreen = () => {
       )}
 
       {realtimeError && !realtimeLoading && (
-        <View style={styles.center}> 
-          <Text style={[styles.error, { color: colors.statusRed }]}>Error loading data. Pull to retry.</Text>
+        <View className="flex-1 items-center justify-center"> 
+          <Text className="text-sm text-warning-light dark:text-warning-dark">Error loading data. Pull to retry.</Text>
         </View>
       )}
 
       {!realtimeLoading && !realtimeError && data.length === 0 && (
-        <View style={styles.center}>
-          <Text style={[styles.empty, { color: colors.textMuted }]}>No parking data available.</Text>
+        <View className="flex-1 items-center justify-center">
+          <Text className="text-sm text-text-muted-light dark:text-text-muted-dark">No parking data available.</Text>
         </View>
       )}
 
@@ -122,18 +126,8 @@ const DashboardScreen = () => {
           refreshControl={<RefreshControl refreshing={realtimeLoading} onRefresh={onRefresh} />}
         />
       )}
-    </SafeAreaView>
+    </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  header: { padding: 12, borderBottomWidth: StyleSheet.hairlineWidth },
-  title: { fontSize: 18, fontWeight: '700' },
-  subtitle: { fontSize: 12, marginTop: 4 },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  error: { fontSize: 14 },
-  empty: { fontSize: 14 },
-});
 
 export default DashboardScreen;

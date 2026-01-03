@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Appearance } from 'react-native';
+import { Appearance, useColorScheme as useRNColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ThemeContext = createContext();
@@ -50,53 +50,50 @@ export function ThemeProvider({ children }) {
   const colorScheme = themeMode === 'auto' ? systemColorScheme : themeMode;
   const isDark = colorScheme === 'dark';
 
-  // Change theme mode and persist to AsyncStorage
-  const setTheme = async (mode) => {
-    if (!['auto', 'light', 'dark'].includes(mode)) {
-      console.warn('Invalid theme mode:', mode);
-      return;
-    }
-    try {
-      await AsyncStorage.setItem(STORAGE_KEY, mode);
-      setThemeMode(mode);
-    } catch (e) {
-      console.error('Failed to save theme preference:', e);
-    }
-  };
-
   const theme = {
     mode: themeMode, // User preference: 'auto' | 'light' | 'dark'
     colorScheme, // Effective scheme: 'light' | 'dark'
     isDark, // Boolean convenience
     colors: {
-      // Background colors
-      background: isDark ? '#000' : '#fff',
-      surface: isDark ? '#1a1a1a' : '#f5f5f5',
-      card: isDark ? '#222' : '#fff',
+      // Background colors (matching web version)
+      background: isDark ? '#0a0e27' : '#f1f5f9',
+      surface: isDark ? '#141937' : '#ffffff',
+      card: isDark ? '#1e2749' : '#f8fafc',
       
-      // Text colors
-      text: isDark ? '#fff' : '#000',
-      textSecondary: isDark ? '#aaa' : '#666',
-      textMuted: isDark ? '#888' : '#999',
+      // Text colors (matching web version)
+      text: isDark ? '#e0e6ff' : '#0f172a',
+      textSecondary: isDark ? '#8b95c9' : '#64748b',
+      textMuted: isDark ? '#6b7399' : '#94a3b8',
       
-      // Border colors
-      border: isDark ? '#333' : '#eee',
-      borderLight: isDark ? '#2a2a2a' : '#f0f0f0',
+      // Border colors (matching web version)
+      border: isDark ? '#2d3b6b' : '#e2e8f0',
+      borderLight: isDark ? '#252f5a' : '#f1f5f9',
       
-      // Status colors (age-based)
-      statusGreen: isDark ? '#4ade80' : '#22c55e', // <5 min
-      statusYellow: isDark ? '#facc15' : '#eab308', // 5-15 min
-      statusRed: isDark ? '#f87171' : '#ef4444', // ≥15 min
+      // Status colors (age-based, matching web version)
+      statusGreen: isDark ? '#00ff88' : '#059669', // <5 min
+      statusYellow: isDark ? '#ffaa00' : '#d97706', // 5-15 min
+      statusRed: isDark ? '#ff3366' : '#dc2626', // ≥15 min
       
-      // Accent colors
-      primary: isDark ? '#60a5fa' : '#3b82f6',
-      primaryDark: isDark ? '#3b82f6' : '#2563eb',
+      // Accent colors (matching web version)
+      primary: isDark ? '#00d9ff' : '#00d9ff',
+      accent: isDark ? '#00d9ff' : '#00d9ff',
       
       // Interactive elements
-      link: isDark ? '#60a5fa' : '#3b82f6',
-      disabled: isDark ? '#444' : '#ccc',
+      link: isDark ? '#00d9ff' : '#0891b2',
+      disabled: isDark ? '#4a5578' : '#cbd5e1',
     },
-    setTheme,
+    setTheme: async (mode) => {
+      if (!['auto', 'light', 'dark'].includes(mode)) {
+        console.warn('Invalid theme mode:', mode);
+        return;
+      }
+      try {
+        await AsyncStorage.setItem(STORAGE_KEY, mode);
+        setThemeMode(mode);
+      } catch (e) {
+        console.error('Failed to save theme preference:', e);
+      }
+    },
   };
 
   return <ThemeContext.Provider value={theme}>{children}</ThemeContext.Provider>;
@@ -107,9 +104,9 @@ export function ThemeProvider({ children }) {
  * 
  * Returns:
  * - mode: User preference ('auto' | 'light' | 'dark')
- * - colorScheme: Effective scheme ('light' | 'dark')
+ * - colorScheme: Effective scheme ('light' | 'dark') - use this for NativeWind className="dark:..."
  * - isDark: Boolean convenience
- * - colors: Color palette object
+ * - colors: Color palette object (legacy, use NativeWind classes instead)
  * - setTheme(mode): Function to change theme
  */
 export function useTheme() {
