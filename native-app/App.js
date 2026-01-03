@@ -55,11 +55,11 @@ function ParkingCard({ data, now, allOffline }) {
   else if (age > 5) ageClass = 'text-amber-500';
 
   return (
-    <SView className="bg-[#0f1724] p-4 mb-3 rounded-lg shadow">
-      <SText className="text-[16px] font-semibold mb-1 text-white">{name}</SText>
-      <SText className={`text-2xl font-bold ${ageClass} text-white`}>{freeSpots}</SText>
+    <SView className="rounded-lg p-4 mb-3 flex flex-col items-center justify-center border bg-[#0f1724] shadow">
+      <SText className="text-base font-semibold mb-1 text-center text-slate-200">{name}</SText>
+      <SText className={`text-4xl font-bold ${ageClass || 'text-white'} flex items-center justify-center`}>{freeSpots}</SText>
       {isApproximated && (
-        <SText className="text-sm text-slate-300">(orig: {originalSpots})</SText>
+        <SText className="text-sm text-slate-400">(orig: {originalSpots})</SText>
       )}
       <SText className="text-sm text-slate-400 mt-2">{ageLabel}</SText>
     </SView>
