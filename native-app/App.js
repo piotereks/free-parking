@@ -21,7 +21,7 @@ const PARKING_PARAMS = [
     ParkingGroupName: 'Bank_1',
     CurrentFreeGroupCounterValue: 12,
     Timestamp: new Date(Date.now() - 10000 * 60 * 2).toISOString().replace('T', ' '), // 2 minutes ago
-    approximationInfo: { isApproximated: true, approximated: 15, original: 12 }
+    approximationInfo: { isApproximated: false }
   },
 
 ];
@@ -47,21 +47,21 @@ function ParkingCard({ data, now, allOffline }) {
   const ageLabel = formatAgeLabel(age);
 
   let ageClass = '';
-  // if (!isApproximated) {
-    if (allOffline) ageClass = 'text-slate-400';
+  if (!isApproximated) {
+    if (allOffline) ageClass = 'text-gray-400';
     else if (age >= 15) ageClass = 'text-rose-600';
     else if (age > 5) ageClass = 'text-amber-500';
-  // } else if (age >= 15) ageClass = 'text-slate-400';
-  // else if (age > 5) ageClass = 'text-amber-500';
+  } else if (age >= 15) ageClass = 'text-gray-400';
+  else if (age > 5) ageClass = 'text-amber-500';
 
   return (
-    <SView className="rounded-lg p-4 mb-3 flex flex-col items-center justify-center border bg-[#0f1724] shadow">
-      <SText className="text-base font-semibold mb-1 text-center text-text-secondary-dark">{name}</SText>
-      <SText className={`text-spot-number font-bold ${ageClass || 'text-white'} flex items-center justify-center`}>{freeSpots}</SText>
+    <SView className="rounded-lg p-4 mb-3 flex flex-col items-center justify-center border border-gray-700 bg-[#0f1724] shadow">
+      <SText className="text-base font-semibold mb-1 text-center text-white">{name}</SText>
+      <SText className={`text-4xl font-bold ${ageClass || 'text-white'} flex items-center justify-center`}>{freeSpots}</SText>
       {isApproximated && (
-        <SText className="text-sm text-slate-400">(orig: {originalSpots})</SText>
+        <SText className="text-sm text-gray-400">(orig: {originalSpots})</SText>
       )}
-      <SText className="text-sm text-slate-400 mt-2">{ageLabel}</SText>
+      <SText className="text-sm text-gray-400 mt-2">{ageLabel}</SText>
     </SView>
   );
 }
