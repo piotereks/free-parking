@@ -1,5 +1,5 @@
 import "./index.css";
-import React, { useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Text, View, ScrollView, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styled } from 'nativewind';
@@ -67,7 +67,13 @@ function ParkingCard({ data, now, allOffline }) {
 }
 
 export default function App() {
-  const now = new Date();
+  const [now, setNow] = useState(new Date());
+  const [lastUpdate] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const processed = useMemo(() => PARKING_PARAMS, []);
 
@@ -78,6 +84,8 @@ export default function App() {
     return age >= 1440;
   });
 
+  const hasApproximation = processed.some(d => d.approximationInfo?.isApproximated);
+
   const totalSpaces = processed.reduce((sum, d) => {
     const info = d.approximationInfo || {};
     const value = info.isApproximated ? info.approximated : (d.CurrentFreeGroupCounterValue || 0);
@@ -85,6 +93,43 @@ export default function App() {
   }, 0);
 
   const originalTotal = processed.reduce((sum, d) => sum + (d.CurrentFreeGroupCounterValue || 0), 0);
+
+  // Calculate aggregated status
+  const getAggregatedStatus = () => {
+    if (processed.length === 0) {
+      return { colorClass: '', statusMessage: 'No data available' };
+    }
+
+    let maxAge = 0;
+    processed.forEach((d) => {
+      const ts = d.Timestamp ? new Date(d.Timestamp.replace(' ', 'T')) : null;
+      if (ts) {
+        const age = Math.max(0, Math.floor((now - ts) / 1000 / 60));
+        maxAge = Math.max(maxAge, age);
+      }
+    });
+
+    let colorClass = '';
+    let statusMessage = '';
+
+    if (allOffline) {
+      colorClass = 'text-warning-dark';
+      statusMessage = 'All parking feeds appear offline';
+    } else if (maxAge >= 15) {
+      colorClass = 'text-warning-dark';
+      statusMessage = 'Data outdated - figures may not reflect actual free spaces';
+    } else if (maxAge > 5) {
+      colorClass = 'text-amber-600';
+      statusMessage = 'Data slightly outdated - refresh recommended';
+    } else {
+      colorClass = 'text-success-dark';
+      statusMessage = 'Data is current and reliable';
+    }
+
+    return { colorClass, statusMessage };
+  };
+
+  const { colorClass: totalColorClass, statusMessage } = getAggregatedStatus();
 
   return (
     <SSafeArea className="flex-1 bg-bg-primary-dark">
@@ -97,14 +142,55 @@ export default function App() {
       </SView>
 
       <SScroll contentContainerStyle={{ padding: 16 }}>
-        {processed.map((d, i) => (
-          <ParkingCard key={i} data={d} now={now} allOffline={allOffline} />
-        ))}
+        <SView className="mb-4 w-full items-center">
+          <SText className="text-base text-text-secondary-dark text-center">Real-time parking availability • UBS Wrocław</SText>
+        </SView>
 
-        <SView className="p-4 rounded-xl shadow-lg mt-4 bg-bg-secondary-dark border border-border-dark">
-              <SText className="text-sm text-text-secondary-dark">Total Spaces</SText>
-              <SText className="text-2xl font-bold mt-1 text-success-dark">{totalSpaces} {totalSpaces !== originalTotal ? <SText className="text-sm text-text-secondary-dark">(orig: {originalTotal})</SText> : null}</SText>
+        <SView className="mb-6">
+          {processed.map((d, i) => (
+            <ParkingCard key={d.ParkingGroupName || i} data={d} now={now} allOffline={allOffline} />
+          ))}
+        </SView>
+
+        <SView className="mb-6 items-center">
+          <SText className={`text-lg font-bold text-center px-4 ${totalColorClass}`}>
+            {statusMessage}
+          </SText>
+        </SView>
+
+        <SView className="rounded-xl shadow-lg mb-4 bg-bg-secondary-dark border border-border-dark">
+          <SView className="flex-1 p-6 items-center">
+            <SText className="text-sm mb-2 text-text-secondary-dark">Total Spaces</SText>
+            <SView className="flex-row items-baseline">
+              {hasApproximation && <SText className="text-amber-600 text-2xl mr-1">≈</SText>}
+              <SText className={`text-4xl font-bold ${totalColorClass}`}>{totalSpaces}</SText>
             </SView>
+            {hasApproximation && (
+              <SText className="text-xs mt-1 text-text-secondary-dark italic">
+                (orig: {originalTotal})
+              </SText>
+            )}
+          </SView>
+
+          <SView className="border-t border-border-dark flex-1 p-6 items-center">
+            <SText className="text-sm mb-2 text-text-secondary-dark">Last Update / Current Time</SText>
+            <SView className="flex-row items-baseline gap-3">
+              <SText className="text-xl font-bold text-text-primary-dark">
+                {lastUpdate.toLocaleTimeString('pl-PL')}
+              </SText>
+              <SText className="text-base text-text-secondary-dark">
+                {now.toLocaleTimeString('pl-PL')}
+              </SText>
+            </SView>
+          </SView>
+
+          <SView className="border-t border-border-dark flex-1 p-6 items-center">
+            <SText className="text-sm mb-2 text-text-secondary-dark">Data Status</SText>
+            <SText className={`text-3xl font-bold ${hasApproximation ? 'text-amber-600' : 'text-success-dark'}`}>
+              {hasApproximation ? 'APPROX' : 'ONLINE'}
+            </SText>
+          </SView>
+        </SView>
 
         {/* Footer link similar to web App.css */}
         <SView className="items-center mt-6">
