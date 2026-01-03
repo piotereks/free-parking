@@ -28,9 +28,9 @@ const PARKING_PARAMS = [
 
 const formatAgeLabel = (ageMinutes) => {
   if (ageMinutes < 1) return 'now';
-  if (ageMinutes < 60) return `${ageMinutes}m`;
-  if (ageMinutes < 1440) return `${Math.floor(ageMinutes / 60)}h`;
-  return `${Math.floor(ageMinutes / 1440)}d`;
+  if (ageMinutes < 60) return `${ageMinutes}m ago`;
+  if (ageMinutes < 1440) return `${Math.floor(ageMinutes / 60)}h ago`;
+  return `${Math.floor(ageMinutes / 1440)}d ago`;
 };
 
 function ParkingCard({ data, now, allOffline }) {
@@ -136,67 +136,84 @@ export default function App() {
       <StatusBar barStyle="light-content" />
 
       {/* Header matching web App.css */}
-      <SView className="w-full bg-bg-secondary-dark items-center justify-center p-6 border-b border-border-dark">
-        <SText className="text-text-primary-dark text-xl font-semibold">Parking Monitor</SText>
-        <SText className="text-text-secondary-dark text-sm mt-1">Real-time parking availability • UBS Wrocław</SText>
+      <SView className="w-full bg-bg-secondary-dark items-center justify-center py-3 px-4 border-b border-border-dark">
+        <SText className="text-text-primary-dark text-lg font-semibold">Parking Monitor</SText>
+        <SText className="text-text-secondary-dark text-xs mt-0.5">Real-time • UBS Wrocław</SText>
       </SView>
 
-      <SScroll contentContainerStyle={{ padding: 16 }}>
-        <SView className="mb-4 w-full items-center">
-          <SText className="text-base text-text-secondary-dark text-center">Real-time parking availability • UBS Wrocław</SText>
-        </SView>
-
-        <SView className="mb-6">
+      <SView className="flex-1 px-3 py-2">
+        {/* Parking cards in horizontal row */}
+        <SView className="flex-row gap-2 mb-3">
           {processed.map((d, i) => (
-            <ParkingCard key={d.ParkingGroupName || i} data={d} now={now} allOffline={allOffline} />
+            <SView key={d.ParkingGroupName || i} className="flex-1 rounded-lg p-3 border border-border-dark bg-bg-secondary-dark">
+              <SText className="text-base font-semibold text-center text-text-primary-dark mb-2">
+                {d.ParkingGroupName === 'Bank_1' ? 'Uni Wroc' : d.ParkingGroupName}
+              </SText>
+              <SText className={`text-6xl font-bold text-center ${(() => {
+                const ts = d.Timestamp ? new Date(d.Timestamp.replace(' ', 'T')) : null;
+                const age = ts ? Math.max(0, Math.floor((now - ts) / 1000 / 60)) : Infinity;
+                const isApproximated = d.approximationInfo?.isApproximated;
+                if (!isApproximated) {
+                  if (allOffline) return 'text-text-secondary-dark';
+                  if (age >= 15) return 'text-warning-dark';
+                  if (age > 5) return 'text-amber-600';
+                }
+                return 'text-success-dark';
+              })()}`}>
+                {d.approximationInfo?.isApproximated ? d.approximationInfo.approximated : (d.CurrentFreeGroupCounterValue || 0)}
+              </SText>
+              <SText className="text-sm text-text-secondary-dark text-center mt-2">
+                {formatAgeLabel((() => {
+                  const ts = d.Timestamp ? new Date(d.Timestamp.replace(' ', 'T')) : null;
+                  return ts ? Math.max(0, Math.floor((now - ts) / 1000 / 60)) : Infinity;
+                })())}
+              </SText>
+            </SView>
           ))}
         </SView>
 
-        <SView className="mb-6 items-center">
-          <SText className={`text-lg font-bold text-center px-4 ${totalColorClass}`}>
+        {/* Compact status message */}
+        <SView className="mb-2">
+          <SText className={`text-sm font-semibold text-center ${totalColorClass}`}>
             {statusMessage}
           </SText>
         </SView>
 
-        <SView className="rounded-xl shadow-lg mb-4 bg-bg-secondary-dark border border-border-dark">
-          <SView className="flex-1 p-6 items-center">
-            <SText className="text-sm mb-2 text-text-secondary-dark">Total Spaces</SText>
-            <SView className="flex-row items-baseline">
-              {hasApproximation && <SText className="text-amber-600 text-2xl mr-1">≈</SText>}
-              <SText className={`text-4xl font-bold ${totalColorClass}`}>{totalSpaces}</SText>
+        {/* Compact status panel - single column */}
+        <SView className="rounded-lg bg-bg-secondary-dark border border-border-dark">
+          <SView className="p-3 items-center border-b border-border-dark">
+            <SText className="text-xs text-text-secondary-dark">Total Spaces</SText>
+            <SView className="flex-row items-baseline mt-1">
+              {hasApproximation && <SText className="text-amber-600 text-lg mr-1">≈</SText>}
+              <SText className={`text-3xl font-bold ${totalColorClass}`}>{totalSpaces}</SText>
             </SView>
             {hasApproximation && (
-              <SText className="text-xs mt-1 text-text-secondary-dark italic">
+              <SText className="text-xs text-text-secondary-dark italic">
                 (orig: {originalTotal})
               </SText>
             )}
           </SView>
 
-          <SView className="border-t border-border-dark flex-1 p-6 items-center">
-            <SText className="text-sm mb-2 text-text-secondary-dark">Last Update / Current Time</SText>
-            <SView className="flex-row items-baseline gap-3">
-              <SText className="text-xl font-bold text-text-primary-dark">
-                {lastUpdate.toLocaleTimeString('pl-PL')}
+          <SView className="p-3 items-center border-b border-border-dark">
+            <SText className="text-xs text-text-secondary-dark mb-1">Last Update / Current</SText>
+            <SView className="flex-row items-baseline gap-2">
+              <SText className="text-base font-bold text-text-primary-dark">
+                {lastUpdate.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })}
               </SText>
-              <SText className="text-base text-text-secondary-dark">
-                {now.toLocaleTimeString('pl-PL')}
+              <SText className="text-sm text-text-secondary-dark">
+                {now.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
               </SText>
             </SView>
           </SView>
 
-          <SView className="border-t border-border-dark flex-1 p-6 items-center">
-            <SText className="text-sm mb-2 text-text-secondary-dark">Data Status</SText>
-            <SText className={`text-3xl font-bold ${hasApproximation ? 'text-amber-600' : 'text-success-dark'}`}>
+          <SView className="p-3 items-center">
+            <SText className="text-xs text-text-secondary-dark mb-1">Status</SText>
+            <SText className={`text-xl font-bold ${hasApproximation ? 'text-amber-600' : 'text-success-dark'}`}>
               {hasApproximation ? 'APPROX' : 'ONLINE'}
             </SText>
           </SView>
         </SView>
-
-        {/* Footer link similar to web App.css */}
-        <SView className="items-center mt-6">
-          <SText className="text-accent">View on web</SText>
-        </SView>
-      </SScroll>
+      </SView>
     </SSafeArea>
   );
 }
