@@ -55,11 +55,11 @@ function ParkingCard({ data, now, allOffline }) {
   else if (age > 5) ageClass = 'text-amber-500';
 
   return (
-    <SView className="bg-white p-4 mb-3 rounded-lg shadow">
-      <SText className="text-[16px] font-semibold mb-1">{name}</SText>
-      <SText className={`text-2xl font-bold ${ageClass}`}>{freeSpots}</SText>
+    <SView className="bg-[#0f1724] p-4 mb-3 rounded-lg shadow">
+      <SText className="text-[16px] font-semibold mb-1 text-white">{name}</SText>
+      <SText className={`text-2xl font-bold ${ageClass} text-white`}>{freeSpots}</SText>
       {isApproximated && (
-        <SText className="text-sm text-slate-500">(orig: {originalSpots})</SText>
+        <SText className="text-sm text-slate-300">(orig: {originalSpots})</SText>
       )}
       <SText className="text-sm text-slate-400 mt-2">{ageLabel}</SText>
     </SView>
@@ -87,7 +87,7 @@ export default function App() {
   const originalTotal = processed.reduce((sum, d) => sum + (d.CurrentFreeGroupCounterValue || 0), 0);
 
   return (
-    <SSafeArea className="flex-1 bg-slate-50">
+    <SSafeArea className="flex-1 bg-[#0b1220]">
       <StatusBar barStyle="light-content" />
 
       {/* Header matching web App.css */}
@@ -101,9 +101,9 @@ export default function App() {
           <ParkingCard key={i} data={d} now={now} allOffline={allOffline} />
         ))}
 
-        <SView className="bg-white p-4 rounded-lg shadow mt-4">
-          <SText className="text-sm text-slate-500">Total Spaces</SText>
-          <SText className="text-2xl font-bold mt-1">{totalSpaces} {totalSpaces !== originalTotal ? <SText className="text-sm text-slate-400">(orig: {originalTotal})</SText> : null}</SText>
+        <SView className="bg-[#0f1724] p-4 rounded-lg shadow mt-4">
+          <SText className="text-sm text-slate-300">Total Spaces</SText>
+          <SText className="text-2xl font-bold mt-1 text-white">{totalSpaces} {totalSpaces !== originalTotal ? <SText className="text-sm text-slate-300">(orig: {originalTotal})</SText> : null}</SText>
         </SView>
 
         {/* Footer link similar to web App.css */}
