@@ -8,6 +8,7 @@ const API_URLS = [
     'https://gd.zaparkuj.pl/api/freegroupcountervalue-green.json'
 ];
 const CORS_PROXY = 'https://corsproxy.io/?';
+// const CORS_PROXY = 'https://corsproxy.io/?';
 
 export const ParkingDataProvider = ({ children }) => {
     const updateRealtimeState = useParkingStore((state) => state.updateRealtimeState);

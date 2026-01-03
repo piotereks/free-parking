@@ -5,20 +5,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { styled } from 'nativewind';
 import { ParkingDataProvider } from './ParkingDataManager';
 import { useParkingStore } from './store/parkingStore';
-import { applyApproximations, calculateDataAge } from './utils/parkingUtils';
+import { applyApproximations, calculateDataAge, formatAgeLabel } from './utils/parkingUtils';
 
 const SSafeArea = styled(SafeAreaView);
 const SView = styled(View);
 const SText = styled(Text);
 
-// Remove the hardcoded PARKING_PARAMS array
-
-const formatAgeLabel = (ageMinutes) => {
-  if (ageMinutes < 1) return 'now';
-  if (ageMinutes < 60) return `${ageMinutes}m ago`;
-  if (ageMinutes < 1440) return `${Math.floor(ageMinutes / 60)}h ago`;
-  return `${Math.floor(ageMinutes / 1440)}d ago`;
-};
+// Remove the formatAgeLabel function since we're importing it from utils
 
 function ParkingCard({ data, now, allOffline }) {
   let name = data.ParkingGroupName;
@@ -159,7 +152,11 @@ function DashboardContent() {
                 {d.approximationInfo?.isApproximated ? d.approximationInfo.approximated : (d.CurrentFreeGroupCounterValue || 0)}
               </SText>
               <SText className="text-sm text-text-secondary-dark text-center mt-2">
-                {formatAgeLabel(calculateDataAge(d.Timestamp, now))}
+                {(() => {
+                  const age = calculateDataAge(d.Timestamp, now);
+                  const { display } = formatAgeLabel(age);
+                  return display;
+                })()}
               </SText>
             </SView>
           ))}
@@ -191,10 +188,10 @@ function DashboardContent() {
             <SText className="text-xs text-text-secondary-dark mb-1">Last Update / Current</SText>
             <SView className="flex-row items-baseline gap-2">
               <SText className="text-base font-bold text-text-primary-dark">
-                {lastRealtimeUpdate ? lastRealtimeUpdate.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' }) : '--:--'}
+                {lastRealtimeUpdate ? lastRealtimeUpdate.toLocaleTimeString('pl-PL') : '--:--:--'}
               </SText>
               <SText className="text-sm text-text-secondary-dark">
-                {now.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                {now.toLocaleTimeString('pl-PL')}
               </SText>
             </SView>
           </SView>

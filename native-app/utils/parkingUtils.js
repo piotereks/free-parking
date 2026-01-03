@@ -12,12 +12,30 @@ export const applyApproximations = (realtimeData, now) => {
 };
 
 export const formatAgeLabel = (age) => {
-    if (age < 1) return { display: 'now', aria: 'Just now' };
-    if (age < 60) return { display: `${age}m ago`, aria: `${age} minutes ago` };
-    if (age < 1440) {
-        const hours = Math.floor(age / 60);
-        return { display: `${hours}h ago`, aria: `${hours} hours ago` };
+    if (!Number.isFinite(age)) {
+        return { display: '--', aria: 'Data age unavailable' };
     }
-    const days = Math.floor(age / 1440);
-    return { display: `${days}d ago`, aria: `${days} days ago` };
+
+    const minutes = Math.max(0, Math.round(age));
+
+    if (minutes < 60) {
+        const label = `${minutes} min ago`;
+        const aria = `Data from ${minutes} minute${minutes === 1 ? '' : 's'} ago`;
+        return { display: label, aria };
+    }
+
+    if (minutes < 1440) {
+        const hours = Math.round(minutes / 60);
+        const label = `${hours} h ago`;
+        const aria = `Data from ${hours} hour${hours === 1 ? '' : 's'} ago`;
+        return { display: label, aria };
+    }
+
+    const daysRaw = minutes / 1440;
+    const daysRounded = Math.round(daysRaw * 2) / 2;
+    const isWholeDay = Number.isInteger(daysRounded);
+    const dayValue = isWholeDay ? daysRounded.toString() : daysRounded.toFixed(1);
+    const label = `${dayValue} d ago`;
+    const aria = `Data from ${dayValue} day${dayValue === '1' ? '' : 's'} ago`;
+    return { display: label, aria };
 };
