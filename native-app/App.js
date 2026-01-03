@@ -55,7 +55,7 @@ function ParkingCard({ data, now, allOffline }) {
   else if (age > 5) ageClass = 'text-amber-500';
 
   return (
-    <SView className="rounded-lg p-4 mb-3 flex flex-col items-center justify-center border border-gray-700 bg-[#0f1724] shadow">
+    <SView className="rounded-lg p-4 mb-3 flex flex-col items-center justify-center border border-[#1f2937] bg-[#0b1220] shadow">
       <SText className="text-base font-semibold mb-1 text-center text-white">{name}</SText>
       <SText className={`text-4xl font-bold ${ageClass || 'text-white'} flex items-center justify-center`}>{freeSpots}</SText>
       {isApproximated && (
@@ -87,7 +87,7 @@ export default function App() {
   const originalTotal = processed.reduce((sum, d) => sum + (d.CurrentFreeGroupCounterValue || 0), 0);
 
   return (
-    <SSafeArea className="flex-1 bg-[#0b1220]">
+    <SSafeArea className="flex-1 bg-[#0f1724]">
       <StatusBar barStyle="light-content" />
 
       {/* Header matching web App.css */}
@@ -101,9 +101,9 @@ export default function App() {
           <ParkingCard key={i} data={d} now={now} allOffline={allOffline} />
         ))}
 
-        <SView className="p-4 rounded-lg shadow mt-4 bg-bg-secondary-dark border border-border-dark">
-              <SText className="text-sm text-text-secondary-dark">Total Spaces</SText>
-              <SText className="text-2xl font-bold mt-1 text-text-primary-dark">{totalSpaces} {totalSpaces !== originalTotal ? <SText className="text-sm text-text-secondary-dark">(orig: {originalTotal})</SText> : null}</SText>
+        <SView className="p-4 rounded-lg shadow mt-4 bg-[#0b1220] border border-[#1f2937]">
+              <SText className="text-sm text-gray-400">Total Spaces</SText>
+              <SText className="text-2xl font-bold mt-1 text-white">{totalSpaces} {totalSpaces !== originalTotal ? <SText className="text-sm text-gray-400">(orig: {originalTotal})</SText> : null}</SText>
             </SView>
 
         {/* Footer link similar to web App.css */}
