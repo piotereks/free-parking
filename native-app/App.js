@@ -1,4 +1,4 @@
-import "../index.css";
+import "./index.css";
 import React, { useMemo } from 'react';
 import { Text, View, ScrollView, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
