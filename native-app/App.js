@@ -1,30 +1,17 @@
 import "./index.css";
 import React, { useState, useEffect, useMemo } from 'react';
-import { Text, View, ScrollView, StatusBar } from 'react-native';
+import { Text, View, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styled } from 'nativewind';
+import { ParkingDataProvider } from './ParkingDataManager';
+import { useParkingStore } from './store/parkingStore';
+import { applyApproximations, calculateDataAge } from './utils/parkingUtils';
 
 const SSafeArea = styled(SafeAreaView);
 const SView = styled(View);
 const SText = styled(Text);
-const SScroll = styled(ScrollView);
 
-// Example parameters (shape matches the web app's ParkingCard `data`)
-const PARKING_PARAMS = [
-  {
-    ParkingGroupName: 'Green Day',
-    CurrentFreeGroupCounterValue: 44,
-    Timestamp: new Date(Date.now() - 1000 * 60 * 8).toISOString().replace('T', ' '), // 8 minutes ago
-    approximationInfo: { isApproximated: false }
-  },
-  {
-    ParkingGroupName: 'Bank_1',
-    CurrentFreeGroupCounterValue: 12,
-    Timestamp: new Date(Date.now() - 10000 * 60 * 2).toISOString().replace('T', ' '), // 2 minutes ago
-    approximationInfo: { isApproximated: false }
-  },
-
-];
+// Remove the hardcoded PARKING_PARAMS array
 
 const formatAgeLabel = (ageMinutes) => {
   if (ageMinutes < 1) return 'now';
@@ -66,21 +53,25 @@ function ParkingCard({ data, now, allOffline }) {
   );
 }
 
-export default function App() {
+function DashboardContent() {
+  const realtimeData = useParkingStore((state) => state.realtimeData);
+  const realtimeLoading = useParkingStore((state) => state.realtimeLoading);
+  const realtimeError = useParkingStore((state) => state.realtimeError);
+  const lastRealtimeUpdate = useParkingStore((state) => state.lastRealtimeUpdate);
+  
   const [now, setNow] = useState(new Date());
-  const [lastUpdate] = useState(new Date());
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  const processed = useMemo(() => PARKING_PARAMS, []);
+  const processed = useMemo(() => {
+    return applyApproximations(realtimeData, now);
+  }, [realtimeData, now]);
 
   const allOffline = processed.length > 0 && processed.every((d) => {
-    const ts = d.Timestamp ? new Date(d.Timestamp.replace(' ', 'T')) : null;
-    if (!ts) return true;
-    const age = Math.max(0, Math.floor((now - ts) / 1000 / 60));
+    const age = calculateDataAge(d.Timestamp, now);
     return age >= 1440;
   });
 
@@ -102,11 +93,8 @@ export default function App() {
 
     let maxAge = 0;
     processed.forEach((d) => {
-      const ts = d.Timestamp ? new Date(d.Timestamp.replace(' ', 'T')) : null;
-      if (ts) {
-        const age = Math.max(0, Math.floor((now - ts) / 1000 / 60));
-        maxAge = Math.max(maxAge, age);
-      }
+      const age = calculateDataAge(d.Timestamp, now);
+      maxAge = Math.max(maxAge, age);
     });
 
     let colorClass = '';
@@ -141,7 +129,16 @@ export default function App() {
         <SText className="text-text-secondary-dark text-xs mt-0.5">Real-time • UBS Wrocław</SText>
       </SView>
 
-      <SView className="flex-1 px-3 py-2">
+      {realtimeLoading && processed.length === 0 ? (
+        <SView className="flex-1 items-center justify-center">
+          <SText className="text-text-secondary-dark text-lg">Loading parking data...</SText>
+        </SView>
+      ) : realtimeError ? (
+        <SView className="flex-1 items-center justify-center px-4">
+          <SText className="text-warning-dark text-base text-center">{realtimeError}</SText>
+        </SView>
+      ) : (
+        <SView className="flex-1 px-3 py-2">
         {/* Parking cards in horizontal row */}
         <SView className="flex-row gap-2 mb-3">
           {processed.map((d, i) => (
@@ -150,8 +147,7 @@ export default function App() {
                 {d.ParkingGroupName === 'Bank_1' ? 'Uni Wroc' : d.ParkingGroupName}
               </SText>
               <SText className={`text-6xl font-bold text-center ${(() => {
-                const ts = d.Timestamp ? new Date(d.Timestamp.replace(' ', 'T')) : null;
-                const age = ts ? Math.max(0, Math.floor((now - ts) / 1000 / 60)) : Infinity;
+                const age = calculateDataAge(d.Timestamp, now);
                 const isApproximated = d.approximationInfo?.isApproximated;
                 if (!isApproximated) {
                   if (allOffline) return 'text-text-secondary-dark';
@@ -163,10 +159,7 @@ export default function App() {
                 {d.approximationInfo?.isApproximated ? d.approximationInfo.approximated : (d.CurrentFreeGroupCounterValue || 0)}
               </SText>
               <SText className="text-sm text-text-secondary-dark text-center mt-2">
-                {formatAgeLabel((() => {
-                  const ts = d.Timestamp ? new Date(d.Timestamp.replace(' ', 'T')) : null;
-                  return ts ? Math.max(0, Math.floor((now - ts) / 1000 / 60)) : Infinity;
-                })())}
+                {formatAgeLabel(calculateDataAge(d.Timestamp, now))}
               </SText>
             </SView>
           ))}
@@ -198,7 +191,7 @@ export default function App() {
             <SText className="text-xs text-text-secondary-dark mb-1">Last Update / Current</SText>
             <SView className="flex-row items-baseline gap-2">
               <SText className="text-base font-bold text-text-primary-dark">
-                {lastUpdate.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })}
+                {lastRealtimeUpdate ? lastRealtimeUpdate.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' }) : '--:--'}
               </SText>
               <SText className="text-sm text-text-secondary-dark">
                 {now.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
@@ -214,6 +207,15 @@ export default function App() {
           </SView>
         </SView>
       </SView>
+      )}
     </SSafeArea>
+  );
+}
+
+export default function App() {
+  return (
+    <ParkingDataProvider>
+      <DashboardContent />
+    </ParkingDataProvider>
   );
 }
