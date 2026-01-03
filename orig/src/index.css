@@ -16,6 +16,15 @@
   /* CSS Custom Properties */
   :root {
     --accent-glow: #00d9ff;
+    /* Semantic variables used by components and inline styles */
+    --background: #f1f5f9;
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --card-bg: #f8fafc;
+    --primary: #00d9ff;
+    --warning: #dc2626;
+    --age-medium: #d97706;
+    --success: #059669;
   }
 
   /* Light theme (default) */
@@ -26,6 +35,15 @@
   /* Dark theme */
   body.dark {
     @apply bg-bg-primary-dark text-text-primary-dark;
+    /* Dark-mode overrides for semantic variables */
+    --background: #0a0e27;
+    --text-primary: #e0e6ff;
+    --text-secondary: #8b95c9;
+    --card-bg: #1e2749;
+    --primary: #00d9ff;
+    --warning: #ff3366;
+    --age-medium: #ffaa00;
+    --success: #00ff88;
   }
 }
 

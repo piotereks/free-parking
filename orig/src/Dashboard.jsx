@@ -175,7 +175,9 @@ const Dashboard = ({ setView }) => {
           {realtimeLoading && realtimeData.length === 0 ? (
             <div className="loader" role="status" aria-live="polite">Loading parking data...</div>
           ) : (
-            processedData.map((d, i) => <ParkingCard key={i} data={d} now={now} allOffline={allOffline} />)
+            processedData.map((d, i) => (
+              <ParkingCard key={d.ParkingGroupName || i} data={d} now={now} allOffline={allOffline} />
+            ))
           )}
         </div>
         <div className={`status-description ${totalColorClass}`} aria-label="Status description">{statusMessage}</div>
@@ -208,8 +210,7 @@ const Dashboard = ({ setView }) => {
             <div className="panel-section">
               <div className="status-label">Data Status</div>
               <div
-                className="status-value"
-                style={{ color: realtimeError ? 'var(--warning)' : (hasApproximation ? 'var(--age-medium)' : 'var(--success)') }}
+                className={`status-value ${realtimeError ? 'age-old' : (hasApproximation ? 'age-medium' : '')}`}
                 role="status"
                 aria-live="polite"
               >
