@@ -1,3 +1,4 @@
+import "../index.css";
 import React, { useMemo } from 'react';
 import { Text, View, ScrollView, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -87,8 +88,13 @@ export default function App() {
 
   return (
     <SSafeArea className="flex-1 bg-slate-50">
-      <StatusBar barStyle="dark-content" />
-      <SText className="text-[20px] font-semibold p-4 text-center">Parking Dashboard (static)</SText>
+      <StatusBar barStyle="light-content" />
+
+      {/* Header matching web App.css */}
+      <SView className="w-full bg-[#282c34] items-center justify-center p-6">
+        <SText className="text-white text-[20px] font-semibold">Parking Monitor</SText>
+        <SText className="text-white text-sm mt-1">Real-time parking availability • UBS Wrocław</SText>
+      </SView>
 
       <SScroll contentContainerStyle={{ padding: 16 }}>
         {processed.map((d, i) => (
@@ -98,6 +104,11 @@ export default function App() {
         <SView className="bg-white p-4 rounded-lg shadow mt-4">
           <SText className="text-sm text-slate-500">Total Spaces</SText>
           <SText className="text-2xl font-bold mt-1">{totalSpaces} {totalSpaces !== originalTotal ? <SText className="text-sm text-slate-400">(orig: {originalTotal})</SText> : null}</SText>
+        </SView>
+
+        {/* Footer link similar to web App.css */}
+        <SView className="items-center mt-6">
+          <SText className="text-[#61dafb]">View on web</SText>
         </SView>
       </SScroll>
     </SSafeArea>
