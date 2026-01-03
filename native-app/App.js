@@ -20,8 +20,8 @@ const PARKING_PARAMS = [
   {
     ParkingGroupName: 'Bank_1',
     CurrentFreeGroupCounterValue: 12,
-    Timestamp: new Date(Date.now() - 1000 * 60 * 2).toISOString().replace('T', ' '), // 2 minutes ago
-    approximationInfo: { isApproximated: false }
+    Timestamp: new Date(Date.now() - 10000 * 60 * 2).toISOString().replace('T', ' '), // 2 minutes ago
+    approximationInfo: { isApproximated: true, approximated: 15, original: 12 }
   },
 
 ];
@@ -47,12 +47,12 @@ function ParkingCard({ data, now, allOffline }) {
   const ageLabel = formatAgeLabel(age);
 
   let ageClass = '';
-  if (!isApproximated) {
+  // if (!isApproximated) {
     if (allOffline) ageClass = 'text-slate-400';
     else if (age >= 15) ageClass = 'text-rose-600';
     else if (age > 5) ageClass = 'text-amber-500';
-  } else if (age >= 15) ageClass = 'text-slate-400';
-  else if (age > 5) ageClass = 'text-amber-500';
+  // } else if (age >= 15) ageClass = 'text-slate-400';
+  // else if (age > 5) ageClass = 'text-amber-500';
 
   return (
     <SView className="rounded-lg p-4 mb-3 flex flex-col items-center justify-center border bg-[#0f1724] shadow">
