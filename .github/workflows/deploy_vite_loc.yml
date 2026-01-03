@@ -21,12 +21,16 @@ jobs:
           node-version: 20
           cache: 'npm'
 
-      - run: npm ci
-      - run: npm run build -- --config vite.config.local.js
+      - name: Install web deps
+        run: npm ci
+        working-directory: orig
+      - name: Build web (local config)
+        run: npm run build -- --config vite.config.local.js
+        working-directory: orig
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: ./parking-deploy/docs/html/parking
+          path: ./orig/parking-deploy/docs/html/parking
 
       - uses: actions/deploy-pages@v4
 

@@ -26,29 +26,33 @@ jobs:
       
       - name: Install dependencies
         run: npm ci
+        working-directory: orig
       
       - name: Run linter
         run: npm run lint
+        working-directory: orig
       
       - name: Run tests with coverage
         run: npm run test:run -- --coverage
+        working-directory: orig
       
       - name: Upload coverage reports
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: coverage-report
-          path: coverage/
+          path: orig/coverage/
           retention-days: 7
       
       - name: Build project
         run: npm run build
+        working-directory: orig
       
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
-          path: parking-deploy/docs/html/parking/
+          path: orig/parking-deploy/docs/html/parking/
           retention-days: 7
 
   build:
@@ -71,9 +75,11 @@ jobs:
       
       - name: Install dependencies
         run: npm ci
+        working-directory: orig
       
       - name: Build production
         run: npm run build
+        working-directory: orig
       
       - name: Deploy to GitHub Pages (if configured)
         uses: peaceiris/actions-gh-pages@v3
@@ -81,7 +87,7 @@ jobs:
           personal_token: ${{ secrets.DEPLOY_TOKEN }}
           external_repository: piotereks/piotereks
           publish_branch: main
-          publish_dir: ./parking-deploy/docs/html/parking
+          publish_dir: ./orig/parking-deploy/docs/html/parking
           destination_dir: docs/html/parking
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
