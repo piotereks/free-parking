@@ -21,6 +21,7 @@ const ParkingDataProvider = ({ children }) => {
   const setLastRealtimeUpdate = useParkingStore((s) => s.setLastRealtimeUpdate);
   const setRefreshCallback = useParkingStore((s) => s.setRefreshCallback);
   const setStopAutoRefresh = useParkingStore((s) => s.setStopAutoRefresh);
+  const cacheCleared = useParkingStore((s) => s.cacheCleared);
 
   const fetchInFlight = useRef(false);
 
@@ -60,13 +61,31 @@ const ParkingDataProvider = ({ children }) => {
   useEffect(() => {
     // Register the actual fetchRealtime function so callers invoke it directly
     setRefreshCallback(fetchRealtime);
-    setStopAutoRefresh(undefined);
+
+    // Initial fetch and auto-refresh every 5 minutes (match web behavior)
+    if (cacheCleared) {
+      debugLog('ParkingDataProvider: cache cleared — skipping initial fetch and auto-refresh');
+      return () => {
+        setRefreshCallback(null);
+        setStopAutoRefresh(null);
+      };
+    }
+
     fetchRealtime();
+    const refreshTimer = global.setInterval(fetchRealtime, 5 * 60 * 1000);
+
+    try {
+      setStopAutoRefresh(() => () => global.clearInterval(refreshTimer));
+    } catch (e) {
+      debugLog('ParkingDataProvider: failed to register stopAutoRefresh', e?.message || e);
+    }
+
     return () => {
+      global.clearInterval(refreshTimer);
       setRefreshCallback(null);
       setStopAutoRefresh(null);
     };
-  }, [fetchRealtime, setRefreshCallback, setStopAutoRefresh]);
+  }, [fetchRealtime, setRefreshCallback, setStopAutoRefresh, cacheCleared]);
 
   return children;
 };
