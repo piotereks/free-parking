@@ -5,7 +5,7 @@ import { styled } from 'nativewind';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import ParkingDataProvider from './context/ParkingDataProvider';
 import useParkingStore from './hooks/useParkingStore';
-import { applyApproximations, calculateDataAge, formatAgeLabel } from 'parking-shared';
+import { applyApproximations, calculateDataAge, formatAgeLabel, parseTimestamp, formatTime } from 'parking-shared';
 
 const SSafeArea = styled(SafeAreaView);
 const SView = styled(View);
@@ -20,8 +20,8 @@ function ParkingCard({ data, now, allOffline }) {
   const freeSpots = isApproximated ? approximationInfo.approximated : (data.CurrentFreeGroupCounterValue || 0);
   const originalSpots = approximationInfo.original ?? data.CurrentFreeGroupCounterValue ?? 0;
 
-  const ts = data.Timestamp ? new Date(data.Timestamp.replace(' ', 'T')) : null;
-  const age = ts ? Math.max(0, Math.floor((now - ts) / 1000 / 60)) : Infinity;
+  const ts = parseTimestamp(data.Timestamp);
+  const age = calculateDataAge(data.Timestamp, now);
   const ageLabel = formatAgeLabel(age);
 
   // Color is based on age/allOffline only; approximation no longer affects color
@@ -212,7 +212,7 @@ function DashboardContent() {
               <SText className="text-xs text-text-secondary-dark mb-1">Last Update / Current</SText>
               <SView className="flex-row items-baseline gap-2">
                 <SText className="text-base font-bold text-text-primary-dark">
-                  {lastRealtimeUpdate ? new Date(lastRealtimeUpdate).toLocaleTimeString('pl-PL') : '--:--:--'}
+                  {lastRealtimeUpdate ? formatTime(lastRealtimeUpdate, 'pl-PL') : '--:--:--'}
                 </SText>
                 <SText className="text-sm text-text-secondary-dark">
                   {now.toLocaleTimeString('pl-PL')}

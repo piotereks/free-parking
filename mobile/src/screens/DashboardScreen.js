@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, FlatList, RefreshControl } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import useParkingStore from '../hooks/useParkingStore';
-import { applyApproximations, isValidParkingData, normalizeParkingName, calculateDataAge, formatAgeLabel } from 'parking-shared';
+import { applyApproximations, isValidParkingData, normalizeParkingName, calculateDataAge, formatAgeLabel, formatTime } from 'parking-shared';
 import ParkingCard from '../components/ParkingCard';
 import LoadingSkeletonCard from '../components/LoadingSkeletonCard';
 
@@ -95,7 +95,7 @@ const DashboardScreen = () => {
     <View className="flex-1 bg-bg-primary-light dark:bg-bg-primary-dark">
       <View className="p-3 border-b border-border-light dark:border-border-dark bg-bg-card-light dark:bg-bg-card-dark">
         <Text className="text-lg font-bold text-text-primary-light dark:text-text-primary-dark">Parking Dashboard</Text>
-        <Text className="text-xs mt-1 text-text-secondary-light dark:text-text-secondary-dark">{`Updated: ${now.toLocaleTimeString()}`}</Text>
+        <Text className="text-xs mt-1 text-text-secondary-light dark:text-text-secondary-dark">{`Updated: ${formatTime(now, 'pl-PL')}`}</Text>
       </View>
 
       {realtimeLoading && (

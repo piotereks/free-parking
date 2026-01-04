@@ -1,15 +1,12 @@
 import React, { useCallback, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
-import { formatAgeLabel } from 'parking-shared/parkingUtils';
+import { formatAgeLabel, calculateDataAge } from 'parking-shared';
 
-const getAgeColorClass = (now, timestamp) => {
-  if (!timestamp) return 'text-text-secondary-light dark:text-text-secondary-dark';
-  const t = new Date(timestamp);
-  if (Number.isNaN(t.getTime())) return 'text-text-secondary-light dark:text-text-secondary-dark';
-  const diffMin = Math.floor((now - t) / 60000);
-  if (diffMin >= 15) return 'text-warning-light dark:text-warning-dark';
-  if (diffMin >= 5) return 'text-warning-medium-light dark:text-warning-medium-dark';
+const getAgeColorClass = (ageMinutes) => {
+  if (ageMinutes === null || ageMinutes === Infinity) return 'text-text-secondary-light dark:text-text-secondary-dark';
+  if (ageMinutes >= 15) return 'text-warning-light dark:text-warning-dark';
+  if (ageMinutes >= 5) return 'text-warning-medium-light dark:text-warning-medium-dark';
   return 'text-success-light dark:text-success-dark';
 };
 
@@ -38,9 +35,9 @@ const ParkingCard = ({ data = {}, now = new Date(), allOffline = false }) => {
   const timestamp = data.timestamp || data.lastUpdated || data.updated_at || null;
   const approx = data.approximation || data.approx || false;
 
-  const ageMinutes = timestamp ? Math.floor((now - new Date(timestamp)) / 60000) : null;
+  const ageMinutes = timestamp ? calculateDataAge(timestamp, now) : null;
   const { display: ageDisplay } = formatAgeLabel(ageMinutes);
-  const ageColorClass = getAgeColorClass(now, timestamp);
+  const ageColorClass = getAgeColorClass(ageMinutes);
 
   const onPress = useCallback(async () => {
     const text = `${name} — ${free}${capacity ? ` / ${capacity}` : ''}`;
