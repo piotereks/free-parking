@@ -24,18 +24,19 @@ function ParkingCard({ data, now, allOffline }) {
   const age = ts ? Math.max(0, Math.floor((now - ts) / 1000 / 60)) : Infinity;
   const ageLabel = formatAgeLabel(age);
 
+  // Color is based on age/allOffline only; approximation no longer affects color
   let ageClass = '';
-  if (!isApproximated) {
-    if (allOffline) ageClass = 'text-text-secondary-dark';
-    else if (age >= 15) ageClass = 'text-warning-dark';
-    else if (age > 5) ageClass = 'text-amber-600';
-  } else if (age >= 15) ageClass = 'text-text-secondary-dark';
+  if (allOffline) ageClass = 'text-text-secondary-dark';
+  else if (age >= 15) ageClass = 'text-warning-dark';
   else if (age > 5) ageClass = 'text-amber-600';
 
   return (
     <SView className="rounded-xl p-4 mb-3 flex flex-col items-center justify-center border border-border-dark bg-bg-secondary-dark shadow-lg">
       <SText className="text-base font-semibold mb-1 text-center text-text-primary-dark">{name}</SText>
-      <SText className={`text-4xl font-bold ${ageClass || 'text-success-dark'} flex items-center justify-center`}>{freeSpots}</SText>
+      <SView className="flex-row items-center justify-center">
+        {isApproximated && <SText className="text-4xl text-amber-600 mr-1">≈</SText>}
+        <SText className={`text-4xl font-bold ${ageClass || 'text-success-dark'}`}>{freeSpots}</SText>
+      </SView>
       {isApproximated && (
         <SText className="text-sm text-text-secondary-dark">(orig: {originalSpots})</SText>
       )}
@@ -110,6 +111,30 @@ function DashboardContent() {
 
   const { colorClass: totalColorClass, statusMessage } = getAggregatedStatus();
 
+  useEffect(() => {
+    // Log only when processed content or totals change (not every tick)
+    try {
+      console.debug('[Parking] Processed items:', processed.length);
+      processed.forEach((d, idx) => {
+        const name = d?.ParkingGroupName || `<unknown-${idx}>`;
+        const age = calculateDataAge(d?.Timestamp); // uses current time internally
+        const approx = d?.approximationInfo || {};
+        console.debug(`[Parking] ${name}: ts=${d?.Timestamp} age=${age}m isApproximated=${!!approx.isApproximated} original=${approx.original ?? d?.CurrentFreeGroupCounterValue ?? 0} approximated=${approx.approximated ?? d?.CurrentFreeGroupCounterValue ?? 0}`);
+      });
+
+      console.debug('[Parking] Totals:', { totalSpaces, originalTotal });
+
+      let maxAgeForLog = 0;
+      processed.forEach((d) => {
+        const a = calculateDataAge(d?.Timestamp);
+        if (a > maxAgeForLog) maxAgeForLog = a;
+      });
+      console.debug('[Parking] Max age (min):', maxAgeForLog, 'All offline:', allOffline);
+    } catch (e) {
+      console.error('[Parking] debug logging failed', e);
+    }
+  }, [processed, totalSpaces, originalTotal, lastRealtimeUpdate]);
+
   return (
     <SSafeArea className="flex-1 bg-bg-primary-dark">
       <StatusBar barStyle="light-content" />
@@ -138,18 +163,17 @@ function DashboardContent() {
                 <SText className="text-base font-semibold text-center text-text-primary-dark mb-2">
                   {d.ParkingGroupName === 'Bank_1' ? 'Uni Wroc' : d.ParkingGroupName}
                 </SText>
-                <SText className={`text-6xl font-bold text-center ${(() => {
+                {(() => {
                   const age = calculateDataAge(d.Timestamp, now);
-                  const isApproximated = d.approximationInfo?.isApproximated;
-                  if (!isApproximated) {
-                    if (allOffline) return 'text-text-secondary-dark';
-                    if (age >= 15) return 'text-warning-dark';
-                    if (age > 5) return 'text-amber-600';
-                  }
-                  return 'text-success-dark';
-                })()}`}>
-                  {d.approximationInfo?.isApproximated ? d.approximationInfo.approximated : (d.CurrentFreeGroupCounterValue || 0)}
-                </SText>
+                  const colorClass = allOffline ? 'text-text-secondary-dark' : (age >= 15 ? 'text-warning-dark' : (age > 5 ? 'text-amber-600' : 'text-success-dark'));
+                  const value = d.approximationInfo?.isApproximated ? d.approximationInfo.approximated : (d.CurrentFreeGroupCounterValue || 0);
+                  return (
+                    <SView className="flex-row items-center justify-center">
+                      {d.approximationInfo?.isApproximated && <SText className="text-6xl text-amber-600 mr-1">≈</SText>}
+                      <SText className={`text-6xl font-bold text-center ${colorClass}`}>{value}</SText>
+                    </SView>
+                  );
+                })()}
                 <SText className="text-sm text-text-secondary-dark text-center mt-2">
                   {(() => {
                     const age = calculateDataAge(d.Timestamp, now);
@@ -171,7 +195,7 @@ function DashboardContent() {
             <SView className="p-3 items-center border-b border-border-dark">
               <SText className="text-xs text-text-secondary-dark">Total Spaces</SText>
               <SView className="flex-row items-baseline mt-1">
-                {hasApproximation && <SText className="text-amber-600 text-lg mr-1">≈</SText>}
+                {hasApproximation && <SText className="text-3xl text-amber-600 mr-1">≈</SText>}
                 <SText className={`text-3xl font-bold ${totalColorClass}`}>{totalSpaces}</SText>
               </SView>
               {hasApproximation && (
