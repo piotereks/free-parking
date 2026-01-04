@@ -1,6 +1,6 @@
-import js from '@eslint/js';
+const js = require('@eslint/js');
 
-export default [
+module.exports = [
   js.configs.recommended,
   {
     plugins: {
@@ -35,9 +35,8 @@ export default [
       }
     },
     rules: {
-    //   'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],  // temporarily disabled
-    'no-unused-vars': 'off',  
-    'no-console': 'off',
+      'no-unused-vars': 'off',
+      'no-console': 'off',
       'react/jsx-uses-react': 'off',
       'react/react-in-jsx-scope': 'off',
       'react-native/no-unused-styles': 'off',
