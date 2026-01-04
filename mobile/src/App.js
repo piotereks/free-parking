@@ -174,6 +174,9 @@ function DashboardContent() {
                     </SView>
                   );
                 })()}
+                {d.approximationInfo?.isApproximated && (
+                  <SText className="text-sm text-text-secondary-dark text-center mt-1">(orig: {d.approximationInfo?.original ?? d.CurrentFreeGroupCounterValue ?? 0})</SText>
+                )}
                 <SText className="text-sm text-text-secondary-dark text-center mt-2">
                   {(() => {
                     const age = calculateDataAge(d.Timestamp, now);
