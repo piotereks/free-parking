@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Text, View, StatusBar, ScrollView, RefreshControl, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { Text, View, StatusBar, ScrollView, RefreshControl, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styled } from 'nativewind';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
@@ -166,7 +166,7 @@ function DashboardContent() {
       <StatusBar barStyle="light-content" />
 
       <SView className="w-full bg-bg-secondary-dark flex-row items-center justify-center py-3 px-4 border-b border-border-dark">
-        <SText className="text-2xl mr-3">🅿️</SText>
+        <Image source={require('../assets/favicon.png')} style={{ width: 36, height: 36, marginRight: 12 }} />
         <SView className="items-center">
           <SText className="text-text-primary-dark text-lg font-semibold">{title}</SText>
           <SText className="text-text-secondary-dark text-xs mt-0.5">Real-time • UBS Wrocław</SText>
