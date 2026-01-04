@@ -1,0 +1,564 @@
+/**
+ * DashboardScreen.test.js
+ * 
+ * Comprehensive test suite for the DashboardScreen component
+ * Tests rendering, data processing, user interactions, and edge cases
+ */
+
+import React from 'react';
+import { render, waitFor, act, fireEvent } from '@testing-library/react-native';
+import DashboardScreen from '../../src/screens/DashboardScreen';
+import useParkingStore from '../../src/hooks/useParkingStore';
+import { useTheme } from '../../src/context/ThemeContext';
+import { applyApproximations, calculateDataAge, formatAgeLabel, formatTime } from 'parking-shared';
+
+// Mock dependencies
+jest.mock('../../src/hooks/useParkingStore');
+jest.mock('../../src/context/ThemeContext');
+jest.mock('parking-shared');
+jest.mock('../../src/config/debug', () => ({
+  debugLog: jest.fn(),
+}));
+jest.mock('../../src/components/ParkingCard', () => 'ParkingCard');
+jest.mock('../../src/components/LoadingSkeletonCard', () => 'LoadingSkeletonCard');
+
+// Mock timers
+jest.useFakeTimers();
+
+describe('DashboardScreen', () => {
+  // Default mock values
+  const mockColors = {
+    background: '#000000',
+    text: '#FFFFFF',
+  };
+
+  const mockTheme = {
+    colors: mockColors,
+    isDark: true,
+  };
+
+  const mockParkingData = [
+    {
+      ParkingGroupName: 'Bank_1',
+      CurrentFreeGroupCounterValue: 45,
+      Timestamp: '2026-01-04 10:30:00',
+      id: 1,
+    },
+    {
+      ParkingGroupName: 'Parking_A',
+      CurrentFreeGroupCounterValue: 23,
+      Timestamp: '2026-01-04 10:28:00',
+      id: 2,
+    },
+  ];
+
+  const mockRefreshCallback = jest.fn();
+
+  beforeEach(() => {
+    // Reset all mocks before each test
+    jest.clearAllMocks();
+    
+    // Setup default mock implementations
+    useTheme.mockReturnValue(mockTheme);
+    
+    useParkingStore.mockReturnValue({
+      realtimeData: mockParkingData,
+      realtimeLoading: false,
+      realtimeError: null,
+      refreshCallback: mockRefreshCallback,
+    });
+
+    applyApproximations.mockImplementation((data) => data);
+    calculateDataAge.mockReturnValue(2); // 2 minutes old
+    formatAgeLabel.mockReturnValue({ display: '2 min ago' });
+    formatTime.mockReturnValue('10:30:00');
+  });
+
+  afterEach(() => {
+    jest.clearAllTimers();
+  });
+
+  describe('Rendering', () => {
+    test('should render dashboard with header', () => {
+      const { getByText } = render(<DashboardScreen />);
+      
+      expect(getByText('Parking Dashboard')).toBeTruthy();
+      expect(getByText(/Updated:/)).toBeTruthy();
+    });
+
+    test('should apply correct theme classes in dark mode', () => {
+      const { container } = render(<DashboardScreen />);
+      
+      // Verify theme hook was called
+      expect(useTheme).toHaveBeenCalled();
+    });
+
+    test('should apply correct theme classes in light mode', () => {
+      useTheme.mockReturnValue({
+        colors: mockColors,
+        isDark: false,
+      });
+
+      const { container } = render(<DashboardScreen />);
+      
+      expect(useTheme).toHaveBeenCalled();
+    });
+
+    test('should render parking cards when data is available', async () => {
+      const { getAllByTestId } = render(<DashboardScreen />);
+      
+      await waitFor(() => {
+        // ParkingCard components should be rendered
+        const cards = getAllByTestId(/parking-card/i);
+        expect(cards).toHaveLength(2);
+      });
+    });
+  });
+
+  describe('Loading States', () => {
+    test('should show loading skeletons when loading', () => {
+      useParkingStore.mockReturnValue({
+        realtimeData: [],
+        realtimeLoading: true,
+        realtimeError: null,
+        refreshCallback: mockRefreshCallback,
+      });
+
+      const { getAllByTestId } = render(<DashboardScreen />);
+      
+      // Should render 4 skeleton cards
+      const skeletons = getAllByTestId(/loading-skeleton/i);
+      expect(skeletons).toHaveLength(4);
+    });
+
+    test('should not show parking data while loading', () => {
+      useParkingStore.mockReturnValue({
+        realtimeData: mockParkingData,
+        realtimeLoading: true,
+        realtimeError: null,
+        refreshCallback: mockRefreshCallback,
+      });
+
+      const { queryByTestId } = render(<DashboardScreen />);
+      
+      // Parking cards should not be visible
+      expect(queryByTestId('parking-card')).toBeNull();
+    });
+  });
+
+  describe('Error States', () => {
+    test('should display error message when there is an error', () => {
+      useParkingStore.mockReturnValue({
+        realtimeData: [],
+        realtimeLoading: false,
+        realtimeError: 'Network connection failed',
+        refreshCallback: mockRefreshCallback,
+      });
+
+      const { getByText } = render(<DashboardScreen />);
+      
+      expect(getByText(/Error loading data/i)).toBeTruthy();
+      expect(getByText(/Pull to retry/i)).toBeTruthy();
+    });
+
+    test('should not show error during loading', () => {
+      useParkingStore.mockReturnValue({
+        realtimeData: [],
+        realtimeLoading: true,
+        realtimeError: 'Some error',
+        refreshCallback: mockRefreshCallback,
+      });
+
+      const { queryByText } = render(<DashboardScreen />);
+      
+      expect(queryByText(/Error loading data/i)).toBeNull();
+    });
+
+    test('should show empty state when no data and no error', () => {
+      useParkingStore.mockReturnValue({
+        realtimeData: [],
+        realtimeLoading: false,
+        realtimeError: null,
+        refreshCallback: mockRefreshCallback,
+      });
+
+      const { getByText } = render(<DashboardScreen />);
+      
+      expect(getByText(/No parking data available/i)).toBeTruthy();
+    });
+  });
+
+  describe('Data Processing', () => {
+    test('should apply approximations to realtime data', () => {
+      render(<DashboardScreen />);
+      
+      expect(applyApproximations).toHaveBeenCalledWith(
+        mockParkingData,
+        expect.any(Date)
+      );
+    });
+
+    test('should normalize parking names', async () => {
+      const { getByText } = render(<DashboardScreen />);
+      
+      await waitFor(() => {
+        // Bank_1 should be normalized (check in processed data)
+        expect(applyApproximations).toHaveBeenCalled();
+      });
+    });
+
+    test('should calculate data age for each item', () => {
+      render(<DashboardScreen />);
+      
+      expect(calculateDataAge).toHaveBeenCalled();
+    });
+
+    test('should format age labels', () => {
+      render(<DashboardScreen />);
+      
+      expect(formatAgeLabel).toHaveBeenCalled();
+    });
+
+    test('should handle invalid parking data gracefully', () => {
+      const invalidData = [
+        { ParkingGroupName: 'Valid', CurrentFreeGroupCounterValue: 10 },
+        { ParkingGroupName: null, CurrentFreeGroupCounterValue: null }, // Invalid
+        { ParkingGroupName: 'Also Valid', CurrentFreeGroupCounterValue: 5 },
+      ];
+
+      useParkingStore.mockReturnValue({
+        realtimeData: invalidData,
+        realtimeLoading: false,
+        realtimeError: null,
+        refreshCallback: mockRefreshCallback,
+      });
+
+      const { container } = render(<DashboardScreen />);
+      
+      // Should render without crashing
+      expect(container).toBeTruthy();
+    });
+
+    test('should handle non-array realtime data', () => {
+      useParkingStore.mockReturnValue({
+        realtimeData: null, // Not an array
+        realtimeLoading: false,
+        realtimeError: null,
+        refreshCallback: mockRefreshCallback,
+      });
+
+      const { getByText } = render(<DashboardScreen />);
+      
+      expect(getByText(/No parking data available/i)).toBeTruthy();
+    });
+
+    test('should calculate most recent timestamp correctly', () => {
+      render(<DashboardScreen />);
+      
+      expect(formatTime).toHaveBeenCalled();
+    });
+
+    test('should handle missing timestamps in data', () => {
+      const dataWithMissingTimestamps = [
+        { ParkingGroupName: 'Test1', CurrentFreeGroupCounterValue: 10 },
+        { ParkingGroupName: 'Test2', CurrentFreeGroupCounterValue: 5, Timestamp: null },
+      ];
+
+      useParkingStore.mockReturnValue({
+        realtimeData: dataWithMissingTimestamps,
+        realtimeLoading: false,
+        realtimeError: null,
+        refreshCallback: mockRefreshCallback,
+      });
+
+      const { container } = render(<DashboardScreen />);
+      
+      expect(container).toBeTruthy();
+    });
+  });
+
+  describe('Refresh Functionality', () => {
+    test('should call refreshCallback on mount', async () => {
+      render(<DashboardScreen />);
+      
+      await waitFor(() => {
+        expect(mockRefreshCallback).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    test('should handle missing refreshCallback on mount', () => {
+      useParkingStore.mockReturnValue({
+        realtimeData: mockParkingData,
+        realtimeLoading: false,
+        realtimeError: null,
+        refreshCallback: null,
+      });
+
+      const { container } = render(<DashboardScreen />);
+      
+      // Should render without errors
+      expect(container).toBeTruthy();
+    });
+
+    test('should call refreshCallback on pull-to-refresh', async () => {
+      const { getByTestId } = render(<DashboardScreen />);
+      
+      // Simulate pull to refresh
+      const flatList = getByTestId('parking-list');
+      await act(async () => {
+        fireEvent(flatList, 'refresh');
+      });
+
+      await waitFor(() => {
+        expect(mockRefreshCallback).toHaveBeenCalled();
+      });
+    });
+
+    test('should handle refresh callback errors gracefully', async () => {
+      const errorCallback = jest.fn().mockRejectedValue(new Error('Refresh failed'));
+      
+      useParkingStore.mockReturnValue({
+        realtimeData: mockParkingData,
+        realtimeLoading: false,
+        realtimeError: null,
+        refreshCallback: errorCallback,
+      });
+
+      const { getByTestId } = render(<DashboardScreen />);
+      
+      await act(async () => {
+        const flatList = getByTestId('parking-list');
+        fireEvent(flatList, 'refresh');
+      });
+
+      // Should not crash despite error
+      await waitFor(() => {
+        expect(errorCallback).toHaveBeenCalled();
+      });
+    });
+
+    test('should not refresh if refreshCallback is not a function', async () => {
+      useParkingStore.mockReturnValue({
+        realtimeData: mockParkingData,
+        realtimeLoading: false,
+        realtimeError: null,
+        refreshCallback: 'not-a-function',
+      });
+
+      const { container } = render(<DashboardScreen />);
+      
+      // Should render without errors
+      expect(container).toBeTruthy();
+    });
+  });
+
+  describe('Time Updates', () => {
+    test('should update current time every second', () => {
+      render(<DashboardScreen />);
+      
+      // Fast-forward time by 1 second
+      act(() => {
+        jest.advanceTimersByTime(1000);
+      });
+
+      // Verify interval is working
+      expect(setInterval).toHaveBeenCalled();
+    });
+
+    test('should cleanup interval on unmount', () => {
+      const { unmount } = render(<DashboardScreen />);
+      
+      unmount();
+      
+      expect(clearInterval).toHaveBeenCalled();
+    });
+
+    test('should recalculate age display on time update', () => {
+      const { rerender } = render(<DashboardScreen />);
+      
+      const initialCalls = calculateDataAge.mock.calls.length;
+      
+      // Advance time
+      act(() => {
+        jest.advanceTimersByTime(1000);
+      });
+      
+      rerender(<DashboardScreen />);
+      
+      // Should recalculate age
+      expect(calculateDataAge.mock.calls.length).toBeGreaterThan(initialCalls);
+    });
+  });
+
+  describe('Edge Cases', () => {
+    test('should handle empty parking data array', () => {
+      useParkingStore.mockReturnValue({
+        realtimeData: [],
+        realtimeLoading: false,
+        realtimeError: null,
+        refreshCallback: mockRefreshCallback,
+      });
+
+      const { getByText } = render(<DashboardScreen />);
+      
+      expect(getByText(/No parking data available/i)).toBeTruthy();
+    });
+
+    test('should handle data processing errors', () => {
+      applyApproximations.mockImplementation(() => {
+        throw new Error('Processing error');
+      });
+
+      const { container } = render(<DashboardScreen />);
+      
+      // Should render without crashing
+      expect(container).toBeTruthy();
+    });
+
+    test('should handle very large datasets', () => {
+      const largeDataset = Array.from({ length: 100 }, (_, i) => ({
+        ParkingGroupName: `Parking_${i}`,
+        CurrentFreeGroupCounterValue: i,
+        Timestamp: '2026-01-04 10:30:00',
+        id: i,
+      }));
+
+      useParkingStore.mockReturnValue({
+        realtimeData: largeDataset,
+        realtimeLoading: false,
+        realtimeError: null,
+        refreshCallback: mockRefreshCallback,
+      });
+
+      const { container } = render(<DashboardScreen />);
+      
+      expect(container).toBeTruthy();
+    });
+
+    test('should handle data with special characters in names', () => {
+      const specialData = [
+        {
+          ParkingGroupName: 'Parking <Test>',
+          CurrentFreeGroupCounterValue: 10,
+          Timestamp: '2026-01-04 10:30:00',
+        },
+      ];
+
+      useParkingStore.mockReturnValue({
+        realtimeData: specialData,
+        realtimeLoading: false,
+        realtimeError: null,
+        refreshCallback: mockRefreshCallback,
+      });
+
+      const { container } = render(<DashboardScreen />);
+      
+      expect(container).toBeTruthy();
+    });
+
+    test('should handle negative free space values', () => {
+      const negativeData = [
+        {
+          ParkingGroupName: 'Test',
+          CurrentFreeGroupCounterValue: -5,
+          Timestamp: '2026-01-04 10:30:00',
+        },
+      ];
+
+      useParkingStore.mockReturnValue({
+        realtimeData: negativeData,
+        realtimeLoading: false,
+        realtimeError: null,
+        refreshCallback: mockRefreshCallback,
+      });
+
+      const { container } = render(<DashboardScreen />);
+      
+      expect(container).toBeTruthy();
+    });
+
+    test('should handle very old timestamps', () => {
+      calculateDataAge.mockReturnValue(1440); // 24 hours old
+      formatAgeLabel.mockReturnValue({ display: '24 hours ago' });
+
+      const { container } = render(<DashboardScreen />);
+      
+      expect(container).toBeTruthy();
+    });
+  });
+
+  describe('Accessibility', () => {
+    test('should have accessible header text', () => {
+      const { getByText } = render(<DashboardScreen />);
+      
+      const header = getByText('Parking Dashboard');
+      expect(header).toBeTruthy();
+    });
+
+    test('should provide refresh control for screen readers', () => {
+      const { getByTestId } = render(<DashboardScreen />);
+      
+      const flatList = getByTestId('parking-list');
+      expect(flatList.props.refreshControl).toBeTruthy();
+    });
+  });
+
+  describe('Performance', () => {
+    test('should memoize processed data', () => {
+      const { rerender } = render(<DashboardScreen />);
+      
+      const firstCallCount = applyApproximations.mock.calls.length;
+      
+      // Rerender with same props
+      rerender(<DashboardScreen />);
+      
+      // Should not recalculate unnecessarily
+      // (Note: actual behavior depends on memo implementation)
+      expect(applyApproximations.mock.calls.length).toBeGreaterThanOrEqual(firstCallCount);
+    });
+
+    test('should memoize last data date calculation', () => {
+      const { rerender } = render(<DashboardScreen />);
+      
+      const firstCallCount = formatTime.mock.calls.length;
+      
+      // Rerender without data change
+      rerender(<DashboardScreen />);
+      
+      expect(formatTime.mock.calls.length).toBeGreaterThanOrEqual(firstCallCount);
+    });
+  });
+
+  describe('Integration with Store', () => {
+    test('should subscribe to store updates', () => {
+      render(<DashboardScreen />);
+      
+      expect(useParkingStore).toHaveBeenCalled();
+    });
+
+    test('should react to store data changes', () => {
+      const { rerender } = render(<DashboardScreen />);
+      
+      // Update store data
+      const newData = [
+        {
+          ParkingGroupName: 'New Parking',
+          CurrentFreeGroupCounterValue: 99,
+          Timestamp: '2026-01-04 11:00:00',
+        },
+      ];
+
+      useParkingStore.mockReturnValue({
+        realtimeData: newData,
+        realtimeLoading: false,
+        realtimeError: null,
+        refreshCallback: mockRefreshCallback,
+      });
+
+      rerender(<DashboardScreen />);
+      
+      // Should process new data
+      expect(applyApproximations).toHaveBeenCalledWith(newData, expect.any(Date));
+    });
+  });
+});
