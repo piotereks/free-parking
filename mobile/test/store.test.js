@@ -1,3 +1,8 @@
+// Mock AsyncStorage before any imports that use it
+jest.mock('@react-native-async-storage/async-storage', () =>
+  require('@react-native-async-storage/async-storage/jest/async-storage-mock')
+);
+
 jest.mock('parking-shared', () => ({
   createParkingStore: (adapters) => {
     const state = { realtimeData: [], historyData: [], lastUpdate: null };

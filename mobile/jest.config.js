@@ -6,12 +6,14 @@ module.exports = {
   
   // Transform ignore patterns for node_modules
   transformIgnorePatterns: [
-    'node_modules/(?!(react-native|@react-native|@react-native-community|@react-navigation|nativewind|parking-shared)/)',
+    'node_modules/(?!(react-native|@react-native|@react-native-community|@react-navigation|nativewind|parking-shared|@babel/runtime)/)',
   ],
   
   // Module name mapper for parking-shared alias
   moduleNameMapper: {
     '^parking-shared$': '<rootDir>/../shared/src/index.js',
+    '^react$': '<rootDir>/node_modules/react',
+    '^react-native$': '<rootDir>/node_modules/react-native',
   },
   
   // Test match patterns

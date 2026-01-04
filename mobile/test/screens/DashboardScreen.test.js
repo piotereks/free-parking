@@ -3,11 +3,12 @@
  * Tests rendering, data processing, state management, and user interactions
  */
 
-import React from 'react';
-import { render, waitFor, act } from '@testing-library/react-native';
-import { View, Text } from 'react-native';
+// Mock debug module
+jest.mock('../../src/config/debug', () => ({
+  debugLog: jest.fn(),
+}));
 
-// Mock parking-shared module
+// Mock modules BEFORE any imports
 jest.mock('parking-shared', () => ({
   applyApproximations: jest.fn((data) => data),
   isValidParkingData: jest.fn((item) => Boolean(item?.ParkingGroupName)),
@@ -47,28 +48,27 @@ jest.mock('../../src/context/ThemeContext', () => ({
 
 // Mock ParkingCard component
 jest.mock('../../src/components/ParkingCard', () => {
-  const { View, Text } = require('react-native');
   return function MockParkingCard({ data, now }) {
-    return (
-      <View testID={`parking-card-${data.name || data.ParkingGroupName}`}>
-        <Text>{data.name || data.ParkingGroupName}</Text>
-        <Text testID={`free-spaces-${data.name || data.ParkingGroupName}`}>
-          {data.freeSpaces ?? data.CurrentFreeGroupCounterValue}
-        </Text>
-        <Text>{data.ageDisplay}</Text>
-      </View>
+    const React = require('react');
+    return React.createElement('View', 
+      { testID: `parking-card-${data.name || data.ParkingGroupName}` },
+      React.createElement('Text', {}, data.name || data.ParkingGroupName),
+      React.createElement('Text', 
+        { testID: `free-spaces-${data.name || data.ParkingGroupName}` }, 
+        data.freeSpaces ?? data.CurrentFreeGroupCounterValue
+      ),
+      React.createElement('Text', {}, data.ageDisplay)
     );
   };
 });
 
 // Mock LoadingSkeletonCard component
 jest.mock('../../src/components/LoadingSkeletonCard', () => {
-  const { View, Text } = require('react-native');
   return function MockLoadingSkeletonCard() {
-    return (
-      <View testID="loading-skeleton">
-        <Text>Loading...</Text>
-      </View>
+    const React = require('react');
+    return React.createElement('View', 
+      { testID: 'loading-skeleton' },
+      React.createElement('Text', {}, 'Loading...')
     );
   };
 });
@@ -104,6 +104,10 @@ jest.mock('../../src/hooks/useParkingStore', () => {
     return mockStoreState;
   });
 });
+
+// Now import React and testing utilities
+import React from 'react';
+import { render, waitFor, act } from '@testing-library/react-native';
 
 import DashboardScreen from '../../src/screens/DashboardScreen';
 import useParkingStore from '../../src/hooks/useParkingStore';
