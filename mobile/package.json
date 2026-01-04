@@ -42,23 +42,6 @@
     "react-test-renderer": "19.1.0",
     "vitest": "^0.34.2"
   },
-  "jest": {
-    "testEnvironment": "node",
-    "setupFilesAfterEnv": [
-      "<rootDir>/test/setup.js"
-    ],
-    "transform": {
-      "^.+\\.(js|jsx|ts|tsx)$": "babel-jest"
-    },
-    "transformIgnorePatterns": [
-      "node_modules/(?!(react-native|@react-native|expo|@expo|parking-shared)/)"
-    ],
-    "moduleNameMapper": {
-      "^parking-shared$": "<rootDir>/../shared/src/index.js"
-    },
-    "testMatch": [
-      "**/test/**/*.test.js"
-    ]
-  },
+
   "private": true
 }
