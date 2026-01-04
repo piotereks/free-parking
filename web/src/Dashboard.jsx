@@ -208,8 +208,7 @@ const Dashboard = ({ setView }) => {
             <div className="panel-section">
               <div className="status-label">Data Status</div>
               <div
-                className="status-value"
-                style={{ color: realtimeError ? 'var(--warning)' : (hasApproximation ? 'var(--age-medium)' : 'var(--success)') }}
+                className={`status-value ${realtimeError ? 'age-old' : (hasApproximation ? 'age-medium' : '')}`}
                 role="status"
                 aria-live="polite"
               >
