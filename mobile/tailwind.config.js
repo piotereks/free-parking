@@ -58,7 +58,17 @@ module.exports = {
           dark: '#2d3b6b',
         },
       },
+      borderRadius: {
+        'card': '0.75rem',
+      },
+      boxShadow: {
+        'custom-light': '0 1px 3px rgba(0, 0, 0, 0.1)',
+        'custom-dark': '0 1px 3px rgba(0, 0, 0, 0.4)',
+      },
+      fontSize: {
+        'spot-number': '3.5rem',
+      }
     },
   },
   plugins: [],
-}
+};
