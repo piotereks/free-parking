@@ -163,6 +163,14 @@ Stabilize web after split:
    - Add offline cache hydration using shared cache shapes.
 ---
 
+**Update (2026-01-04): Phase 2 scope change**
+- After completing Iteration 4 we added two focused Phase 2 iterations to support a faster mobile release and developer testing:
+  - **Iteration 5 — Ad Banner (AdMob):** add a lightweight `AdBanner` component, wire `expo-ads-admob` (or an RN-compatible AdMob package), feature-flag the banner behind a config flag, and add telemetry hooks for impressions/clicks (privacy-aware, opt-out).
+  - **Iteration 6 — Android Deployment:** finalize Android build pipeline: `expo prebuild`, Gradle configuration, signing config, automated `assembleRelease` step, and Play Store checklist (privacy, icons, screenshots).
+
+- The remaining lower-priority or larger-scope items have been moved into [PHASE3_PLAN_DETAILED.md](PHASE3_PLAN_DETAILED.md) for Phase 3 planning and resourcing.
+
+
 - Ship ESM (and optionally CJS) with `exports` map; include types (JSDoc or d.ts).
 - Tests live with package; keep high coverage on parsing, transforms, store reducers.
 - Semantic versioning for tracking changes; changelog per version bump.
