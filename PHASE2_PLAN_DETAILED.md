@@ -209,8 +209,8 @@
 
 **Tasks:**
 
-1. **Create screens folder** — `mobile/src/screens/`
-2. **DashboardScreen.js**:
+1. ✅ **Create screens folder** — `mobile/src/screens/` — **COMPLETED 2026-01-04**
+2. ✅ **DashboardScreen.js** — `mobile/src/screens/DashboardScreen.js` — **COMPLETED 2026-01-04**:
    - Consume `useParkingStore` hook: realtimeData, realtimeLoading, realtimeError
    - Use React Native Native Appearance API for theme detection
    - Render FlatList of parking locations
@@ -231,24 +231,24 @@
              ├── Timestamp + Age
              └── Approximation badge (if applicable)
      ```
-3. **ParkingCard.js sub-component**:
+3. ✅ **ParkingCard.js sub-component** — `mobile/src/components/ParkingCard.js` — **COMPLETED 2026-01-04**:
    - Props: `data` (parking object), `now` (Date), `allOffline` (bool)
    - Display age-based color: red (≥15 min), yellow (5-15 min), green (<5 min)
    - Show approximation indicator if present
    - Tap to copy to clipboard (optional)
-4. **LoadingSkeletonCard.js**:
+4. ✅ **LoadingSkeletonCard.js** — `mobile/src/components/LoadingSkeletonCard.js` — **COMPLETED 2026-01-04**:
    - Placeholder while loading
    - 3-4 rows of gray boxes
 5. **Data flow**:
-   - On mount, trigger `refreshCallback` (will be set by DataManager in later iteration)
-   - Subscribe to store via `useShallow()` (Zustand hook)
-   - Update `now` state every 1 second for live age display
-   - Apply `applyApproximations()` from shared (before rendering)
-6. **Theme integration**:
+   - ✅ On mount, trigger `refreshCallback` (will be set by DataManager in later iteration) — **COMPLETED 2026-01-04**
+   - ✅ Subscribe to store via `useParkingStore()` (Zustand hook) — **COMPLETED 2026-01-04**
+   - ✅ Update `now` state every 1 second for live age display — **COMPLETED 2026-01-04**
+   - ✅ Apply `applyApproximations()` from shared (before rendering) — `mobile/src/App.js` — **COMPLETED 2026-01-04**
+6. ✅ **Theme integration** — `mobile/src/context/ThemeContext.js` (Appearance API + persisted preference) — **COMPLETED 2026-01-04**
    - Read `Appearance.getColorScheme()` on mount
    - Store in context or state
    - Apply colors: light mode (white bg, black text), dark mode (dark bg, light text)
-7. **Unit tests** — `test/screens/DashboardScreen.test.js`:
+7. ❗ **Unit tests** — `test/screens/DashboardScreen.test.js` — **PENDING 2026-01-04**:
    - Mock store with sample parking data
    - Verify FlatList renders cards
    - Verify age updates every second
@@ -258,22 +258,29 @@
 
 **Validation Steps:**
 
-- [ ] `npm test` passes (DashboardScreen.test.js)
-- [ ] `npm run lint` passes
-- [ ] Offline Emulator run: App loads, displays cached parking data if available
-- [ ] Live age counter increments every 1 second
-- [ ] Theme colors match light/dark modes
-- [ ] No network calls on mount (cache-first)
+- [ ] `npm test` passes (DashboardScreen.test.js) — **PENDING 2026-01-04**
+- [ ] `npm run lint` passes — **PENDING 2026-01-04**
+- [ ] Offline Emulator run: App loads, displays cached parking data if available — **PENDING 2026-01-04**
+- [x] Live age counter increments every 1 second
+- [x] Theme colors match light/dark modes
+- [ ] No network calls on mount (cache-first) — **PENDING 2026-01-04**
 
 **Checklist:**
 
-- [ ] mobile/src/screens/DashboardScreen.js (FlatList + live clock)
-- [ ] mobile/src/components/ParkingCard.js (card UI)
-- [ ] mobile/src/components/LoadingSkeletonCard.js (skeleton)
-- [ ] mobile/src/context/ThemeContext.js (Appearance API + storage)
+- [x] mobile/src/screens/DashboardScreen.js (FlatList + live clock)
+- [x] mobile/src/components/ParkingCard.js (card UI)
+- [x] mobile/src/components/LoadingSkeletonCard.js (skeleton)
+- [x] mobile/src/context/ThemeContext.js (Appearance API + storage)
 - [ ] test/screens/DashboardScreen.test.js (rendering + age update)
-- [ ] Integrate applyApproximations() from shared on render
+- [x] Integrate applyApproximations() from shared on render — `mobile/src/App.js` — **COMPLETED 2026-01-04**
 - [ ] docs: copilot_instructions.md (component structure)
+ - [x] mobile/src/screens/DashboardScreen.js (FlatList + live clock)
+ - [x] mobile/src/components/ParkingCard.js (card UI)
+ - [x] mobile/src/components/LoadingSkeletonCard.js (skeleton)
+ - [x] mobile/src/context/ThemeContext.js (Appearance API + storage)
+ - [ ] test/screens/DashboardScreen.test.js (rendering + age update) — **PENDING 2026-01-04**
+ - [x] Integrate applyApproximations() from shared on render — `mobile/src/App.js` — **COMPLETED 2026-01-04**
+ - [ ] docs: copilot_instructions.md (component structure) — **PENDING 2026-01-04**
 
 **Documentation Updates:**
 

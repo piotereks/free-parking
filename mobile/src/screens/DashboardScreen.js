@@ -61,8 +61,9 @@ const DashboardScreen = () => {
   // Apply shared approximations to the realtime data for display (age-aware)
   const processedData = useMemo(() => {
     try {
-      // Filter valid data
-      const validData = Array.isArray(data) ? data.filter(isValidParkingData) : [];
+      // First apply approximations from shared (age-aware), then validate
+      const approxed = Array.isArray(data) ? applyApproximations(data, now) : [];
+      const validData = Array.isArray(approxed) ? approxed.filter(isValidParkingData) : [];
 
       // Normalize and format data
       return validData.map((item) => {

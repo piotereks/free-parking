@@ -214,7 +214,7 @@ function DashboardContent() {
             </SText>
           </SView>
 
-          <SView className="rounded-lg bg-bg-secondary-dark border border-border-dark">
+          <SView className="rounded-lg bg-bg-secondary-dark border border-border-dark overflow-hidden">
             <SView className="p-3 items-center border-b border-border-dark">
               <SText className="text-xs text-text-secondary-dark">Total Spaces</SText>
               <SView className="flex-row items-baseline mt-1">
@@ -231,7 +231,7 @@ function DashboardContent() {
             <SView className="p-3 border-b border-border-dark flex-row items-center justify-center gap-2">
               <SView className="items-center">
                 <SText className="text-xs text-text-secondary-dark mb-1 text-center">Last Update / Current</SText>
-                <SView className="flex-row items-baseline gap-2 justify-center">
+                <SView className="flex-row items-center gap-2 justify-center pb-1">
                   <SText className="text-base font-bold text-text-primary-dark text-center">
                     {lastRealtimeUpdate ? formatTime(lastRealtimeUpdate, 'pl-PL') : '--:--:--'}
                   </SText>
