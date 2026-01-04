@@ -1,15 +1,16 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Text, View, StatusBar } from 'react-native';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { Text, View, StatusBar, ScrollView, RefreshControl, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styled } from 'nativewind';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import ParkingDataProvider from './context/ParkingDataProvider';
 import useParkingStore from './hooks/useParkingStore';
-import { applyApproximations, calculateDataAge, formatAgeLabel, parseTimestamp, formatTime } from 'parking-shared';
+import { applyApproximations, calculateDataAge, formatAgeLabel, parseTimestamp, formatTime, createRefreshHelper } from 'parking-shared';
 
 const SSafeArea = styled(SafeAreaView);
 const SView = styled(View);
 const SText = styled(Text);
+const SScroll = styled(ScrollView);
 
 function ParkingCard({ data, now, allOffline }) {
   let name = data.ParkingGroupName;
@@ -53,6 +54,7 @@ function DashboardContent() {
   const lastRealtimeUpdate = useParkingStore((state) => state.lastRealtimeUpdate);
 
   const [now, setNow] = useState(new Date());
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     const timer = global.setInterval(() => setNow(new Date()), 1000);
@@ -62,6 +64,19 @@ function DashboardContent() {
   const processed = useMemo(() => {
     return applyApproximations(realtimeData, now);
   }, [realtimeData, now]);
+
+  // refresh helper calls the fetch callback wired by ParkingDataProvider
+  const refreshHelper = useMemo(() => createRefreshHelper(useParkingStore), []);
+  const onRefresh = useCallback(async () => {
+    try {
+      setRefreshing(true);
+      await refreshHelper();
+    } catch (e) {
+      console.error('Refresh failed', e);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refreshHelper]);
 
   const allOffline = processed.length > 0 && processed.every((d) => {
     const age = calculateDataAge(d.Timestamp, now);
@@ -156,7 +171,12 @@ function DashboardContent() {
           <SText className="text-warning-dark text-base text-center">{String(realtimeError)}</SText>
         </SView>
       ) : (
-        <SView className="flex-1 px-3 py-2">
+        <SScroll
+          className="flex-1 px-3 py-2"
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
           <SView className="flex-row gap-2 mb-3">
             {processed.map((d, i) => (
               <SView key={d.ParkingGroupName || i} className="flex-1 rounded-lg p-3 border border-border-dark bg-bg-secondary-dark">
@@ -208,16 +228,34 @@ function DashboardContent() {
               )}
             </SView>
 
-            <SView className="p-3 items-center border-b border-border-dark">
-              <SText className="text-xs text-text-secondary-dark mb-1">Last Update / Current</SText>
-              <SView className="flex-row items-baseline gap-2">
-                <SText className="text-base font-bold text-text-primary-dark">
-                  {lastRealtimeUpdate ? formatTime(lastRealtimeUpdate, 'pl-PL') : '--:--:--'}
-                </SText>
-                <SText className="text-sm text-text-secondary-dark">
-                  {now.toLocaleTimeString('pl-PL')}
-                </SText>
+            <SView className="p-3 border-b border-border-dark flex-row items-center justify-center gap-2">
+              <SView className="items-center">
+                <SText className="text-xs text-text-secondary-dark mb-1 text-center">Last Update / Current</SText>
+                <SView className="flex-row items-baseline gap-2 justify-center">
+                  <SText className="text-base font-bold text-text-primary-dark text-center">
+                    {lastRealtimeUpdate ? formatTime(lastRealtimeUpdate, 'pl-PL') : '--:--:--'}
+                  </SText>
+                  <SText className="text-sm text-text-secondary-dark text-center">
+                    {now.toLocaleTimeString('pl-PL')}
+                  </SText>
+                </SView>
               </SView>
+
+              <TouchableOpacity onPress={onRefresh} activeOpacity={0.8} accessibilityRole="button" accessibilityLabel="Refresh data" style={{ alignSelf: 'center', justifyContent: 'center' }}>
+                <SView className="nav-btn px-3 py-2 rounded-md border border-border-dark bg-bg-primary-dark flex-row items-center">
+                  {refreshing || realtimeLoading ? (
+                    <>
+                      <ActivityIndicator size="small" color="#ffffff" />
+                      <SText className="btn-text ml-2 text-text-primary-dark">Refreshing</SText>
+                    </>
+                  ) : (
+                    <>
+                      <SText accessibilityRole="image" accessibilityLabel="Refresh icon" className="btn-icon mr-2 text-text-primary-dark">⟳</SText>
+                      <SText className="btn-text text-text-primary-dark">Refresh</SText>
+                    </>
+                  )}
+                </SView>
+              </TouchableOpacity>
             </SView>
 
             <SView className="p-3 items-center">
@@ -227,7 +265,7 @@ function DashboardContent() {
               </SText>
             </SView>
           </SView>
-        </SView>
+        </SScroll>
       )}
     </SSafeArea>
   );

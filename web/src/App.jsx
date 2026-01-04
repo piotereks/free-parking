@@ -17,6 +17,7 @@ function App() {
           ) : (
             <Statistics setView={setView} />
           )}
+          <span className="btn-icon" role="img" aria-label="Refresh icon">⟳</span>
         </ParkingDataProvider>
       </ThemeProvider>
     </ErrorBoundary>
