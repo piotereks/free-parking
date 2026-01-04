@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { styled } from 'nativewind';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import ParkingDataProvider from './context/ParkingDataProvider';
+import { debugLog } from './config/debug';
 import useParkingStore from './hooks/useParkingStore';
 import { applyApproximations, calculateDataAge, formatAgeLabel, parseTimestamp, formatTime, createRefreshHelper } from 'parking-shared';
 
@@ -66,11 +67,21 @@ function DashboardContent() {
   }, [realtimeData, now]);
 
   // refresh helper calls the fetch callback wired by ParkingDataProvider
-  const refreshHelper = useMemo(() => createRefreshHelper(useParkingStore), []);
+  const refreshHelper = useMemo(() => {
+    const base = createRefreshHelper(useParkingStore);
+    return async () => {
+      debugLog('refreshHelper: invoked');
+      await base();
+      debugLog('refreshHelper: completed');
+    };
+  }, []);
+
   const onRefresh = useCallback(async () => {
     try {
       setRefreshing(true);
+      debugLog('onRefresh: start user-initiated refresh');
       await refreshHelper();
+      debugLog('onRefresh: refreshHelper resolved');
     } catch (e) {
       console.error('Refresh failed', e);
     } finally {
@@ -129,22 +140,22 @@ function DashboardContent() {
   useEffect(() => {
     // Log only when processed content or totals change (not every tick)
     try {
-      console.debug('[Parking] Processed items:', processed.length);
+      debugLog('[Parking] Processed items:', processed.length);
       processed.forEach((d, idx) => {
         const name = d?.ParkingGroupName || `<unknown-${idx}>`;
         const age = calculateDataAge(d?.Timestamp); // uses current time internally
         const approx = d?.approximationInfo || {};
-        console.debug(`[Parking] ${name}: ts=${d?.Timestamp} age=${age}m isApproximated=${!!approx.isApproximated} original=${approx.original ?? d?.CurrentFreeGroupCounterValue ?? 0} approximated=${approx.approximated ?? d?.CurrentFreeGroupCounterValue ?? 0}`);
+        debugLog(`[Parking] ${name}: ts=${d?.Timestamp} age=${age}m isApproximated=${!!approx.isApproximated} original=${approx.original ?? d?.CurrentFreeGroupCounterValue ?? 0} approximated=${approx.approximated ?? d?.CurrentFreeGroupCounterValue ?? 0}`);
       });
 
-      console.debug('[Parking] Totals:', { totalSpaces, originalTotal });
+      debugLog('[Parking] Totals:', { totalSpaces, originalTotal });
 
       let maxAgeForLog = 0;
       processed.forEach((d) => {
         const a = calculateDataAge(d?.Timestamp);
         if (a > maxAgeForLog) maxAgeForLog = a;
       });
-      console.debug('[Parking] Max age (min):', maxAgeForLog, 'All offline:', allOffline);
+      debugLog('[Parking] Max age (min):', maxAgeForLog, 'All offline:', allOffline);
     } catch (e) {
       console.error('[Parking] debug logging failed', e);
     }
@@ -228,10 +239,10 @@ function DashboardContent() {
               )}
             </SView>
 
-            <SView className="p-3 border-b border-border-dark flex-row items-center justify-center gap-2">
+              <SView className="p-3 border-b border-border-dark flex-row items-center justify-center gap-2">
               <SView className="items-center">
                 <SText className="text-xs text-text-secondary-dark mb-1 text-center">Last Update / Current</SText>
-                <SView className="flex-row items-center gap-2 justify-center pb-1">
+                <SView className="flex-row items-baseline gap-2 justify-center py-1">
                   <SText className="text-base font-bold text-text-primary-dark text-center">
                     {lastRealtimeUpdate ? formatTime(lastRealtimeUpdate, 'pl-PL') : '--:--:--'}
                   </SText>

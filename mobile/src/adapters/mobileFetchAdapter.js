@@ -1,8 +1,11 @@
+import { debugLog } from '../config/debug';
+
 export const createMobileFetchAdapter = () => {
   const fetchWithBust = async (url, options = {}) => {
     try {
       const sep = url.includes("?") ? "&" : "?";
       const finalUrl = `${url}${sep}t=${Date.now()}`;
+      debugLog('Fetch', finalUrl);
       return fetch(finalUrl, options);
     } catch (e) {
       console.error("Fetch failed:", e);

@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import { useParkingStore } from '../hooks/useParkingStore';
 import { createMobileFetchAdapter } from '../adapters/mobileFetchAdapter';
+import { debugLog } from '../config/debug';
 
 const API_URLS = [
   'https://gd.zaparkuj.pl/api/freegroupcountervalue.json',
@@ -28,7 +29,15 @@ const ParkingDataProvider = ({ children }) => {
     fetchInFlight.current = true;
     setRealtimeLoading(true);
     setRealtimeError(null);
+    // Mark the time we started a fetch so UI shows an immediate "last update" timestamp
     try {
+      setLastRealtimeUpdate(new Date());
+      debugLog('fetchRealtime: set lastRealtimeUpdate at start');
+    } catch (e) {
+      // ignore errors setting the timestamp
+    }
+    try {
+      debugLog('fetchRealtime: starting network fetch');
       const results = await Promise.all(
         API_URLS.map((url) => fetchAdapter.fetchJSON(url))
       );
@@ -37,6 +46,7 @@ const ParkingDataProvider = ({ children }) => {
         ? results.filter((item) => !!item)
         : [];
       setRealtimeData(cleaned);
+      debugLog('fetchRealtime: network data received', cleaned.length, 'items');
       setLastRealtimeUpdate(new Date());
     } catch (err) {
       console.error('Failed to fetch realtime data:', err);
@@ -48,8 +58,9 @@ const ParkingDataProvider = ({ children }) => {
   }, [setLastRealtimeUpdate, setRealtimeData, setRealtimeError, setRealtimeLoading]);
 
   useEffect(() => {
-    setRefreshCallback(() => fetchRealtime);
-    setStopAutoRefresh(() => undefined);
+    // Register the actual fetchRealtime function so callers invoke it directly
+    setRefreshCallback(fetchRealtime);
+    setStopAutoRefresh(undefined);
     fetchRealtime();
     return () => {
       setRefreshCallback(null);
