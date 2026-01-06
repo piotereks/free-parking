@@ -1,0 +1,60 @@
+Checking host: airpark.zaparkuj.pl
+Checking host: cierpiegi.zaparkuj.pl
+Checking host: demo.zaparkuj.pl
+Checking host: f2.zaparkuj.pl
+Checking host: gd.zaparkuj.pl
+✅ https://gd.zaparkuj.pl/api/freegroupcountervalue-green.json is valid JSON
+✅ https://gd.zaparkuj.pl/api/freegroupcountervalue.json is valid JSON
+Checking host: harman.zaparkuj.pl
+✅ https://harman.zaparkuj.pl/api/freegroupcountervalue.json is valid JSON
+Checking host: jelczanka.zaparkuj.pl
+Checking host: kercelak.zaparkuj.pl
+Checking host: kingparking.zaparkuj.pl
+Checking host: krolewska55.zaparkuj.pl
+Checking host: luxmed-tarniny.zaparkuj.pl
+Checking host: mail.gd.zaparkuj.pl
+Checking host: mail.kercelak.zaparkuj.pl
+Checking host: mail.sagitarius.zaparkuj.pl
+Checking host: mail.sagittarius.zaparkuj.pl
+Checking host: obiektplus.zaparkuj.pl
+Checking host: parkingwyzynna.zaparkuj.pl
+Checking host: pay.zaparkuj.pl
+Checking host: peri.zaparkuj.pl
+Checking host: piatkowska.zaparkuj.pl
+Checking host: rusa.zaparkuj.pl
+Checking host: sagitarius.zaparkuj.pl
+Checking host: sagittarius.zaparkuj.pl
+Checking host: sienkiewicza.zaparkuj.pl
+Checking host: smartparking.zaparkuj.pl
+Checking host: szymkowka.zaparkuj.pl
+Checking host: tomickiego.zaparkuj.pl
+Checking host: uek.zaparkuj.pl
+Checking host: vipparking.zaparkuj.pl
+Checking host: wielicka232.zaparkuj.pl
+Checking host: wizpark.zaparkuj.pl
+Checking host: wykusz.zaparkuj.pl
+Checking host: zdrofit.zaparkuj.pl
+Checking host: www.airpark.zaparkuj.pl
+Checking host: www.demo.zaparkuj.pl
+Checking host: www.gd.zaparkuj.pl
+✅ https://www.gd.zaparkuj.pl/api/freegroupcountervalue-green.json is valid JSON
+✅ https://www.gd.zaparkuj.pl/api/freegroupcountervalue.json is valid JSON
+Checking host: www.kingparking.zaparkuj.pl
+Checking host: www.krolewska55.zaparkuj.pl
+Checking host: www.obiektplus.zaparkuj.pl
+Checking host: www.parkingwyzynna.zaparkuj.pl
+Checking host: www.peri.zaparkuj.pl
+Checking host: www.piatkowska.zaparkuj.pl
+Checking host: www.rusa.zaparkuj.pl
+Checking host: www.sagitarius.zaparkuj.pl
+Checking host: www.sagittarius.zaparkuj.pl
+Checking host: www.sienkiewicza.zaparkuj.pl
+Checking host: www.smartparking.zaparkuj.pl
+Checking host: www.szymkowka.zaparkuj.pl
+Checking host: www.tomickiego.zaparkuj.pl
+Checking host: www.uek.zaparkuj.pl
+Checking host: www.vipparking.zaparkuj.pl
+Checking host: www.wielicka232.zaparkuj.pl
+Checking host: www.wizpark.zaparkuj.pl
+Checking host: www.wykusz.zaparkuj.pl
+Checking host: www.zaparkuj.pl
