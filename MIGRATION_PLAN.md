@@ -142,8 +142,15 @@ Stabilize web after split:
 3. Test live deployment to GH Pages
 ### Phase 2 — Mobile App MVP (Expo, mobile/ folder)
 
+1. [x] **Scaffold Expo project** ✅ _Completed 2025-12-31_
+   - Created mobile/ folder with default Expo blank template
+   - Configured offline mode (--offline flag in all npm scripts)
+   - Added prebuild script for native project generation
+   - React Native 0.81.5 + Expo ~54.0 + React 19.1.0
+
 2. [ ] **Wire shared package**
    - Add `parking-shared` dependency via `file:../shared` in mobile/package.json.
+   - Configure Metro bundler for shared package integration
    - Ensure ESM/CJS compatibility with React Native bundler (Metro).
    - Implement platform adapters:
    - Reuse shared fetch/transform logic; build a thin data manager suited for React Native (no document/localStorage).
@@ -155,6 +162,14 @@ Stabilize web after split:
    - Add charts via RN-compatible lib (e.g., `victory-native`/`react-native-svg`).
    - Add offline cache hydration using shared cache shapes.
 ---
+
+**Update (2026-01-04): Phase 2 scope change**
+- After completing Iteration 4 we added two focused Phase 2 iterations to support a faster mobile release and developer testing:
+  - **Iteration 5 — Ad Banner (AdMob):** add a lightweight `AdBanner` component, wire `expo-ads-admob` (or an RN-compatible AdMob package), feature-flag the banner behind a config flag, and add telemetry hooks for impressions/clicks (privacy-aware, opt-out).
+  - **Iteration 6 — Android Deployment:** finalize Android build pipeline: `expo prebuild`, Gradle configuration, signing config, automated `assembleRelease` step, and Play Store checklist (privacy, icons, screenshots).
+
+- The remaining lower-priority or larger-scope items have been moved into [PHASE3_PLAN_DETAILED.md](PHASE3_PLAN_DETAILED.md) for Phase 3 planning and resourcing.
+
 
 - Ship ESM (and optionally CJS) with `exports` map; include types (JSDoc or d.ts).
 - Tests live with package; keep high coverage on parsing, transforms, store reducers.
@@ -186,6 +201,11 @@ Stabilize web after split:
 - 2025-12-29 — Phase 1 Step 3 — ✅ Done — **Extracted and hardened pure logic** — Created parking-shared package with all core modules, tests, and documentation.
 - 2025-12-29 — Phase 1 Step 4 — ✅ Done — **Versioned and built shared package** — Fixed lint errors, built dist/ artifacts (ESM, CJS, DTS), created git commit and tag v0.1.0-alpha.0.
 - 2025-12-29 — Phase 1 Step 5 — ✅ Done — **Integrated shared into repo-web** — Created web adapters, updated all imports, removed duplicated modules, verified lint/build.
+- 2025-12-31 — Phase 2 Iteration 1 Task 1 — ✅ Done — **Scaffolded Expo project** — Created mobile/ folder with Expo blank template (RN 0.81.5, Expo ~54.0), configured offline mode (--offline flags in all npm scripts), added prebuild script, added android:build/android:install/android:deploy scripts for Gradle builds, configured Android SDK (local.properties), verified APK builds and installs on emulator successfully.
+
+- 2026-01-01 — Phase 2 Iteration 1 — ✅ Done — **Mobile scaffold & shared integration** — Completed Iteration 1: added `mobile/` Expo app, wired `parking-shared` via `file:../shared` in `mobile/package.json`, added Vitest config and initial tests, added ESLint config, created minimal `mobile/src/App.js`, added `prebuild` and Gradle scripts, created Metro/Babel/Vitest aliases to resolve `parking-shared`, and verified `npm test`, `npm run lint`, `expo prebuild`, and local Gradle assemble (assembleDebug) succeeded. Metro runtime resolution check was intentionally skipped and deferred to runtime validation or CI.
+
+- 2026-01-02 — Phase 2 Iteration 2 — ✅ Done — **Mobile adapters & store integration** — Implemented mobile adapters (`AsyncStorage` storage adapter and direct fetch adapter), wired `createParkingStore()` from `parking-shared` with mobile adapters via `mobile/src/hooks/useParkingStore.js`, added unit tests for adapters/store/offline hydration, verified cache-key parity (`parking_realtime_cache`, `parking_history_cache`), and updated `mobile/README.md` with adapter architecture notes.
 
 ---
 

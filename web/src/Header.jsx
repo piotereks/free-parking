@@ -5,11 +5,17 @@ import { clearCache } from './store/parkingStore';
 const Header = ({ title, shortTitle, icon, onRefresh, updateStatus, currentView, setView, children }) => {
   const { isLight, toggleTheme } = useTheme();
 
+  const isImage = typeof icon === 'string' && (icon.endsWith('.png') || icon.endsWith('.svg') || icon.startsWith('/') || icon.startsWith('http'));
+
   return (
     <header className="header-controls" role="banner">
       <div className="header-title-group">
         <h1>
-          <span className="title-icon" role="img" aria-label={`${title} icon`}>{icon}</span>
+          {isImage ? (
+            <img className="title-icon" src={icon} alt={`${title} icon`} />
+          ) : (
+            <span className="title-icon" role="img" aria-label={`${title} icon`}>{icon}</span>
+          )}
           <span className="title-text-full"> {title}</span>
           <span className="title-text-short"> {shortTitle || title}</span>
         </h1>

@@ -12,6 +12,7 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./parkingUtils": "./src/parkingUtils.js",
     "./package.json": "./package.json"
   },
   "files": [
@@ -40,6 +41,7 @@
     "zustand": "^5.0.0"
   },
   "devDependencies": {
+    "@babel/runtime": "^7.23.0",
     "eslint": "^9.39.0",
     "tsup": "^8.0.0",
     "typescript": "^5.7.2",

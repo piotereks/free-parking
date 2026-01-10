@@ -11,6 +11,8 @@ export const PARKING_MAX_CAPACITY = {
 };
 
 // Threshold for approximation (in minutes)
+// Default staleness threshold for applying approximations (minutes)
+// Historically this was intended to be 30 minutes.
 export const APPROXIMATION_THRESHOLD_MINUTES = 30;
 
 /**
