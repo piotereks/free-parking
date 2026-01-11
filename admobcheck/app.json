@@ -2,10 +2,12 @@
   "expo": {
     "plugins": [
       [
-        "expo-ads-admob",
+        "react-native-google-mobile-ads",
         {
           "androidAppId": "ca-app-pub-4295926250176261~7670233655",
-          "iosAppId": "ca-app-pub-4295926250176261~7670233655"
+          "android_app_id": "ca-app-pub-4295926250176261~7670233655",
+          "iosAppId": "ca-app-pub-4295926250176261~7670233655",
+          "ios_app_id": "ca-app-pub-4295926250176261~7670233655"
         }
       ]
     ],
@@ -42,6 +44,11 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "7dae50d8-c356-4c19-8ca3-62f83ae090bb"
+      }
     }
   }
 }
