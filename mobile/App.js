@@ -28,29 +28,29 @@ function PlaceholderBanner({ style }) {
 }
 
 
-// export default function Root() {
-// 	return (
-// 		<SafeAreaView style={styles.container}>
-// 			<View style={styles.content}>
-// 				<App />
-// 			</View>
-// 			<View style={styles.bannerContainer}>
-// 				{AdMobManager ? <AdMobManager style={{ marginTop: 10 }} /> : <PlaceholderBanner style={{ marginTop: 10 }} />}
-// 			</View>
-// 		</SafeAreaView>
-// 	);
-// }
-
 export default function Root() {
 	return (
-		<View style={styles.container}>
-			<Text>Open up App.js to start working on your app!</Text>
-			{/* <App /> */}
-			<StatusBar style="auto" />
-			{AdMobManager ? <AdMobManager style={{ marginTop: 10 }} /> : <PlaceholderBanner style={{ marginTop: 10 }} />}
-		</View>
+		<SafeAreaView style={styles.container}>
+			<View style={styles.content}>
+				<App />
+			</View>
+			<View style={styles.bannerContainer}>
+				{AdMobManager ? <AdMobManager style={{ marginTop: 10 }} /> : <PlaceholderBanner style={{ marginTop: 10 }} />}
+			</View>
+		</SafeAreaView>
 	);
 }
+
+// export default function Root() {
+// 	return (
+// 		<View style={styles.container}>
+// 			{/* <Text>Open up App.js to start working on your app!</Text> */}
+// 			<App />
+// 			<StatusBar style="auto" />
+// 			{AdMobManager ? <AdMobManager style={{ marginTop: 10 }} /> : <PlaceholderBanner style={{ marginTop: 10 }} />}
+// 		</View>
+// 	);
+// }
 
 const styles = StyleSheet.create({
 	// container: { flex: 1 },
