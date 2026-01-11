@@ -12,6 +12,7 @@
     "test:watch": "jest --watch",
     "lint": "eslint \"**/*.{js,jsx}\"",
     "prebuild": "expo prebuild",
+    "postinstall": "npm install @react-native-async-storage/async-storage --no-save",
     "android:build": "cd android && gradlew assembleRelease",
     "android:install": "adb install android/app/build/outputs/apk/release/app-release.apk",
     "android:deploy": "cd android && gradlew installRelease"
