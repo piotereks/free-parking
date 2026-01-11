@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Platform } from 'react-native';
 import mobileAds, { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
 
 // Use official Google demo banner ad unit for both platforms outside dev.

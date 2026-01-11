@@ -1,11 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-// import { BannerAd, BannerAdSize } from 'react-native-google-mobile-ads';
 import { StatusBar } from 'expo-status-bar';
-
-import App from './src/App';
-
+import { StyleSheet, Text, View } from 'react-native';
 
 let AdMobManager = null;
 try {
@@ -27,25 +22,10 @@ function PlaceholderBanner({ style }) {
 	);
 }
 
-
-// export default function Root() {
-// 	return (
-// 		<SafeAreaView style={styles.container}>
-// 			<View style={styles.content}>
-// 				<App />
-// 			</View>
-// 			<View style={styles.bannerContainer}>
-// 				{AdMobManager ? <AdMobManager style={{ marginTop: 10 }} /> : <PlaceholderBanner style={{ marginTop: 10 }} />}
-// 			</View>
-// 		</SafeAreaView>
-// 	);
-// }
-
-export default function Root() {
+export default function App() {
 	return (
 		<View style={styles.container}>
 			<Text>Open up App.js to start working on your app!</Text>
-			{/* <App /> */}
 			<StatusBar style="auto" />
 			{AdMobManager ? <AdMobManager style={{ marginTop: 10 }} /> : <PlaceholderBanner style={{ marginTop: 10 }} />}
 		</View>
@@ -53,12 +33,7 @@ export default function Root() {
 }
 
 const styles = StyleSheet.create({
-	// container: { flex: 1 },
-	content: { flex: 1 },
-	// bannerContainer: {
-	// 	alignSelf: 'stretch',
-	// },
-		container: {
+	container: {
 		flex: 1,
 		backgroundColor: '#fff',
 		alignItems: 'center',
@@ -82,5 +57,3 @@ const styles = StyleSheet.create({
 		color: '#333',
 	},
 });
-
-
