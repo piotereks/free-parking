@@ -53,21 +53,21 @@ export default function Root() {
 // }
 
 const styles = StyleSheet.create({
-	// container: { flex: 1 },
+	container: { flex: 1 },
 	content: { flex: 1 },
-	// bannerContainer: {
-	// 	alignSelf: 'stretch',
-	// },
-		container: {
-		flex: 1,
-		backgroundColor: '#fff',
-		alignItems: 'center',
-		justifyContent: 'center',
-	},
 	bannerContainer: {
-		width: '100%',
-		alignItems: 'center',
+		alignSelf: 'stretch',
 	},
+	// 	container: {
+	// 	flex: 1,
+	// 	backgroundColor: '#fff',
+	// 	alignItems: 'center',
+	// 	justifyContent: 'center',
+	// },
+	// bannerContainer: {
+	// 	width: '100%',
+	// 	alignItems: 'center',
+	// },
 	banner: {
 		width: 320,
 		height: 50,
