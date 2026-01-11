@@ -1,7 +1,18 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
+        "plugins": [
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-4295926250176261~7670233655",
+          "android_app_id": "ca-app-pub-4295926250176261~7670233655",
+          "iosAppId": "ca-app-pub-4295926250176261~7670233655",
+          "ios_app_id": "ca-app-pub-4295926250176261~7670233655"
+        }
+      ]
+    ],
+    "name": "free-parking",
+    "slug": "free-parking",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/favicon.png",
@@ -13,7 +24,15 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSUserTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you.",
+        "SKAdNetworkItems": [
+          {
+            "SKAdNetworkIdentifier": "cstr6suwn9.skadnetwork"
+          }
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -21,7 +40,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.mobile"
+      "package": "app.piotereks.freeparking"
     },
     "web": {
       "favicon": "./assets/favicon.svg"
