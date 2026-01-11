@@ -2,10 +2,25 @@
   "expo": {
     "plugins": [
       [
-        "expo-ads-admob",
+        "react-native-google-mobile-ads",
         {
-          "androidAppId": "ca-app-pub-3940256099942544/6300978111",
-          "iosAppId": "ca-app-pub-3940256099942544/6300978111"
+          "androidAppId": "ca-app-pub-3940256099942544~3347511713",
+          "iosAppId": "ca-app-pub-3940256099942544~1458002511"
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
+            "minSdkVersion": 23,
+            "buildToolsVersion": "35.0.0",
+            "kotlinVersion": "1.9.24"
+          },
+          "ios": {
+            "deploymentTarget": "13.4"
+          }
         }
       ]
     ],
@@ -15,7 +30,7 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -25,6 +40,7 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSUserTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you.",
+        "GADApplicationIdentifier": "ca-app-pub-3940256099942544~1458002511",
         "SKAdNetworkItems": [
           {
             "SKAdNetworkIdentifier": "cstr6suwn9.skadnetwork"
@@ -37,7 +53,6 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
       "package": "com.anonymous.admobcheck"
     },
     "web": {
