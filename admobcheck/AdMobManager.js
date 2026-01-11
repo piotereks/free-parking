@@ -9,18 +9,18 @@ import {
 
 // Define your ad unit IDs
 const BANNER_AD_UNIT_ID = Platform.select({
-  ios: 'ca-app-pub-xxx/yyy',
-  android: 'ca-app-pub-xxx/yyy'
+  ios: 'ca-app-pub-3940256099942544/6300978111',
+  android: 'ca-app-pub-3940256099942544/6300978111'
 });
 
 const INTERSTITIAL_AD_UNIT_ID = Platform.select({
-  ios: 'ca-app-pub-xxx/yyy',
-  android: 'ca-app-pub-xxx/yyy'
+  ios: 'ca-app-pub-3940256099942544/1033173712',
+  android: 'ca-app-pub-3940256099942544/1033173712'
 });
 
 const REWARDED_AD_UNIT_ID = Platform.select({
-  ios: 'ca-app-pub-xxx/yyy',
-  android: 'ca-app-pub-xxx/yyy'
+  ios: 'ca-app-pub-3940256099942544/5224354917',
+  android: 'ca-app-pub-3940256099942544/5224354917'
 });
 
 const AdMobManager = ({ style }) => {
