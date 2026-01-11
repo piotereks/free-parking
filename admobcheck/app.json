@@ -1,5 +1,22 @@
 {
   "expo": {
+    "name": "admobcheck",
+    "slug": "admobcheck",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "plugins": [
       [
         "react-native-google-mobile-ads",
@@ -12,48 +29,23 @@
         "expo-build-properties",
         {
           "android": {
-            "compileSdkVersion": 35,
-            "targetSdkVersion": 35,
-            "minSdkVersion": 23,
-            "buildToolsVersion": "35.0.0",
-            "kotlinVersion": "1.9.24"
-          },
-          "ios": {
-            "deploymentTarget": "13.4"
+            "compileSdkVersion": 34,
+            "targetSdkVersion": 34,
+            "minSdkVersion": 21,
+            "buildToolsVersion": "34.0.0"
           }
         }
       ]
     ],
-    "name": "admobcheck",
-    "slug": "admobcheck",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "newArchEnabled": false,
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
     "ios": {
-      "supportsTablet": true,
-      "infoPlist": {
-        "NSUserTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you.",
-        "GADApplicationIdentifier": "ca-app-pub-3940256099942544~1458002511",
-        "SKAdNetworkItems": [
-          {
-            "SKAdNetworkIdentifier": "cstr6suwn9.skadnetwork"
-          }
-        ]
-      }
+      "supportsTablet": true
     },
     "android": {
+      "package": "com.admobcheck.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      },
-      "package": "com.anonymous.admobcheck"
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
