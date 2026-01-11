@@ -1,122 +1,44 @@
-import React, { useEffect, useRef, useCallback } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
-import mobileAds, {
-  NativeAdView,
-  CallToActionView,
-  HeadlineView,
-  TaglineView,
-  IconView,
-  MediaView,
-  StarRatingView,
-  TestIds
-} from 'react-native-google-mobile-ads';
+import React, { useEffect } from 'react';
+import { StyleSheet, View } from 'react-native';
+import mobileAds, { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
 
-// Use official Google demo native ad unit for both platforms outside dev.
-const NATIVE_AD_UNIT_ID = __DEV__
-  ? TestIds.NATIVE_ADVANCED
+// Use official Google demo banner ad unit for both platforms outside dev.
+const BANNER_AD_UNIT_ID = __DEV__
+  ? TestIds.BANNER
   : Platform.select({
-      ios: 'ca-app-pub-3940256099942544/2247696110',
-      android: 'ca-app-pub-3940256099942544/2247696110'
+      ios: 'ca-app-pub-3940256099942544/2934735716',
+      android: 'ca-app-pub-3940256099942544/6300978111'
     });
 
 const AdMobManager = ({ style }) => {
-  const adRef = useRef(null);
-
   useEffect(() => {
-    mobileAds().initialize();
-  }, []);
-
-  const handleAdFailedToLoad = useCallback((error) => {
-    console.warn('Native ad failed to load:', error);
+    try {
+      mobileAds().initialize().then(() => {
+        console.log('AdMob initialized successfully');
+      }).catch((initError) => {
+        console.warn('AdMob initialization failed:', initError);
+      });
+    } catch (e) {
+      console.warn('AdMob initialization threw an error:', e);
+    }
   }, []);
 
   return (
-    <NativeAdView
-      ref={adRef}
-      adUnitID={NATIVE_AD_UNIT_ID}
-      requestOptions={{ requestNonPersonalizedAdsOnly: true }}
-      onAdFailedToLoad={handleAdFailedToLoad}
-      style={style}
-    >
-      <View style={styles.container}>
-        <View style={styles.headerRow}>
-          <IconView style={styles.icon} />
-          <View style={styles.titles}>
-            <HeadlineView style={styles.headline} />
-            <TaglineView style={styles.tagline} />
-          </View>
-        </View>
-
-        <MediaView style={styles.media} />
-
-        <View style={styles.footer}>
-          <StarRatingView style={styles.stars} />
-          <CallToActionView style={styles.cta} textStyle={styles.ctaText} />
-        </View>
-      </View>
-    </NativeAdView>
+    <View style={[styles.container, style]}>
+      <BannerAd
+        unitId={BANNER_AD_UNIT_ID}
+        size={BannerAdSize.BANNER}
+        requestOptions={{ requestNonPersonalizedAdsOnly: true }}
+      />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    borderRadius: 8,
-    backgroundColor: '#fff',
-    borderColor: '#ddd',
-    borderWidth: 1,
-    overflow: 'hidden'
-  },
-  headerRow: {
-    flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
-    gap: 10
   },
-  icon: {
-    width: 48,
-    height: 48,
-    borderRadius: 8,
-    backgroundColor: '#f1f1f1'
-  },
-  titles: {
-    flex: 1
-  },
-  headline: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#111'
-  },
-  tagline: {
-    fontSize: 13,
-    color: '#555',
-    marginTop: 4
-  },
-  media: {
-    height: 200,
-    backgroundColor: '#f7f7f7'
-  },
-  footer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 12,
-    gap: 10
-  },
-  stars: {
-    width: 120,
-    height: 20
-  },
-  cta: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    backgroundColor: '#2563eb',
-    borderRadius: 6
-  },
-  ctaText: {
-    color: '#fff',
-    fontWeight: '700'
-  }
 });
 
 export default AdMobManager;
