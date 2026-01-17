@@ -3,11 +3,13 @@ import { StyleSheet, View, Platform } from 'react-native';
 import mobileAds, { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
 
 // Use official Google demo banner ad unit for both platforms outside dev.
+// const useTestAd = false;
+// const BANNER_AD_UNIT_ID = useTestAd
 const BANNER_AD_UNIT_ID = __DEV__
   ? TestIds.BANNER
   : Platform.select({
-      ios: 'ca-app-pub-3940256099942544/2934735716',
-      android: 'ca-app-pub-3940256099942544/6300978111'
+      ios: 'ca-app-pub-4295926250176261/3717620167',
+      android: 'ca-app-pub-4295926250176261/3717620167'
     });
 
 const AdMobManager = ({ style }) => {
