@@ -34,6 +34,7 @@ parking-deploy/
 
 # Temporary/backup files
 xxx/
+xxx*.*
 *.tmp
 *.bak
 *~

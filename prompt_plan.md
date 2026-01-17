@@ -33,3 +33,15 @@ Maintain web and mobile repos fully separate, including CI/CD pipelines
 Each step should be small, actionable, and testable, so progress can pause and resume easily
 Output should be ready to save as MIGRATION_PLAN.md and serve as a persistent, iterative roadmap for the migration.
 
+---
+6. test on expo web 
+1. check if app will pass google play evaluation (with some github copilot test)
+2. deploy app to android store
+3. add apps to web version
+4. create javascript forwarder in github copilot and tiny-url it
+5. create leaflet with QR code (print)
+7. package ios package on expo 
+8. ios app might be served outside app store for now (would banners work?)
+9. create version fingerprint on app (analyze before)
+10. add some guide how to use app (for web and for android)
+11. suggestive 3 keys instead of UBS  - ⊔ß∫

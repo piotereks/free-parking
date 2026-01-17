@@ -1,0 +1,30 @@
+# EAS ignore for entire repo
+# Exclude unnecessary folders and files from EAS upload
+
+admobcheck/
+docs/
+web/
+wrk/
+xxx/
+native-app/
+orig/
+parking-deploy/
+shell_src/
+sadf/
+
+# Exclude root files
+MIGRATION_PLAN.md
+PHASE2_PLAN_DETAILED.md
+PHASE2_PLAN.md
+PHASE3_PLAN_DETAILED.md
+prompt_plan.md
+README.md
+SECURITY.md
+CONTRIBUTING.md
+DEPLOYMENT.md
+IMPROVEMENTS.md
+logcat.txt
+xpackage-lock.json
+xpackage.json
+
+# Keep mobile/ and shared/ for the build
