@@ -6,7 +6,7 @@ import { ThemeProvider, useTheme } from './context/ThemeContext';
 import ParkingDataProvider from './context/ParkingDataProvider';
 import { debugLog } from './config/debug';
 import useParkingStore from './hooks/useParkingStore';
-import { applyApproximations, calculateDataAge, formatAgeLabel, parseTimestamp, formatTime, createRefreshHelper } from 'parking-shared';
+import { applyApproximations, calculateDataAge, formatAgeLabel, parseTimestamp, formatTime, createRefreshHelper } from './index.js';
 
 const SSafeArea = styled(SafeAreaView);
 const SView = styled(View);
