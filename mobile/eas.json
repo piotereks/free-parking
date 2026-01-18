@@ -7,15 +7,21 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "prebuildCommand": "npm install @react-native-async-storage/async-storage"
+      "prebuildCommand": "npm install @react-native-async-storage/async-storage && npx expo-modules-autolinking resolve || true"
     },
     "preview": {
       "distribution": "internal",
-      "prebuildCommand": "npm install @react-native-async-storage/async-storage"
+      "prebuildCommand": "npm install @react-native-async-storage/async-storage && npx expo-modules-autolinking resolve || true"
     },
     "production": {
       "autoIncrement": true,
-      "prebuildCommand": "npm install @react-native-async-storage/async-storage"
+      "prebuildCommand": "npm install @react-native-async-storage/async-storage && npx expo-modules-autolinking resolve",
+      "android": {
+        "gradleCommand": ":app:bundleRelease",
+        "cache": {
+          "paths": []
+        }
+      }
     }
   },
   "submit": {
