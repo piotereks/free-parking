@@ -6,6 +6,9 @@ dist/
 dist-ssr/
 docs/
 parking-deploy/
+admobcheck*/
+uni/
+
 
 # IDE
 .idea/
@@ -34,14 +37,14 @@ parking-deploy/
 
 # Temporary/backup files
 xxx/
+xxx*.*
 *.tmp
 *.bak
 *~
- 
- 
+
+
 # Local working artifacts
 wrk/
 
 # Coverage reports (generated)
 coverage/
-

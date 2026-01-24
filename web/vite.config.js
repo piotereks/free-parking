@@ -7,7 +7,7 @@ export default defineConfig(({ command: _command, mode: _mode }) => {
 
   // Support dynamic base path from environment variable (used in branch-specific deployments)
   // Falls back to default for main branch deployment
-  const base = process.env.VITE_BASE_PATH || '/piotereks/html/parking/'
+  const base = process.env.VITE_BASE_PATH || '/free-parking/'
 
   console.log('Using base:', base)
 
@@ -38,7 +38,7 @@ export default defineConfig(({ command: _command, mode: _mode }) => {
     build: {
       emptyOutDir: true,
       // Emit build output into repo root to keep gh-pages path unchanged
-      outDir: path.resolve(__dirname, '../parking-deploy/docs/html/parking'),
+      // outDir: path.resolve(__dirname, '../parking-deploy/docs/html/parking'),
       chunkSizeWarningLimit: 2000,
       // Allow CommonJS resolution for files inside shared source during dev/build
       commonjsOptions: {
@@ -57,8 +57,8 @@ export default defineConfig(({ command: _command, mode: _mode }) => {
 
     preview: {
       port: 4173
-      // Preview will automatically use base: '/piotereks/docs/html/parking/'
-      // Access at: http://localhost:4173/piotereks/docs/html/parking/
+      // Preview will automatically use base: '/free-parking/'
+      // Access at: http://localhost:4173/free-parking/
     }
   }
 })
