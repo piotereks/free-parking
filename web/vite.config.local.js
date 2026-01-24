@@ -12,7 +12,7 @@ export default defineConfig(({ command: _command, mode: _mode }) => {
 
   // Build output path: compute relative to this config file (which lives in `web/`)
   // This resolves to <repo-root>/parking-deploy/docs/html/parking
-  const outDir = path.resolve(__dirname, '..', 'parking-deploy', 'docs', 'html', 'parking')
+  // const outDir = path.resolve(__dirname, '..', 'parking-deploy', 'docs', 'html', 'parking')
 
   return {
     plugins: [react()],
@@ -40,7 +40,7 @@ export default defineConfig(({ command: _command, mode: _mode }) => {
 
     build: {
       emptyOutDir: true,
-      outDir,
+      // outDir,
       chunkSizeWarningLimit: 2000,
       // Allow CommonJS resolution for files inside shared source during dev/build
       commonjsOptions: {

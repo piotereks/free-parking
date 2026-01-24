@@ -37,7 +37,7 @@ jobs:
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: ./parking-deploy/docs/html/parking
+          path: ./web/dist
 
       - uses: actions/deploy-pages@v4
 
