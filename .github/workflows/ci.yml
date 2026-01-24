@@ -101,8 +101,8 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           personal_token: ${{ secrets.DEPLOY_TOKEN }}
-          external_repository: piotereks/piotereks
-          publish_branch: main
+          external_repository: piotereks/app
+          publish_branch: gh-pages
           publish_dir: ./web/dist
           destination_dir: ./free-parking
           user_name: 'github-actions[bot]'
