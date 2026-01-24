@@ -95,7 +95,7 @@ jobs:
           external_repository: piotereks/app
           publish_branch: gh-pages
           publish_dir: ./web/dist
-          destination_dir: ./free-parking
+          destination_dir: ./
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
           commit_message: 'Deploy from ${{ github.repository }}@${{ github.sha }}'
