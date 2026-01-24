@@ -76,17 +76,17 @@ jobs:
           cache-dependency-path: web/package-lock.json
       
       - name: Prebuild shared package
-        working-directory: ./web
+        working-directory: ./
         run: |
           cd shared
           npm ci
           npm run build
 
-      - name: Install dependencies
-        run: npm ci
       
       - name: Build production
-        run: npm run build
+        run: |
+          npm ci
+          npm run build
       
       - name: Deploy to GitHub Pages (if configured)
         uses: peaceiris/actions-gh-pages@v3
