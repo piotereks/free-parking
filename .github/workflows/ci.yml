@@ -59,7 +59,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
-          path: parking-deploy/docs/html/parking/
+          path: ./web/dist
           retention-days: 7
 
   build:
@@ -103,8 +103,8 @@ jobs:
           personal_token: ${{ secrets.DEPLOY_TOKEN }}
           external_repository: piotereks/piotereks
           publish_branch: main
-          publish_dir: ./parking-deploy/docs/html/parking
-          destination_dir: docs/html/parking
+          publish_dir: ./web/dist
+          destination_dir: ./free-parking
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
           commit_message: 'Deploy from ${{ github.repository }}@${{ github.sha }}'
