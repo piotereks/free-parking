@@ -18,6 +18,10 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './test/setup.js',
     css: true,
+    coverage: {
+      reporter: ['text', 'html', 'json', 'lcov'],
+      exclude: ['node_modules/', 'test/'],
+    },
     // exclude: ['src/test/**'],
   },
 });
