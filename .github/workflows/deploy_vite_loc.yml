@@ -33,11 +33,11 @@ jobs:
           npm run build
 
       - run: npm ci
-      - run: npm run build -- --config vite.config.local.js
+      - run: npm run build
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: ./parking-deploy/docs/html/parking
+          path: ./web/dist
 
       - uses: actions/deploy-pages@v4
 
