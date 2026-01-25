@@ -94,8 +94,8 @@ jobs:
           personal_token: ${{ secrets.DEPLOY_TOKEN }}
           external_repository: piotereks/app
           publish_branch: gh-pages
-          publish_dir: ./web/dist
-          destination_dir: ./
+          publish_dir: dist
+          destination_dir: ./free-parking
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
           commit_message: 'Deploy from ${{ github.repository }}@${{ github.sha }}'
