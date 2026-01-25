@@ -32,7 +32,18 @@ jobs:
           npm ci
           npm run build
 
-      - run: npm ci
+      - uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: 'latest'
+          extended: true
+      
+      - run: |
+          npm ci
+
+      - run: |
+          cd docs
+          hugo build --minify -d ../public
+
       - run: npm run build
 
       - uses: actions/upload-pages-artifact@v3

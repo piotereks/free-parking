@@ -4,10 +4,15 @@ node_modules/
 # Build outputs
 dist/
 dist-ssr/
-docs/
-parking-deploy/
+# docs/
+*parking-deploy/
 admobcheck*/
 uni/
+
+# Public folder (except assets)
+*/public/*
+!*/public/assets/
+!*/public/assets/**
 
 
 # IDE

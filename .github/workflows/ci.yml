@@ -56,7 +56,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     needs: lint-and-test
-
     if: github.event_name == 'push' || github.event_name == 'pull_request'
 
     defaults:
@@ -84,11 +83,21 @@ jobs:
           npm ci
           npm run build
 
+
+      - uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: 'latest'
+          extended: true          
       
-      - name: Build production
-        run: |
+      - run: |
           npm ci
-          npm run build
+
+      - run: |
+          cd docs
+          hugo build --minify -d ../public
+
+      - run: npm run build
+
       
       - name: Deploy to GitHub Pages (if configured)
         uses: peaceiris/actions-gh-pages@v3

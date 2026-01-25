@@ -1,0 +1,1 @@
+use hugo (or lighter jekyll) to convert privacy-policy.md into html in folder dist/privacy-policy/index.html.
