@@ -44,7 +44,7 @@ jobs:
           find .
       - run: |
           cd docs
-          hugo build --minify -D ../public
+          hugo build --minify -D ./public
           find .. | grep public
       - run: npm run build
 
