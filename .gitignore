@@ -9,10 +9,11 @@ dist-ssr/
 admobcheck*/
 uni/
 
-# Public folder (ignore build outputs, but keep assets)
-/public/*
-!/public/assets
-!/public/assets/**
+# Public folder (except assets)
+*/public/*
+!*/public/assets/
+!*/public/assets/**
+
 
 # IDE
 .idea/
