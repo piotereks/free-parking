@@ -7,8 +7,7 @@ export default defineConfig(({ command: _command, mode: _mode }) => {
 
   // Support dynamic base path from environment variable (used in branch-specific deployments)
   // Falls back to default for main branch deployment
-  // const base = process.env.VITE_BASE_PATH || '/free-parking/'
-  const base = process.env.VITE_BASE_PATH 
+  const base = process.env.VITE_BASE_PATH || '/free-parking/'
 
   console.log('Using base:', base)
 
