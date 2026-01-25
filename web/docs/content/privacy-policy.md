@@ -1,4 +1,7 @@
-# Privacy Policy for Free Parking App
+---
+title: Privacy Policy for Free Parking App
+layout: striptheme
+---
 
 **Effective Date:** January 18, 2026
 
