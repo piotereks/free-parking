@@ -8,8 +8,11 @@ dist-ssr/
 *parking-deploy/
 admobcheck*/
 uni/
-public/
 
+# Public folder (ignore build outputs, but keep assets)
+/public/*
+!/public/assets
+!/public/assets/**
 
 # IDE
 .idea/
