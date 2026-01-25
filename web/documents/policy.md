@@ -1,3 +1,8 @@
+---
+_build:
+  render: false
+---
+
 # Privacy Policy for Free Parking App
 
 **Effective Date:** January 18, 2026

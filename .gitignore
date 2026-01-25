@@ -5,9 +5,10 @@ node_modules/
 dist/
 dist-ssr/
 # docs/
-parking-deploy/
+*parking-deploy/
 admobcheck*/
 uni/
+public/
 
 
 # IDE
