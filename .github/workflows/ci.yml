@@ -84,10 +84,11 @@ jobs:
           npm run build
 
       
-      - name: Build production
-        run: |
-          npm ci
-          npm run build
+      - run: npm ci
+      - run: |
+          cd docs
+          hugo build --minify -D ../public
+      - run: npm run build
       
       - name: Deploy to GitHub Pages (if configured)
         uses: peaceiris/actions-gh-pages@v3

@@ -33,6 +33,9 @@ jobs:
           npm run build
 
       - run: npm ci
+      - run: |
+          cd docs
+          hugo build --minify -D ../public
       - run: npm run build
 
       - uses: actions/upload-pages-artifact@v3
