@@ -45,7 +45,7 @@ jobs:
       - run: |
           cd docs
           hugo build --minify -D ../public
-          find .
+          find ..
       - run: npm run build
 
       - uses: actions/upload-pages-artifact@v3
