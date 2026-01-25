@@ -89,10 +89,13 @@ jobs:
           hugo-version: 'latest'
           extended: true          
       
-      - run: npm ci
+      - run: |
+          npm ci
+          find .
       - run: |
           cd docs
           hugo build --minify -D ../public
+          find .
       - run: npm run build
       
       - name: Deploy to GitHub Pages (if configured)
