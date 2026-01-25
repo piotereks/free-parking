@@ -163,7 +163,7 @@ const Dashboard = ({ setView }) => {
       />
 
       <main className="container-main" role="main" aria-label="Parking dashboard">
-        <div className="subtitle">Real-time parking availability • GD-xUni Wrocław</div>
+        <div className="subtitle">Real-time parking availability • GD-x2Uni Wrocław</div>
 
         {realtimeError && (
           <div className="error" role="alert" aria-live="polite">
