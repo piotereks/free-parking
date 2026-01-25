@@ -91,12 +91,13 @@ jobs:
       
       - run: |
           npm ci
-          find .
+
       - run: |
           cd docs
-          hugo build --minify -D ../public
-          find .
+          hugo build --minify -d ../public
+
       - run: npm run build
+
       
       - name: Deploy to GitHub Pages (if configured)
         uses: peaceiris/actions-gh-pages@v3

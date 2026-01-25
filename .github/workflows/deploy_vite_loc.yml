@@ -37,15 +37,13 @@ jobs:
           hugo-version: 'latest'
           extended: true
       
-
-      
       - run: |
           npm ci
-          find .
+
       - run: |
           cd docs
           hugo build --minify -d ../public
-          find .. | grep public
+
       - run: npm run build
 
       - uses: actions/upload-pages-artifact@v3
