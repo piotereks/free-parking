@@ -3,8 +3,8 @@
  * Compatible with parking-shared FetchAdapter interface
  */
 
-const CORS_PROXY = 'https://corsproxy.io/?';
-const CORS_REQUIRED_DOMAINS = ['zaparkuj.pl', 'docs.google.com'];
+const CORS_PROXY = 'https://proxy.piotereks.workers.dev/?url=';
+const CORS_REQUIRED_DOMAINS = ['zaparkuj.pl'];
 
 /**
  * Check if URL needs CORS proxy
