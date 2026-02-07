@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 📱 Mobile Modifications Reference
+    url: https://github.com/piotereks/free-parking/blob/main/mobile/TINY_MODIFICATIONS.md
+    about: View the complete list of 100 tiny modifications for the mobile app
+  - name: 📖 Documentation
+    url: https://github.com/piotereks/free-parking/blob/main/README.md
+    about: Read the project documentation
