@@ -4,6 +4,7 @@ import { ThemeProvider } from './ThemeContext';
 import { ParkingDataProvider } from './ParkingDataManager';
 import Dashboard from './Dashboard';
 import Statistics from './Statistics';
+import AdComponent from './components/AdComponent';
 
 function App() {
   const [view, setView] = useState('dashboard'); // 'dashboard' or 'stats'
@@ -17,6 +18,7 @@ function App() {
           ) : (
             <Statistics setView={setView} />
           )}
+          <AdComponent slot="1234567890" style={{ marginTop: '20px' }} />
         </ParkingDataProvider>
       </ThemeProvider>
     </ErrorBoundary>

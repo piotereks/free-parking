@@ -16,8 +16,8 @@ import { webFetchAdapter } from './adapters/webFetchAdapter';
 const ParkingDataContext = createContext();
 
 const API_URLS = [
-    'https://gd.zaparkuj.pl/api/freegroupcountervalue.json',
-    'https://gd.zaparkuj.pl/api/freegroupcountervalue-green.json'
+    'https://api.piotereks.workers.dev/?parking=gd',
+    'https://api.piotereks.workers.dev/?parking=uni'
 ];
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTwLNDbg8KjlVHsZWj9JUnO_OBIyZaRgZ4gZ8_Gbyly2J3f6rlCW6lDHAihwbuLhxWbBkNMI1wdWRAq/pub?gid=411529798&single=true&output=csv';
 

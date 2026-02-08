@@ -1,0 +1,6 @@
+baseURL = 'https://piotereks.top/'
+languageCode = 'en-us'
+title = 'Publish Site'
+
+theme = "adritian-free-hugo-theme"
+ 

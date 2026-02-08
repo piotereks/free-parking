@@ -4,8 +4,16 @@ node_modules/
 # Build outputs
 dist/
 dist-ssr/
-docs/
-parking-deploy/
+# docs/
+*parking-deploy/
+admobcheck*/
+uni/
+
+# Public folder (except assets)
+*/public/*
+!*/public/assets/
+!*/public/assets/**
+
 
 # IDE
 .idea/
@@ -38,11 +46,10 @@ xxx*.*
 *.tmp
 *.bak
 *~
- 
- 
+
+
 # Local working artifacts
 wrk/
 
 # Coverage reports (generated)
 coverage/
-
