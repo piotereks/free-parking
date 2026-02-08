@@ -1,0 +1,99 @@
+# EAS ignore for free-parking
+
+# Keep the app source we need for builds
+!mobile/
+!shared/
+
+# Node / packages
+node_modules/
+**/node_modules/
+
+# Local build outputs
+dist/
+dist-ssr/
+build/
+**/build/
+android/.gradle/
+android/**/build/
+android/app/build/
+ios/Pods/
+ios/build/
+android/
+ios/
+
+# Expo / EAS artifacts
+.expo/
+.expo-shared/
+.eas/
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.sublime-*
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Temp / backup / local working files
+*.tmp
+*.bak
+*~
+xxx/
+wrk/
+
+# Test and coverage
+coverage/
+test-results/
+*.lcov
+
+# Secrets and sensitive files
+.env
+.env.*
+*.local
+local.properties
+*.keystore
+*.jks
+*.p12
+credentials.json
+.keystore
+
+# Docs, examples and unrelated project folders
+admobcheck/
+admobcheck*/
+docs/
+web/
+wrk/
+xxx/
+native-app/
+orig/
+parking-deploy/
+shell_src/
+sadf/
+uni/
+
+# Project root files to exclude from upload
+MIGRATION_PLAN.md
+PHASE2_PLAN_DETAILED.md
+PHASE2_PLAN.md
+PHASE3_PLAN_DETAILED.md
+prompt_plan.md
+README.md
+SECURITY.md
+CONTRIBUTING.md
+DEPLOYMENT.md
+IMPROVEMENTS.md
+logcat.txt
+xpackage-lock.json
+xpackage.json
+
+# Public assets: include assets only
+*/public/*
+!*/public/assets/
+!*/public/assets/**
+
+# Keep this as a safety net
+!**/*.keystore            # if you actually need to include keystore, remove this negation

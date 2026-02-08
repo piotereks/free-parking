@@ -1,0 +1,78 @@
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+*.log
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+.env*.local
+
+# typescript
+*.tsbuildinfo
+
+# generated native folders
+/ios
+/android
+
+# tests (exclude if not running on EAS)
+test/
+
+# IDE
+.vscode/
+.idea/
+
+# temporary files
+*.tmp
+*.swp
+
+# exclude parent directories not needed for mobile build
+../admobcheck/
+../docs/
+../web/
+../wrk/
+../xxx/
+../native-app/
+../orig/
+../parking-deploy/
+../shell_src/
+../sadf/
+../MIGRATION_PLAN.md
+../PHASE2_PLAN_DETAILED.md
+../PHASE2_PLAN.md
+../PHASE3_PLAN_DETAILED.md
+../prompt_plan.md
+../README.md
+../SECURITY.md
+../CONTRIBUTING.md
+../DEPLOYMENT.md
+../IMPROVEMENTS.md
+../logcat.txt
+../xpackage-lock.json
+../xpackage.json

@@ -13,7 +13,8 @@ uni/
 */public/*
 !*/public/assets/
 !*/public/assets/**
-
+android/
+ios/
 
 # IDE
 .idea/

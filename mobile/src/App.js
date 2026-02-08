@@ -169,7 +169,7 @@ function DashboardContent() {
         <Image source={require('../assets/favicon.png')} style={{ width: 36, height: 36, marginRight: 12 }} />
         <SView className="items-center">
           <SText className="text-text-primary-dark text-lg font-semibold">{title}</SText>
-          <SText className="text-text-secondary-dark text-xs mt-0.5">Real-time • UBS Wrocław</SText>
+          <SText className="text-text-secondary-dark text-xs mt-0.5">Real-time • GD-Uni Wrocław</SText>
         </SView>
       </SView>
 

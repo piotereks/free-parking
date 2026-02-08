@@ -1,0 +1,28 @@
+{
+  "name": "admobcheck",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web",
+    "test": "jest",
+    "test:vitest": "vitest",
+    "test:watch": "jest --watch",
+    "lint": "eslint \"**/*.{js,jsx}\"",
+    "prebuild": "expo prebuild",
+    "android:build": "cd android && gradlew assembleRelease",
+    "android:install": "adb install android/app/build/outputs/apk/release/app-release.apk",
+    "android:deploy": "cd android && gradlew installRelease"
+  },
+  "dependencies": {
+    "expo": "^54.0.31",
+    "expo-status-bar": "^3.0.9",
+    "expo-system-ui": "^6.0.9",
+    "react": "^19.1.0",
+    "react-native": "^0.81.5",
+    "react-native-google-mobile-ads": "^16.0.1"
+  },
+  "private": true
+}

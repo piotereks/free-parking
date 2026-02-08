@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@testing-library/jest-native": "^5.4.3"
+  },
+  "devDependencies": {
+    "eslint-plugin-react-native": "^5.0.0"
+  }
+}

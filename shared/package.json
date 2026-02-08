@@ -3,14 +3,12 @@
   "version": "0.1.0-alpha.0",
   "description": "Shared parking data logic for web and mobile applications",
   "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./src/index.js",
+  "module": "./src/index.js",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "import": "./src/index.js",
+      "require": "./src/index.js"
     },
     "./parkingUtils": "./src/parkingUtils.js",
     "./package.json": "./package.json"
