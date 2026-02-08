@@ -5,7 +5,13 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "android": {
+        "reactNativeVersion": "0.81.5"
+      },
+      "ios": {
+        "reactNativeVersion": "0.81.5"
+      }
     },
     "simulator": {
       "ios": {
@@ -15,7 +21,16 @@
     "preview": {
       "distribution": "internal"
     },
-    "production": {}
+    "production": {
+      "android": {
+        "buildType": "app-bundle",
+        "reactNativeVersion": "0.81.5"
+      },
+      "ios": {
+        "buildType": "release",
+        "reactNativeVersion": "0.81.5"
+      }
+    }
   },
   "submit": {
     "production": {}
