@@ -1,17 +1,12 @@
 {
   "cli": {
-    "version": ">= 3.0.0"
+    "version": ">= 3.0.0",
+    "appVersionSource": "app.json"
   },
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal",
-      "android": {
-        "reactNativeVersion": "0.81.5"
-      },
-      "ios": {
-        "reactNativeVersion": "0.81.5"
-      }
+      "distribution": "internal"
     },
     "simulator": {
       "ios": {
@@ -22,13 +17,8 @@
       "distribution": "internal"
     },
     "production": {
-      "android": {
-        "buildType": "app-bundle",
-        "reactNativeVersion": "0.81.5"
-      },
-      "ios": {
-        "buildType": "release",
-        "reactNativeVersion": "0.81.5"
+       "android": {
+        "buildType": "app-bundle"
       }
     }
   },
