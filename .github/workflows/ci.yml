@@ -15,10 +15,6 @@ concurrency:
   group: pages-artifact-group
   cancel-in-progress: false
 
-concurrency:
-  group: pages-artifact-group
-  cancel-in-progress: false
-
 jobs:
   lint-and-test:
     runs-on: ubuntu-latest
