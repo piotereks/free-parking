@@ -11,6 +11,7 @@ orig/
 parking-deploy/
 shell_src/
 sadf/
+node_modules/
 
 # Exclude root files
 MIGRATION_PLAN.md
@@ -28,3 +29,61 @@ xpackage-lock.json
 xpackage.json
 
 # Keep mobile/ and shared/ for the build
+
+
+
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+dist-ssr/
+# docs/
+*parking-deploy/
+admobcheck*/
+uni/
+
+# Public folder (except assets)
+*/public/*
+!*/public/assets/
+!*/public/assets/**
+
+
+# IDE
+.idea/
+# .vscode/
+*.sublime-*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment variables
+*.local
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Deployment
+parking-deploy/
+
+# Temporary/backup files
+xxx/
+xxx*.*
+*.tmp
+*.bak
+*~
+
+
+# Local working artifacts
+wrk/
+
+# Coverage reports (generated)
+coverage/
