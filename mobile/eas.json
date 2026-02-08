@@ -1,28 +1,21 @@
 {
   "cli": {
-    "version": ">= 16.28.0",
-    "appVersionSource": "remote"
+    "version": ">= 3.0.0"
   },
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal",
-      "prebuildCommand": "npm install @react-native-async-storage/async-storage && npx expo-modules-autolinking resolve || true"
+      "distribution": "internal"
+    },
+    "simulator": {
+      "ios": {
+        "simulator": true
+      }
     },
     "preview": {
-      "distribution": "internal",
-      "prebuildCommand": "npm install @react-native-async-storage/async-storage && npx expo-modules-autolinking resolve || true"
+      "distribution": "internal"
     },
-    "production": {
-      "autoIncrement": true,
-      "prebuildCommand": "npm install @react-native-async-storage/async-storage && npx expo-modules-autolinking resolve",
-      "android": {
-        "gradleCommand": ":app:bundleRelease",
-        "cache": {
-          "paths": []
-        }
-      }
-    }
+    "production": {}
   },
   "submit": {
     "production": {}
