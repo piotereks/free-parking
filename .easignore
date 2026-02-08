@@ -1,7 +1,68 @@
-# EAS ignore for entire repo
-# Exclude unnecessary folders and files from EAS upload
+# EAS ignore for free-parking
 
+# Keep the app source we need for builds
+!mobile/
+!shared/
+
+# Node / packages
+node_modules/
+**/node_modules/
+
+# Local build outputs
+dist/
+dist-ssr/
+build/
+**/build/
+android/.gradle/
+android/**/build/
+android/app/build/
+ios/Pods/
+ios/build/
+android/
+
+# Expo / EAS artifacts
+.expo/
+.expo-shared/
+.eas/
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.sublime-*
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Temp / backup / local working files
+*.tmp
+*.bak
+*~
+xxx/
+wrk/
+
+# Test and coverage
+coverage/
+test-results/
+*.lcov
+
+# Secrets and sensitive files
+.env
+.env.*
+*.local
+local.properties
+*.keystore
+*.jks
+*.p12
+credentials.json
+.keystore
+
+# Docs, examples and unrelated project folders
 admobcheck/
+admobcheck*/
 docs/
 web/
 wrk/
@@ -11,9 +72,9 @@ orig/
 parking-deploy/
 shell_src/
 sadf/
-node_modules/
+uni/
 
-# Exclude root files
+# Project root files to exclude from upload
 MIGRATION_PLAN.md
 PHASE2_PLAN_DETAILED.md
 PHASE2_PLAN.md
@@ -28,62 +89,10 @@ logcat.txt
 xpackage-lock.json
 xpackage.json
 
-# Keep mobile/ and shared/ for the build
-
-
-
-# Dependencies
-node_modules/
-
-# Build outputs
-dist/
-dist-ssr/
-# docs/
-*parking-deploy/
-admobcheck*/
-uni/
-
-# Public folder (except assets)
+# Public assets: include assets only
 */public/*
 !*/public/assets/
 !*/public/assets/**
 
-
-# IDE
-.idea/
-# .vscode/
-*.sublime-*
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Environment variables
-*.local
-.env
-.env.local
-.env.*.local
-
-# Logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
-# Deployment
-parking-deploy/
-
-# Temporary/backup files
-xxx/
-xxx*.*
-*.tmp
-*.bak
-*~
-
-
-# Local working artifacts
-wrk/
-
-# Coverage reports (generated)
-coverage/
+# Keep this as a safety net
+!**/*.keystore            # if you actually need to include keystore, remove this negation
