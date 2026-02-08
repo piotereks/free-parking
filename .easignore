@@ -19,6 +19,7 @@ android/app/build/
 ios/Pods/
 ios/build/
 android/
+/android
 
 # Expo / EAS artifacts
 .expo/
