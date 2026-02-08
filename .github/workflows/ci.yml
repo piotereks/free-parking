@@ -2,9 +2,18 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, master ]
+    branches:
+      - main
+      - master
   pull_request:
-    branches: [ main, master ]
+    branches:
+      - main
+      - master
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: pages-artifact-group
+  cancel-in-progress: false
 
 concurrency:
   group: pages-artifact-group
