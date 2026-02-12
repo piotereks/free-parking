@@ -18,6 +18,8 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './test/setup.js',
     css: true,
+    // explicitly ignore E2E and any files under node_modules
+    exclude: ['tests-e2e/**', 'node_modules/**'],
     coverage: {
       reporter: ['text', 'html', 'json', 'lcov'],
       exclude: ['node_modules/', 'test/'],
