@@ -5,7 +5,7 @@
 MSG_FILE="$1"
 MSG=$(sed -n '1p' "$MSG_FILE")
 
-regex='^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\\([^)]+\\))?(!)?: .+'
+regex='^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([^)]+\))?(!)?: .+'
 
 if ! printf "%s" "$MSG" | grep -Eq "$regex"; then
   echo "\nERROR: Commit message does not follow Conventional Commits format.\n"

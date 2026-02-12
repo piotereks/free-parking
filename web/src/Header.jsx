@@ -3,8 +3,11 @@ import { useCallback, useRef, useState } from 'react';
 import { useTheme } from './ThemeContext';
 import { clearCache } from './store/parkingStore';
 
+import pkg from '../package.json';
+
 const Header = ({ title, shortTitle, icon, onRefresh, updateStatus, currentView, setView, children }) => {
   const { isLight, toggleTheme } = useTheme();
+  const version = pkg?.version || '0.0.0';
   const tooltipRef = useRef(null);
   const donateRef = useRef(null);
   const [tooltipStyle, setTooltipStyle] = useState({});
@@ -71,7 +74,10 @@ const Header = ({ title, shortTitle, icon, onRefresh, updateStatus, currentView,
           <span className="title-text-full"> {title}</span>
           <span className="title-text-short"> {shortTitle || title}</span>
         </h1>
-        <div className="status-info" role="status" aria-live="polite">{updateStatus}</div>
+        <div>
+          <div className="status-info" role="status" aria-live="polite">{updateStatus}</div>
+          <div className="status-version" aria-hidden="true">Version: {version}</div>
+        </div>
       </div>
       <div className="header-actions" role="navigation" aria-label="Main navigation">
         {/* Extra actions like Palette Selector */}
