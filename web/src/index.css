@@ -101,7 +101,7 @@
   }
 
   .status-version {
-    @apply text-2xs text-text-secondary-light mt-0.5 pl-7;
+    @apply text-xs text-text-secondary-light mt-0.5 pl-7;
     font-size: 11px;
     opacity: 0.85;
   }
