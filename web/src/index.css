@@ -54,6 +54,7 @@
     @apply bg-bg-secondary-light border-b border-border-light transition-theme duration-300;
     height: 60px;
     box-shadow: 0 1px 10px rgba(0, 0, 0, 0.2);
+    padding-right: 220px; /* reserve space for header actions so they don't wrap */
   }
 
   /* Fix header to top so dashboard content scrolls underneath */
@@ -71,10 +72,20 @@
 
   .header-title-group {
     @apply flex flex-col;
+    flex: 1 1 auto; /* allow title to take remaining space so actions stay right */
+    min-width: 0; /* enable truncation when space is tight */
   }
 
   .header-title-group h1 {
     @apply text-xl font-bold tracking-tight m-0 leading-tight;
+    /* allow wrapping so actions don't get pushed out of the header */
+    overflow: visible;
+    text-overflow: unset;
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    max-height: 3.2rem; /* approx. 2 lines */
   }
 
   .title-icon {
@@ -95,6 +106,11 @@
 
   .header-actions {
     @apply flex items-center gap-3;
+    flex-shrink: 0; /* prevent actions from shrinking/wrapping under title */
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
   }
 
   /* Buttons */
@@ -149,6 +165,104 @@
 
   .dark .theme-toggle:hover {
     @apply bg-bg-card-dark;
+  }
+
+  /* Donate / BuyCoffee button */
+  .donate-btn {
+    @apply flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold;
+    @apply transition-all duration-200 cursor-pointer;
+    @apply bg-yellow-50 border border-yellow-200 text-yellow-800;
+    height: 44px;
+    width: auto;
+  }
+
+  .dark .donate-btn {
+    @apply bg-yellow-900 border-yellow-700 text-yellow-300;
+  }
+
+  .donate-badge {
+    @apply inline-flex items-center justify-center rounded-md text-lg;
+    width: 28px;
+    height: 28px;
+    background: rgba(250, 204, 21, 0.12);
+  }
+
+  .donate-btn:hover {
+    @apply -translate-y-px shadow-hover-light;
+  }
+
+  .tooltip-wrapper {
+    position: relative;
+    display: inline-block;
+  }
+
+  /* clearer, higher-contrast tooltip that appears below the button */
+  .tooltip-text {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: translateY(-6px);
+    opacity: 0;
+    pointer-events: none;
+    width: max-content;
+    max-width: min(260px, calc(100vw - 16px));
+    text-align: center;
+    @apply bg-bg-card-light text-sm text-text-primary-light border border-border-light rounded-md px-3 py-2 shadow-lg transition-all duration-150;
+    white-space: normal; /* allow wrapping and explicit line breaks */
+    line-height: 1.3;
+    word-break: break-word;
+    z-index: 9999;
+  }
+
+  .tooltip-text::after {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: var(--tooltip-arrow-left, 16px);
+    border-width: 6px;
+    border-style: solid;
+    border-color: transparent transparent var(--tw-bg-opacity, currentColor) transparent;
+  }
+
+  .tooltip-text[data-placement='top'] {
+    transform: translateY(6px);
+  }
+
+  .tooltip-text[data-placement='top']::after {
+    top: auto;
+    bottom: -6px;
+    border-color: var(--tw-bg-opacity, currentColor) transparent transparent transparent;
+  }
+
+  .tooltip-sub {
+    @apply text-xs text-text-secondary-light mt-1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .tooltip-line {
+    display: block;
+    white-space: nowrap;
+  }
+
+  .tooltip-link {
+    white-space: nowrap;
+    text-decoration: underline;
+    cursor: pointer;
+    color: inherit;
+  }
+
+  .dark .tooltip-text {
+    @apply bg-bg-card-dark text-text-primary-dark border-border-dark;
+  }
+
+  .tooltip-wrapper:hover .tooltip-text,
+  .tooltip-wrapper:focus-within .tooltip-text {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
   }
 
   /* Palette selector */
@@ -444,6 +558,7 @@
   .header-controls {
     @apply px-2;
     height: 54px;
+    padding-right: 110px; /* smaller reserve on narrow screens */
   }
 
   .container-main {
@@ -463,8 +578,29 @@
     @apply inline;
   }
 
+  /* keep most buttons icon-only on small screens, but allow donate button text to show when space permits */
   .btn-text {
     @apply hidden;
+  }
+
+  /* On very small screens show donate text and prevent the donate button from collapsing */
+  .donate-btn {
+    width: auto;
+    min-width: 88px;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .donate-btn .btn-text {
+    display: inline-block;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .donate-btn.show-text .btn-text {
+    max-width: 160px;
   }
 
   .btn-icon {
