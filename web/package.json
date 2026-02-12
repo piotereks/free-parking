@@ -1,6 +1,6 @@
 {
   "name": "parking",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
   "type": "module",
   "scripts": {
@@ -11,7 +11,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "release": "standard-version"
   },
   "dependencies": {
     "echarts": "^6.0.0",
@@ -36,6 +37,7 @@
     "@vitest/coverage-v8": "^4.0.16",
     "@vitest/ui": "^4.0.16",
     "autoprefixer": "^10.4.16",
+    "standard-version": "^9.5.0",
     "cross-env": "^7.0.3",
     "eslint": "^9.39.1",
     "eslint-plugin-react": "^7.37.5",
