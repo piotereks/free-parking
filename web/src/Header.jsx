@@ -71,7 +71,10 @@ const Header = ({ title, shortTitle, icon, onRefresh, updateStatus, currentView,
           <span className="title-text-full"> {title}</span>
           <span className="title-text-short"> {shortTitle || title}</span>
         </h1>
-        <div className="status-info" role="status" aria-live="polite">{updateStatus}</div>
+        <div className="status-info" role="status" aria-live="polite">
+          {updateStatus}
+          <span className="app-version" title={`version ${import.meta.env.VITE_APP_VERSION || process.env.npm_package_version || 'dev'}`} aria-hidden="false">v{import.meta.env.VITE_APP_VERSION || process.env.npm_package_version || 'dev'}</span>
+        </div>
       </div>
       <div className="header-actions" role="navigation" aria-label="Main navigation">
         {/* Extra actions like Palette Selector */}

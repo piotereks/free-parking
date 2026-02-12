@@ -242,6 +242,16 @@
     gap: 2px;
   }
 
+  /* small version badge shown in header */
+  .app-version {
+    display: inline-block;
+    margin-left: 8px;
+    font-size: 0.72rem;
+    opacity: 0.85;
+    color: var(--muted-color,#666);
+    vertical-align: middle;
+  }
+
   .tooltip-line {
     display: block;
     white-space: nowrap;
