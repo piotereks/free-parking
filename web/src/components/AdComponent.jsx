@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import PropTypes from 'prop-types';
 
 const AdComponent = ({ slot, style = { display: "block" } }) => {
   useEffect(() => {
@@ -17,6 +18,11 @@ const AdComponent = ({ slot, style = { display: "block" } }) => {
          data-ad-format="auto"
          data-full-width-responsive="true"></ins>
   );
+};
+
+AdComponent.propTypes = {
+  slot: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  style: PropTypes.object
 };
 
 export default AdComponent;

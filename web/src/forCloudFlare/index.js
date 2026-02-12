@@ -62,7 +62,7 @@ export async function onRequest(context) {
       status: upstreamResp.status,
       headers
     })
-  } catch (err) {
+  } catch {
     return new Response("Upstream fetch failed", { status: 502 })
   }
 }
