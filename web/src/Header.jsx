@@ -128,7 +128,7 @@ const Header = ({ title, shortTitle, icon, onRefresh, updateStatus, currentView,
             onMouseEnter={positionTooltip}
             onFocus={positionTooltip}
           >
-            <span className="btn-text">Buy </span>
+            <span className="btn-text">Buy me </span>
             <span className="donate-badge" aria-hidden="true">☕</span>
           </a>
           <div
