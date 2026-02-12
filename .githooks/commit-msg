@@ -1,0 +1,22 @@
+#!/bin/sh
+# repo-level git hook (tracked under .githooks/)
+# Enforces Conventional Commits
+
+MSG_FILE="$1"
+MSG=$(sed -n '1p' "$MSG_FILE")
+
+regex='^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\\([^)]+\\))?(!)?: .+'
+
+if ! printf "%s" "$MSG" | grep -Eq "$regex"; then
+  echo "\nERROR: Commit message does not follow Conventional Commits format.\n"
+  echo "Expected: <type>[optional scope][!]: <description>"
+  echo "Allowed types: build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test"\n
+  echo "Examples:" 
+  echo "  feat: add parking map view"
+  echo "  fix(parser): handle missing timestamp"
+  echo "  perf!: change API contract (breaking)"\n
+  echo "See: https://www.conventionalcommits.org/ for details."
+  exit 1
+fi
+
+exit 0
