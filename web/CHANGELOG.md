@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.1](https://github.com/piotereks/free-parking/compare/v1.1.0...v1.1.1) (2026-02-12)
+
+
+### Bug Fixes
+
+* **header:** but ->buy me - label tweak ([2aee192](https://github.com/piotereks/free-parking/commit/2aee192366c54f3f62f7bbab74be7fa890bd001d))
+
 ## [1.1.0](https://github.com/piotereks/free-parking/compare/v1.0.0...v1.1.0) (2026-02-12)
 
 
