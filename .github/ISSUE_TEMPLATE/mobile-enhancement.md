@@ -1,12 +1,12 @@
 ---
-name: 🎨 Mobile - UI / UX
-about: UI or UX improvements for the mobile app
+name: ✨ Enhancement
+about: Propose a new feature or improvement
 title: "[Mobile] "
-labels: ["mobile", "ui-ux"]
+labels: ["mobile", "enhancement"]
 
 ---
 
-## UI/UX Improvement
+## Enhancement request
 
 ### Description
 
@@ -15,4 +15,3 @@ labels: ["mobile", "ui-ux"]
 ### Additional Context
 
 <!-- Add any extra information -->
-

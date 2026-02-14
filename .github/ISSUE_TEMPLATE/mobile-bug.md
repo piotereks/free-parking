@@ -1,12 +1,12 @@
 ---
-name: 🎨 Mobile - UI / UX
-about: UI or UX improvements for the mobile app
+name: 🐛 Bug report
+about: Report a bug in the project
 title: "[Mobile] "
-labels: ["mobile", "ui-ux"]
+labels: ["mobile", "bug"]
 
 ---
 
-## UI/UX Improvement
+## Bug report
 
 ### Description
 
@@ -15,4 +15,3 @@ labels: ["mobile", "ui-ux"]
 ### Additional Context
 
 <!-- Add any extra information -->
-
