@@ -3,7 +3,6 @@ name: 📚 Mobile - Documentation
 about: Improve documentation for the mobile app
 title: "[Mobile] "
 labels: ["mobile", "documentation"]
-
 ---
 
 ## Documentation Improvement
@@ -15,4 +14,3 @@ labels: ["mobile", "documentation"]
 ### Additional Context
 
 <!-- Add any extra information -->
-
