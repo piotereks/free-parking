@@ -1,0 +1,27 @@
+name: Create or update repository labels
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+jobs:
+  labels:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create or update labels
+        uses: peter-evans/create-or-update-labels@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          labels: |
+            - name: performance
+              color: f29513
+              description: Performance improvements and optimizations
+            - name: quick-win
+              color: 0e8a16
+              description: Small, high-impact fixes (< 30 minutes)
+            - name: testing
+              color: 0052cc
+              description: Add or improve test coverage
+            - name: ui-ux
+              color: 5319e7
+              description: UI / UX improvements, mockups, screenshots
