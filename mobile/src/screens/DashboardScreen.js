@@ -115,10 +115,10 @@ const DashboardScreen = () => {
   }, [realtimeData]);
 
   return (
-    <View className="flex-1 bg-bg-primary-light dark:bg-bg-primary-dark">
-      <View className="p-3 border-b border-border-light dark:border-border-dark bg-bg-card-light dark:bg-bg-card-dark">
-        <Text className="text-lg font-bold text-text-primary-light dark:text-text-primary-dark">Parking Dashboard</Text>
-        <Text className="text-xs mt-1 text-text-secondary-light dark:text-text-secondary-dark">{`Updated: ${formatTime(lastDataDate || now, 'pl-PL')}`}</Text>
+    <View className="flex-1 bg-bg-primary-light">
+      <View className="p-3 border-b border-border-light bg-bg-card-light">
+        <Text className="text-lg font-bold text-text-primary-light">Parking Dashboard</Text>
+        <Text className="text-xs mt-1 text-text-secondary-light">{`Updated: ${formatTime(lastDataDate || now, 'pl-PL')}`}</Text>
       </View>
 
       {realtimeLoading && (
@@ -131,13 +131,13 @@ const DashboardScreen = () => {
 
       {realtimeError && !realtimeLoading && (
         <View className="flex-1 items-center justify-center"> 
-          <Text className="text-sm text-warning-light dark:text-warning-dark">Error loading data. Pull to retry.</Text>
+          <Text className="text-sm text-warning-light">Error loading data. Pull to retry.</Text>
         </View>
       )}
 
       {!realtimeLoading && !realtimeError && data.length === 0 && (
         <View className="flex-1 items-center justify-center">
-          <Text className="text-sm text-text-muted-light dark:text-text-muted-dark">No parking data available.</Text>
+          <Text className="text-sm text-text-muted-light">No parking data available.</Text>
         </View>
       )}
 

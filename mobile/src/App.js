@@ -28,21 +28,21 @@ function ParkingCard({ data, now, allOffline }) {
 
   // Color is based on age/allOffline only; approximation no longer affects color
   let ageClass = '';
-  if (allOffline) ageClass = 'text-text-secondary-dark';
-  else if (age >= 15) ageClass = 'text-warning-dark';
-  else if (age > 5) ageClass = 'text-amber-600';
+  if (allOffline) ageClass = 'text-text-secondary-light';
+  else if (age >= 15) ageClass = 'text-warning-light';
+  else if (age > 5) ageClass = 'text-warning-medium';
 
   return (
-    <SView className="rounded-xl p-4 mb-3 flex flex-col items-center justify-center border border-border-dark bg-bg-secondary-dark shadow-lg">
-      <SText className="text-base font-semibold mb-1 text-center text-text-primary-dark">{name}</SText>
+    <SView className="rounded-xl p-4 mb-3 flex flex-col items-center justify-center border border-border bg-bg-secondary">
+      <SText className="text-base font-semibold mb-1 text-center text-text-primary">{name}</SText>
       <SView className="flex-row items-center justify-center">
         {isApproximated && <SText className="text-4xl text-amber-600 mr-1">≈</SText>}
-        <SText className={`text-4xl font-bold ${ageClass || 'text-success-dark'}`}>{freeSpots}</SText>
+        <SText className={`text-4xl font-bold ${ageClass || 'text-success'}`}>{freeSpots}</SText>
       </SView>
       {isApproximated && (
-        <SText className="text-sm text-text-secondary-dark">(orig: {originalSpots})</SText>
+        <SText className="text-sm text-text-secondary">(orig: {originalSpots})</SText>
       )}
-      <SText className="text-sm text-text-secondary-dark mt-2">{ageLabel.display || ageLabel}</SText>
+      <SText className="text-sm text-text-secondary mt-2">{ageLabel.display || ageLabel}</SText>
     </SView>
   );
 }
@@ -162,24 +162,24 @@ function DashboardContent() {
   }, [processed, totalSpaces, originalTotal, lastRealtimeUpdate]);
 
   return (
-    <SSafeArea className="flex-1 bg-bg-primary-dark">
-      <StatusBar barStyle="light-content" />
+    <SSafeArea className="flex-1 bg-bg-primary">
+      <StatusBar barStyle="dark-content" />
 
-      <SView className="w-full bg-bg-secondary-dark flex-row items-center justify-center py-3 px-4 border-b border-border-dark">
+      <SView className="w-full bg-bg-secondary flex-row items-center justify-center py-3 px-4 border-b border-border">
         <Image source={require('../assets/favicon.png')} style={{ width: 36, height: 36, marginRight: 12 }} />
         <SView className="items-center">
-          <SText className="text-text-primary-dark text-lg font-semibold">{title}</SText>
-          <SText className="text-text-secondary-dark text-xs mt-0.5">Real-time • GD-Uni Wrocław</SText>
+          <SText className="text-text-primary text-lg font-semibold">{title}</SText>
+          <SText className="text-text-secondary text-xs mt-0.5">Real-time • GD-Uni Wrocław</SText>
         </SView>
       </SView>
 
       {realtimeLoading && processed.length === 0 ? (
         <SView className="flex-1 items-center justify-center">
-          <SText className="text-text-secondary-dark text-lg">Loading parking data...</SText>
+          <SText className="text-text-secondary text-lg">Loading parking data...</SText>
         </SView>
       ) : realtimeError ? (
         <SView className="flex-1 items-center justify-center px-4">
-          <SText className="text-warning-dark text-base text-center">{String(realtimeError)}</SText>
+          <SText className="text-warning-light text-base text-center">{String(realtimeError)}</SText>
         </SView>
       ) : (
         <SScroll
@@ -190,13 +190,13 @@ function DashboardContent() {
         >
           <SView className="flex-row gap-2 mb-3">
             {processed.map((d, i) => (
-              <SView key={d.ParkingGroupName || i} className="flex-1 rounded-lg p-3 border border-border-dark bg-bg-secondary-dark">
-                <SText className="text-base font-semibold text-center text-text-primary-dark mb-2">
+              <SView key={d.ParkingGroupName || i} className="flex-1 rounded-lg p-3 border border-border bg-bg-secondary">
+                <SText className="text-base font-semibold text-center text-text-primary mb-2">
                   {d.ParkingGroupName === 'Bank_1' ? 'Uni Wroc' : d.ParkingGroupName}
                 </SText>
                 {(() => {
                   const age = calculateDataAge(d.Timestamp, now);
-                  const colorClass = allOffline ? 'text-text-secondary-dark' : (age >= 15 ? 'text-warning-dark' : (age > 5 ? 'text-amber-600' : 'text-success-dark'));
+                  const colorClass = allOffline ? 'text-text-secondary-light' : (age >= 15 ? 'text-warning-light' : (age > 5 ? 'text-warning-medium' : 'text-success'));
                   const value = d.approximationInfo?.isApproximated ? d.approximationInfo.approximated : (d.CurrentFreeGroupCounterValue || 0);
                   return (
                     <SView className="flex-row items-center justify-center">
@@ -206,9 +206,9 @@ function DashboardContent() {
                   );
                 })()}
                 {d.approximationInfo?.isApproximated && (
-                  <SText className="text-sm text-text-secondary-dark text-center mt-1">(orig: {d.approximationInfo?.original ?? d.CurrentFreeGroupCounterValue ?? 0})</SText>
+                  <SText className="text-sm text-text-secondary text-center mt-1">(orig: {d.approximationInfo?.original ?? d.CurrentFreeGroupCounterValue ?? 0})</SText>
                 )}
-                <SText className="text-sm text-text-secondary-dark text-center mt-2">
+                <SText className="text-sm text-text-secondary text-center mt-2">
                   {(() => {
                     const age = calculateDataAge(d.Timestamp, now);
                     const { display } = formatAgeLabel(age);
@@ -225,44 +225,44 @@ function DashboardContent() {
             </SText>
           </SView>
 
-          <SView className="rounded-lg bg-bg-secondary-dark border border-border-dark overflow-hidden">
-            <SView className="p-3 items-center border-b border-border-dark">
-              <SText className="text-xs text-text-secondary-dark">Total Spaces</SText>
+          <SView className="rounded-lg bg-bg-secondary border border-border overflow-hidden">
+            <SView className="p-3 items-center border-b border-border">
+              <SText className="text-xs text-text-secondary">Total Spaces</SText>
               <SView className="flex-row items-baseline mt-1">
                 {hasApproximation && <SText className="text-3xl text-amber-600 mr-1">≈</SText>}
                 <SText className={`text-3xl font-bold ${totalColorClass}`}>{totalSpaces}</SText>
               </SView>
               {hasApproximation && (
-                <SText className="text-xs text-text-secondary-dark italic">
+                <SText className="text-xs text-text-secondary italic">
                   (orig: {originalTotal})
                 </SText>
               )}
             </SView>
 
-              <SView className="p-3 border-b border-border-dark flex-row items-center justify-center gap-2">
+              <SView className="p-3 border-b border-border flex-row items-center justify-center gap-2">
               <SView className="items-center">
-                <SText className="text-xs text-text-secondary-dark mb-1 text-center">Last Update / Current</SText>
+                <SText className="text-xs text-text-secondary mb-1 text-center">Last Update / Current</SText>
                 <SView className="flex-row items-baseline gap-2 justify-center py-1">
-                  <SText className="text-base font-bold text-text-primary-dark text-center">
+                  <SText className="text-base font-bold text-text-primary text-center">
                     {lastRealtimeUpdate ? formatTime(lastRealtimeUpdate, 'pl-PL') : '--:--:--'}
                   </SText>
-                  <SText className="text-sm text-text-secondary-dark text-center">
+                  <SText className="text-sm text-text-secondary text-center">
                     {now.toLocaleTimeString('pl-PL')}
                   </SText>
                 </SView>
               </SView>
 
               <TouchableOpacity onPress={onRefresh} activeOpacity={0.8} accessibilityRole="button" accessibilityLabel="Refresh data" style={{ alignSelf: 'center', justifyContent: 'center' }}>
-                <SView className="nav-btn px-3 py-2 rounded-md border border-border-dark bg-bg-primary-dark flex-row items-center">
+                <SView className="nav-btn px-3 py-2 rounded-md border border-border bg-bg-primary flex-row items-center">
                   {refreshing || realtimeLoading ? (
                     <>
-                      <ActivityIndicator size="small" color="#ffffff" />
-                      <SText className="btn-text ml-2 text-text-primary-dark">Refreshing</SText>
+                      <ActivityIndicator size="small" color="#333333" />
+                      <SText className="btn-text ml-2 text-text-primary">Refreshing</SText>
                     </>
                   ) : (
                     <>
-                      <SText accessibilityRole="image" accessibilityLabel="Refresh icon" className="btn-icon mr-2 text-text-primary-dark">⟳</SText>
-                      <SText className="btn-text text-text-primary-dark">Refresh</SText>
+                      <SText accessibilityRole="image" accessibilityLabel="Refresh icon" className="btn-icon mr-2 text-text-primary">⟳</SText>
+                      <SText className="btn-text text-text-primary">Refresh</SText>
                     </>
                   )}
                 </SView>
@@ -270,8 +270,8 @@ function DashboardContent() {
             </SView>
 
             <SView className="p-3 items-center">
-              <SText className="text-xs text-text-secondary-dark mb-1">Status</SText>
-              <SText className={`text-xl font-bold ${hasApproximation ? 'text-amber-600' : 'text-success-dark'}`}>
+              <SText className="text-xs text-text-secondary mb-1">Status</SText>
+              <SText className={`text-xl font-bold ${hasApproximation ? 'text-amber-600' : 'text-success'}`}>
                 {hasApproximation ? 'APPROX' : 'ONLINE'}
               </SText>
             </SView>
@@ -283,10 +283,8 @@ function DashboardContent() {
 }
 
 const AppContent = () => {
-  const { colorScheme } = useTheme();
-
   return (
-    <View className={colorScheme} style={{ flex: 1 }}>
+    <View style={{ flex: 1 }}>
       <DashboardContent />
     </View>
   );
