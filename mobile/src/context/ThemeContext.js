@@ -1,34 +1,33 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Appearance, useColorScheme as useRNColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { debugLog } from '../config/debug';
+import { useColorScheme as useNativewindColorScheme } from 'nativewind';
 
 const ThemeContext = createContext();
 
 const STORAGE_KEY = 'parking_theme';
 
 /**
- * ThemeProvider - Manages app theme (light/dark) with system detection and user override
- * 
+ * ThemeProvider - Manages app theme (light/dark) with user override.
+ *
  * Theme modes:
- * - 'auto': Follow system preference (Appearance.getColorScheme())
  * - 'light': Force light mode
  * - 'dark': Force dark mode
- * 
+ *
  * Persists user preference in AsyncStorage.
  */
 export function ThemeProvider({ children }) {
-  const [themeMode, setThemeMode] = useState('auto'); // 'auto' | 'light' | 'dark'
-  const [systemColorScheme, setSystemColorScheme] = useState(
-    Appearance.getColorScheme() || 'light'
-  );
+  const [themeMode, setThemeMode] = useState('dark'); // 'light' | 'dark'
 
   // Load theme preference from AsyncStorage on mount
   useEffect(() => {
     const loadThemePreference = async () => {
       try {
         const saved = await AsyncStorage.getItem(STORAGE_KEY);
-        if (saved && ['auto', 'light', 'dark'].includes(saved)) {
+        debugLog('ThemeProvider: loaded from storage ->', saved);
+        if (saved && ['light', 'dark'].includes(saved)) {
           setThemeMode(saved);
+          debugLog('ThemeProvider: applied saved theme ->', saved);
         }
       } catch (e) {
         console.error('Failed to load theme preference:', e);
@@ -37,21 +36,25 @@ export function ThemeProvider({ children }) {
     loadThemePreference();
   }, []);
 
-  // Listen to system color scheme changes
-  useEffect(() => {
-    const subscription = Appearance.addChangeListener(({ colorScheme }) => {
-      setSystemColorScheme(colorScheme || 'light');
-    });
-
-    return () => subscription.remove();
-  }, []);
-
   // Determine effective color scheme based on mode
-  const colorScheme = themeMode === 'auto' ? systemColorScheme : themeMode;
+  const colorScheme = themeMode;
   const isDark = colorScheme === 'dark';
 
+  // Also sync the global NativeWind color-scheme runtime so `dark:` variants work
+  const { setColorScheme: setNativewindColorScheme } = useNativewindColorScheme();
+
+  useEffect(() => {
+    try {
+      debugLog('ThemeProvider: setting NativeWind color-scheme ->', colorScheme);
+      // accept 'light' | 'dark' (nativewind also supports 'system')
+      setNativewindColorScheme(colorScheme);
+    } catch (e) {
+      console.error('Failed to update NativeWind color scheme:', e);
+    }
+  }, [colorScheme, setNativewindColorScheme]);
+
   const theme = {
-    mode: themeMode, // User preference: 'auto' | 'light' | 'dark'
+    mode: themeMode, // User preference: 'light' | 'dark'
     colorScheme, // Effective scheme: 'light' | 'dark'
     isDark, // Boolean convenience
     colors: {
@@ -83,13 +86,17 @@ export function ThemeProvider({ children }) {
       disabled: isDark ? '#4a5578' : '#cbd5e1',
     },
     setTheme: async (mode) => {
-      if (!['auto', 'light', 'dark'].includes(mode)) {
+      if (!['light', 'dark'].includes(mode)) {
         console.warn('Invalid theme mode:', mode);
         return;
       }
       try {
-        await AsyncStorage.setItem(STORAGE_KEY, mode);
+        debugLog('ThemeProvider.setTheme: requested ->', mode, 'current ->', themeMode);
+        // optimistic update so UI changes immediately, persist afterwards
         setThemeMode(mode);
+        debugLog('ThemeProvider.setTheme: optimistic update applied ->', mode);
+        await AsyncStorage.setItem(STORAGE_KEY, mode);
+        debugLog('ThemeProvider.setTheme: persisted ->', mode);
       } catch (e) {
         console.error('Failed to save theme preference:', e);
       }
@@ -103,7 +110,7 @@ export function ThemeProvider({ children }) {
  * useTheme hook - Access theme context
  * 
  * Returns:
- * - mode: User preference ('auto' | 'light' | 'dark')
+ * - mode: User preference ('light' | 'dark')
  * - colorScheme: Effective scheme ('light' | 'dark') - use this for NativeWind className="dark:..."
  * - isDark: Boolean convenience
  * - colors: Color palette object (legacy, use NativeWind classes instead)

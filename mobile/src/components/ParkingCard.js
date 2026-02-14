@@ -14,7 +14,6 @@ const tryCopyToClipboard = async (text) => {
   try {
     // try to use expo-clipboard if available
     // dynamically require to avoid hard dependency in tests
-    // eslint-disable-next-line global-require
     const Clipboard = require('expo-clipboard');
     if (Clipboard && Clipboard.setStringAsync) {
       await Clipboard.setStringAsync(String(text));

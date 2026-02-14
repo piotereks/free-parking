@@ -39,6 +39,7 @@ module.exports = {
           DEFAULT: '#00d9ff',
           light: '#00fff7',
           cyan: '#0891b2',
+          'cyan-light': '#06b6d4',
         },
         'success': {
           light: '#059669',
@@ -52,11 +53,26 @@ module.exports = {
             dark: '#ffaa00',
           }
         },
+        'notice': {
+          light: '#fefce8',
+          dark: '#713f12',
+        },
+        'notice-border': {
+          light: '#fef08a',
+          dark: '#a16207',
+        },
+        'notice-text': {
+          light: '#fde047',
+          dark: '#854d0e',
+        },
         // Border colors
         'border': {
           light: '#e2e8f0',
           dark: '#2d3b6b',
         },
+      },
+      fontFamily: {
+        sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'sans-serif'],
       },
       borderRadius: {
         'card': '0.75rem',
@@ -64,10 +80,18 @@ module.exports = {
       boxShadow: {
         'custom-light': '0 1px 3px rgba(0, 0, 0, 0.1)',
         'custom-dark': '0 1px 3px rgba(0, 0, 0, 0.4)',
+        'hover-light': '0 4px 6px rgba(0, 0, 0, 0.1)',
+        'hover-dark': '0 4px 6px rgba(0, 0, 0, 0.4)',
+        'header-light': '0 1px 10px rgba(0, 0, 0, 0.2)',
+        'header-dark': '0 1px 10px rgba(0, 0, 0, 0.2)',
       },
       fontSize: {
         'spot-number': '3.5rem',
-      }
+        'spot-number-mobile': '5.2rem',
+      },
+      transitionProperty: {
+        'theme': 'background-color, color, border-color',
+      },
     },
   },
   plugins: [],
