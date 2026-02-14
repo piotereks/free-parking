@@ -41,3 +41,9 @@ Give Copilot the minimal context to work safely and productively in this React/V
 - Confirm Google Form entry mapping before submission changes.
 - Check whether `parking-deploy/docs/html/parking/` artifacts are authoritative before modifying build outputs.
 
+## Coding delivery
+
+- for delivered code always verify if code code not creat errors. you may use link for that.
+- repeat chnages untill code is not creating errors.
+- fixing error is adapting code functionality, instead of creating patches that allow avoid lint to recognize errors. No patches, only real fixes.
+- if you are not sure about the code, ask for help. Do not create code that you are not sure about. You are too stupid to understand authors intentions. 

@@ -49,6 +49,18 @@ export default {
             dark: '#ffaa00',
           }
         },
+        'notice': {
+          light: '#fefce8',
+          dark: '#713f12',
+        },
+        'notice-border': {
+          light: '#fef08a',
+          dark: '#a16207',
+        },
+        'notice-text': {
+          light: '#fde047',
+          dark: '#854d0e',
+        },
         // Border colors
         'border': {
           light: '#e2e8f0',
