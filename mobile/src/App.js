@@ -49,7 +49,6 @@ function ParkingCard({ data, now, allOffline }) {
 
 function DashboardContent({ isDark }) {
   const { setTheme, colors } = useTheme();
-  debugLog && debugLog('DashboardContent: theme colors ->', colors);
   const title = 'Parking Monitor';
   const realtimeData = useParkingStore((state) => state.realtimeData);
   const realtimeLoading = useParkingStore((state) => state.realtimeLoading);
@@ -105,14 +104,9 @@ function DashboardContent({ isDark }) {
     }
   }, [isDark, setTheme]);
 
-  // Log when effective scheme changes and show the className used for NativeWind
+  // Log when effective scheme changes
   useEffect(() => {
-    try {
-      const className = `flex-1 bg-bg-primary-light dark:bg-bg-primary-dark ${isDark ? 'dark' : ''}`;
-      debugLog('DashboardContent: isDark changed ->', isDark, 'applied className ->', className);
-    } catch (e) {
-      console.error('DashboardContent debug logging failed', e);
-    }
+    debugLog('DashboardContent: isDark changed ->', isDark);
   }, [isDark]);
 
   const allOffline = processed.length > 0 && processed.every((d) => {
@@ -188,15 +182,15 @@ function DashboardContent({ isDark }) {
   }, [processed, totalSpaces, originalTotal, lastRealtimeUpdate]);
 
   return (
-    <SSafeArea style={{ backgroundColor: colors.background }} className={`flex-1 bg-bg-primary-light dark:bg-bg-primary-dark ${isDark ? 'dark' : ''}`}>
+    <SSafeArea className="flex-1 bg-bg-primary-light dark:bg-bg-primary-dark">
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
-      <SView style={{ backgroundColor: colors.surface, borderColor: colors.border }} className="w-full bg-bg-secondary-light dark:bg-bg-secondary-dark flex-row items-center justify-between py-3 px-4 border-b border-border-light dark:border-border-dark">
+      <SView className="w-full bg-bg-secondary-light dark:bg-bg-secondary-dark flex-row items-center justify-between py-3 px-4 border-b border-border-light dark:border-border-dark">
         <SView className="flex-row items-center">
           <Image source={require('../assets/favicon.png')} style={{ width: 36, height: 36, marginRight: 12 }} />
           <SView className="items-start">
-            <SText style={{ color: colors.text }} className="text-text-primary-light dark:text-text-primary-dark text-lg font-semibold">{title}</SText>
-            <SText style={{ color: colors.textSecondary }} className="text-text-secondary-light dark:text-text-secondary-dark text-xs mt-0.5">Real-time • GD-Uni Wrocław</SText>
+            <SText className="text-text-primary-light dark:text-text-primary-dark text-lg font-semibold">{title}</SText>
+            <SText className="text-text-secondary-light dark:text-text-secondary-dark text-xs mt-0.5">Real-time • GD-Uni Wrocław</SText>
           </SView>
         </SView>
         <TouchableOpacity
@@ -235,8 +229,8 @@ function DashboardContent({ isDark }) {
         >
           <SView className="flex-row gap-2 mb-3">
             {processed.map((d, i) => (
-              <SView key={d.ParkingGroupName || i} style={{ backgroundColor: colors.surface, borderColor: colors.border }} className="flex-1 rounded-lg p-3 border border-border-light dark:border-border-dark bg-bg-secondary-light dark:bg-bg-secondary-dark">
-                <SText style={{ color: colors.text }} className="text-base font-semibold text-center text-text-primary-light dark:text-text-primary-dark mb-2">
+              <SView key={d.ParkingGroupName || i} className="flex-1 rounded-lg p-3 border border-border-light dark:border-border-dark bg-bg-secondary-light dark:bg-bg-secondary-dark">
+                <SText className="text-base font-semibold text-center text-text-primary-light dark:text-text-primary-dark mb-2">
                   {d.ParkingGroupName === 'Bank_1' ? 'Uni Wroc' : d.ParkingGroupName}
                 </SText>
                 {(() => {
@@ -286,30 +280,30 @@ function DashboardContent({ isDark }) {
               )}
             </SView>
 
-<SView style={{ borderColor: colors.border }} className="p-3 border-b border-border-light dark:border-border-dark flex-row items-center justify-center gap-2">
+<SView className="p-3 border-b border-border-light dark:border-border-dark flex-row items-center justify-center gap-2">
                   <SView className="items-center">
-                    <SText style={{ color: colors.textSecondary }} className="text-xs text-text-secondary-light dark:text-text-secondary-dark mb-1 text-center">Last Update / Current</SText>
+                    <SText className="text-xs text-text-secondary-light dark:text-text-secondary-dark mb-1 text-center">Last Update / Current</SText>
                     <SView className="flex-row items-baseline gap-2 justify-center py-1">
-                      <SText style={{ color: colors.text }} className="text-base font-bold text-text-primary-light dark:text-text-primary-dark text-center">
+                      <SText className="text-base font-bold text-text-primary-light dark:text-text-primary-dark text-center">
                         {lastRealtimeUpdate ? formatTime(lastRealtimeUpdate, 'pl-PL') : '--:--:--'}
                       </SText>
-                      <SText style={{ color: colors.textSecondary }} className="text-sm text-text-secondary-light dark:text-text-secondary-dark text-center">
+                      <SText className="text-sm text-text-secondary-light dark:text-text-secondary-dark text-center">
                         {now.toLocaleTimeString('pl-PL')}
                       </SText>
                     </SView>
                   </SView>
 
                   <TouchableOpacity onPress={onRefresh} activeOpacity={0.8} accessibilityRole="button" accessibilityLabel="Refresh data" style={{ alignSelf: 'center', justifyContent: 'center' }}>
-                    <SView style={{ backgroundColor: colors.background, borderColor: colors.border }} className="nav-btn px-3 py-2 rounded-md border border-border-light dark:border-border-dark bg-bg-primary-light dark:bg-bg-primary-dark flex-row items-center">
+                    <SView className="nav-btn px-3 py-2 rounded-md border border-border-light dark:border-border-dark bg-bg-primary-light dark:bg-bg-primary-dark flex-row items-center">
                       {refreshing || realtimeLoading ? (
                         <>
                           <ActivityIndicator size="small" color={isDark ? '#e0e6ff' : '#0f172a'} />
-                          <SText style={{ color: colors.text }} className="btn-text ml-2 text-text-primary-light dark:text-text-primary-dark">Refreshing</SText>
+                          <SText className="btn-text ml-2 text-text-primary-light dark:text-text-primary-dark">Refreshing</SText>
                         </>
                       ) : (
                         <>
-                          <SText accessibilityRole="image" accessibilityLabel="Refresh icon" style={{ color: colors.text }} className="btn-icon mr-2 text-text-primary-light dark:text-text-primary-dark">⟳</SText>
-                          <SText style={{ color: colors.text }} className="btn-text text-text-primary-light dark:text-text-primary-dark">Refresh</SText>
+                          <SText accessibilityRole="image" accessibilityLabel="Refresh icon" className="btn-icon mr-2 text-text-primary-light dark:text-text-primary-dark">⟳</SText>
+                          <SText className="btn-text text-text-primary-light dark:text-text-primary-dark">Refresh</SText>
                     </>
                   )}
                 </SView>
@@ -333,9 +327,9 @@ const AppContent = () => {
   const { isDark } = useTheme();
 
   return (
-    <View style={{ flex: 1 }}>
+    <SView className="flex-1">
       <DashboardContent isDark={isDark} />
-    </View>
+    </SView>
   );
 };
 

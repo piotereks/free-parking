@@ -4,7 +4,7 @@ module.exports = {
     "./App.{js,jsx,ts,tsx}",
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
-  darkMode: 'class', // Enable class-based dark mode
+  darkMode: 'class', // NativeWind v2 requires class-based dark mode
   theme: {
     extend: {
       colors: {
