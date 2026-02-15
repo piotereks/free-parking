@@ -23,10 +23,14 @@ module.exports = {
         'bg-card-dark': '#1e2749',
 
         // Text
-        'text-primary-light': '#0f172a',
-        'text-primary-dark': '#e0e6ff',
-        'text-secondary-light': '#64748b',
-        'text-secondary-dark': '#8b95c9',
+        'text-primary-light': '#FFFF00',
+        'text-primary-dark': '#0000ff',
+        // 'text-primary-light': '#0f172a',
+        // 'text-primary-dark': '#e0e6ff',
+        'text-secondary-light': '#ff0000',
+        'text-secondary-dark': '#00ff00',
+        // 'text-secondary-light': '#64748b',
+        // 'text-secondary-dark': '#8b95c9',
         'text-muted': '#94a3b8',
         'text-success-light': '#059669',
         'text-success-dark': '#00ff88',

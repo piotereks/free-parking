@@ -1,7 +1,7 @@
 // Utility: buildColorMaps extracted from ThemeContext
 // Pure function - does not call React hooks
 
-export function buildColorMaps(APP_THEME = null, systemColorScheme = null) {
+export function buildColorMaps(APP_THEME = null) {
   try {
     const tailwindConfig = require('../../tailwind.config.js');
     const colorObj = tailwindConfig.theme?.extend?.colors || {};
@@ -11,34 +11,46 @@ export function buildColorMaps(APP_THEME = null, systemColorScheme = null) {
     // Build light/dark flattened maps from tailwind color keys
     Object.keys(colorObj).forEach((key) => {
       const m = key.match(/^(.*)-(light|dark)$/);
+      console.log('buildColorMaps — variable: key =', key);
+      console.log('buildColorMaps — variable: m =', m);
       if (m) {
-        const base = m[1];
-        const variant = m[2];
-        if (variant === 'light') {
-          lightStyles[base] = key;
-          if (`${base}-dark` in colorObj) darkStyles[base] = `${base}-dark`;
-        } else {
-          darkStyles[base] = key;
-          if (`${base}-light` in colorObj) lightStyles[base] = `${base}-light`;
-        }
+      const base = m[1];
+      const variant = m[2];
+      console.log('buildColorMaps — variable: base =', base);
+      console.log('buildColorMaps — variable: variant =', variant);
+      console.log('-----------------------------------');
+      if (variant === 'light') {
+        lightStyles[base] = key;
+        if (`${base}-dark` in colorObj) darkStyles[base] = `${base}-dark`;
       } else {
-        lightStyles[key] = key;
-        darkStyles[key] = key;
+        darkStyles[base] = key;
+        if (`${base}-light` in colorObj) lightStyles[base] = `${base}-light`;
+      }
+      } else {
+      console.log('buildColorMaps — no variant match; using key for both themes =', key);
+      lightStyles[key] = key;
+      darkStyles[key] = key;
       }
     });
 
     // determine effective color scheme
     const allowed = new Set(['light', 'dark', 'system']);
-    let resolvedSystem = systemColorScheme || null;
+    // let resolvedSystem = systemColorScheme || null;
+    // let resolvedSystem = 'light';
+    // let colorScheme = resolvedSystem || 'light';
+    // if (typeof APP_THEME === 'string' && allowed.has(APP_THEME)) {
+    //   if (APP_THEME === 'system') {
+    //     colorScheme = resolvedSystem || 'light';
+    //   } else {
+    //     colorScheme = APP_THEME;
+    //   }
+    // }
+    let resolvedSystem = APP_THEME;
     let colorScheme = resolvedSystem || 'light';
-    if (typeof APP_THEME === 'string' && allowed.has(APP_THEME)) {
-      if (APP_THEME === 'system') {
-        colorScheme = resolvedSystem || 'light';
-      } else {
-        colorScheme = APP_THEME;
-      }
-    }
-
+    colorScheme = APP_THEME;
+    console.log('===========================');
+    console.log('colorScheme====================', colorScheme);
+    console.log('===========================');
     const isDark = colorScheme === 'dark';
     const allStyles = isDark ? darkStyles : lightStyles;
 

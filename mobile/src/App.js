@@ -11,7 +11,7 @@ import { debugLog } from './config/debug';
 import useParkingStore from './hooks/useParkingStore';
 import { applyApproximations, calculateDataAge, formatAgeLabel, parseTimestamp, formatTime, createRefreshHelper } from 'parking-shared';
 
-export const APP_THEME = 'dark'; // 'light', 'dark', or 'auto' (system)
+export const APP_THEME = 'light'; // 'light', 'dark', or 'auto' (system)
 
 export const { allStyles, colorScheme, isDark }  = buildColorMaps(APP_THEME);
 
@@ -27,25 +27,25 @@ const SScroll = styled(ScrollView);
 
 
 function ParkingTile(d, i, now, allOffline) {
-  return <SView key={d.ParkingGroupName || i} className={`flex-1 rounded-lg p-3 ${allStyles['border']} ${allStyles['bg-secondary']}`}>
-    <SText className={`${allStyles['text-primary']} text-base font-semibold text-center mb-2`}>
+  return <SView key={d.ParkingGroupName || i} className={`flex-1 rounded-lg p-3 border border-${allStyles['border']} bg-${allStyles['bg-secondary']}`}>
+    <SText className={`text-base font-semibold text-center text-${allStyles['text-primary']} mb-2`}>
       {d.ParkingGroupName === 'Bank_1' ? 'Uni Wroc' : d.ParkingGroupName}
     </SText>
     {(() => {
       const age = calculateDataAge(d.Timestamp, now);
-      const colorClass = allOffline ? `${allStyles['text-secondary']}` : (age >= 15 ? `${allStyles['text-warning']}` : (age > 5 ? `${allStyles['text-warning-medium']}` : `${allStyles['text-success']}`));
+      const colorClass = allOffline ? `text-${allStyles['text-secondary']}` : (age >= 15 ? `text-${allStyles['text-warning']}` : (age > 5 ? `text-${allStyles['text-warning-medium']}` : `text-${allStyles['text-success']}`));
       const value = d.approximationInfo?.isApproximated ? d.approximationInfo.approximated : (d.CurrentFreeGroupCounterValue || 0);
       return (
         <SView className="flex-row items-center justify-center">
-          {d.approximationInfo?.isApproximated && <SText className={`${allStyles['text-warning-medium']} text-6xl mr-1`}>≈</SText>}
+          {d.approximationInfo?.isApproximated && <SText className={`text-6xl text-${allStyles['text-warning-medium']} mr-1`}>≈</SText>}
           <SText className={`text-6xl font-bold text-center ${colorClass}`}>{value}</SText>
         </SView>
       );
     })()}
     {d.approximationInfo?.isApproximated && (
-      <SText className={`${allStyles['text-secondary']} text-sm text-center mt-1`}>(orxig: {d.approximationInfo?.original ?? d.CurrentFreeGroupCounterValue ?? 0})</SText>
+      <SText className={`text-sm text-${allStyles['text-secondary']} text-center mt-1`}>(orxig: {d.approximationInfo?.original ?? d.CurrentFreeGroupCounterValue ?? 0})</SText>
     )}
-    <SText className={`${allStyles['text-secondary']} text-sm text-center mt-2`}>
+    <SText className={`text-sm text-${allStyles['text-secondary']} text-center mt-2`}>
       {(() => {
         const age = calculateDataAge(d.Timestamp, now);
         const { display } = formatAgeLabel(age);
@@ -214,13 +214,17 @@ function DashboardContent() {
           <SView className={`rounded-lg bg-${allStyles['bg-secondary']} border border-${allStyles['border']} overflow-hidden`}>
             <SView className={`p-3 items-center border-b border-${allStyles['border']}`}>
               <SText className={`text-xs text-${allStyles['text-secondary']}`}>Total Spaces</SText>
+              {/* <SText className={`text-xs text-text-secondary-dark`}>Total Spaces</SText>
+              <SText className={`text-xs text-text-secondary-light`}>Total Spaces</SText> */}
+        {/* 'text-secondary-light': '#ff0000',
+        'text-secondary-dark': '#00ff00', */}
               <SView className="flex-row items-baseline mt-1">
                 {hasApproximation && <SText className={`text-3xl text-${allStyles['text-warning-medium']} mr-1`}>≈</SText>}
                 <SText className={`text-3xl font-bold ${totalColorClass}`}>{totalSpaces}</SText>
               </SView>
               {hasApproximation && (
                 <SText className={`text-xs text-${allStyles['text-secondary']} italic`}>
-                  (oryig: {originalTotal})
+                  (orig: {originalTotal})
                 </SText>
               )}
             </SView>
