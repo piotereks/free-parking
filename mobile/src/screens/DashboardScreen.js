@@ -9,13 +9,8 @@ import ParkingCard from '../components/ParkingCard';
 import LoadingSkeletonCard from '../components/LoadingSkeletonCard';
 
 const DashboardScreen = () => {
-  const { colors, isDark } = useTheme();
+  const { isDark } = useTheme();
   const [now, setNow] = useState(() => new Date());
-
-  // Debug: Log theme colors
-  useEffect(() => {
-    debugLog('DashboardScreen: Theme applied', { isDark, background: colors.background, text: colors.text });
-  }, [isDark, colors]);
 
   const realtimeData = useParkingStore((s) => s.realtimeData);
   const realtimeLoading = useParkingStore((s) => s.realtimeLoading);
@@ -115,10 +110,10 @@ const DashboardScreen = () => {
   }, [realtimeData]);
 
   return (
-    <View className="flex-1 bg-bg-primary">
-      <View className="p-3 border-b border-border bg-bg-card">
-        <Text className="text-lg font-bold text-text-primary">Parking Dashboard</Text>
-        <Text className="text-xs mt-1 text-text-secondary">{`Updated: ${formatTime(lastDataDate || now, 'pl-PL')}`}</Text>
+    <View className="flex-1 bg-bg-primary-light dark:bg-bg-primary-dark">
+      <View className="p-3 border-b border-border-light dark:border-border-dark bg-bg-card-light dark:bg-bg-card-dark">
+        <Text className="text-lg font-bold text-text-primary-light dark:text-text-primary-dark">Parking Dashboard</Text>
+        <Text className="text-xs mt-1 text-text-secondary-light dark:text-text-secondary-dark">{`Updated: ${formatTime(lastDataDate || now, 'pl-PL')}`}</Text>
       </View>
 
       {realtimeLoading && (
@@ -131,7 +126,7 @@ const DashboardScreen = () => {
 
       {realtimeError && !realtimeLoading && (
         <View className="flex-1 items-center justify-center"> 
-          <Text className="text-sm text-text-warning">Error loading data. Pull to retry.</Text>
+          <Text className="text-sm text-text-warning-light dark:text-text-warning-dark">Error loading data. Pull to retry.</Text>
         </View>
       )}
 

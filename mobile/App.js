@@ -13,7 +13,7 @@ try {
 	AdMobManager = require('./AdMobManager').default;
 } catch (e) {
 	// keep app alive if AdMob native module or file is missing/unready
-	// eslint-disable-next-line no-console
+	 
 	console.warn('AdMobManager failed to load:', e && e.message ? e.message : e);
 }
 

@@ -1,58 +1,65 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Appearance, useColorScheme as useRNColorScheme } from 'react-native';
+import { useColorScheme as useRNColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ThemeContext = createContext();
 
 const STORAGE_KEY = 'parking_theme';
 
+// Top-level constant for default theme
+const DEFAULT_THEME_MODE = 'dark';
+
 /**
  * ThemeProvider - Manages app theme (light/dark) with system detection and user override
  * 
  * Theme modes:
- * - 'auto': Follow system preference (Appearance.getColorScheme())
+ * - 'auto': Follow system preference
  * - 'light': Force light mode
- * - 'dark': Force dark mode
+ * - 'dark': Force dark mode (DEFAULT)
  * 
  * Persists user preference in AsyncStorage.
+ * Colors are managed by Tailwind CSS via tailwind.config.js - use NativeWind classes.
  */
 export function ThemeProvider({ children }) {
-  // Force light mode only
-  const [themeMode, setThemeMode] = useState('light');
-  const [systemColorScheme, setSystemColorScheme] = useState('light');
+  const [themeMode, setThemeMode] = useState(DEFAULT_THEME_MODE);
+  const systemColorScheme = useRNColorScheme() || 'dark';
 
   // Load theme preference from AsyncStorage on mount
-  // No-op: always light mode
-
-  // Listen to system color scheme changes
-  // No-op: always light mode
+  useEffect(() => {
+    const loadTheme = async () => {
+      try {
+        const stored = await AsyncStorage.getItem(STORAGE_KEY);
+        if (stored && ['auto', 'light', 'dark'].includes(stored)) {
+          setThemeMode(stored);
+        }
+      } catch (error) {
+        // Ignore storage errors, use default
+      }
+    };
+    void loadTheme();
+  }, []);
 
   // Determine effective color scheme based on mode
-  const colorScheme = 'light';
-  const isDark = false;
+  const colorScheme = themeMode === 'auto' ? systemColorScheme : themeMode;
+  const isDark = colorScheme === 'dark';
+
+  const setTheme = async (mode) => {
+    if (!['auto', 'light', 'dark'].includes(mode)) {
+      return;
+    }
+    setThemeMode(mode);
+    try {
+      await AsyncStorage.setItem(STORAGE_KEY, mode);
+    } catch (error) {
+      // Ignore storage errors
+    }
+  };
 
   const theme = {
-    mode: 'light',
-    colorScheme: 'light',
-    isDark: false,
-    colors: {
-      background: '#f1f5f9',
-      surface: '#ffffff',
-      card: '#f8fafc',
-      text: '#0f172a',
-      textSecondary: '#64748b',
-      textMuted: '#94a3b8',
-      border: '#e2e8f0',
-      borderLight: '#f1f5f9',
-      statusGreen: '#059669',
-      statusYellow: '#d97706',
-      statusRed: '#dc2626',
-      primary: '#00d9ff',
-      accent: '#00d9ff',
-      link: '#0891b2',
-      disabled: '#cbd5e1',
-    },
-    setTheme: async () => {}, // No-op
+    mode: themeMode,
+    colorScheme,
+    isDark,
+    setTheme,
   };
 
   return <ThemeContext.Provider value={theme}>{children}</ThemeContext.Provider>;
@@ -63,10 +70,12 @@ export function ThemeProvider({ children }) {
  * 
  * Returns:
  * - mode: User preference ('auto' | 'light' | 'dark')
- * - colorScheme: Effective scheme ('light' | 'dark') - use this for NativeWind className="dark:..."
+ * - colorScheme: Effective scheme ('light' | 'dark') - use this to apply 'dark' class
  * - isDark: Boolean convenience
- * - colors: Color palette object (legacy, use NativeWind classes instead)
  * - setTheme(mode): Function to change theme
+ * 
+ * Use NativeWind classes with dark: prefix for styling (e.g., "bg-bg-primary-light dark:bg-bg-primary-dark")
+ * All colors come from tailwind.config.js
  */
 export function useTheme() {
   const context = useContext(ThemeContext);
