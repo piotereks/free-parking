@@ -28,21 +28,21 @@ function ParkingCard({ data, now, allOffline }) {
 
   // Color is based on age/allOffline only; approximation no longer affects color
   let ageClass = '';
-  if (allOffline) ageClass = 'text-text-secondary-light';
-  else if (age >= 15) ageClass = 'text-warning-light';
+  if (allOffline) ageClass = 'text-secondary';
+  else if (age >= 15) ageClass = 'text-warning';
   else if (age > 5) ageClass = 'text-warning-medium';
 
   return (
-    <SView className="rounded-xl p-4 mb-3 flex flex-col items-center justify-center border border-border bg-bg-secondary">
-      <SText className="text-base font-semibold mb-1 text-center text-text-primary">{name}</SText>
+    <SView className="rounded-xl p-4 mb-3 flex flex-col items-center justify-center border border-border bg-secondary">
+      <SText className="text-base font-semibold mb-1 text-center text-primary">{name}</SText>
       <SView className="flex-row items-center justify-center">
         {isApproximated && <SText className="text-4xl text-amber-600 mr-1">≈</SText>}
         <SText className={`text-4xl font-bold ${ageClass || 'text-success'}`}>{freeSpots}</SText>
       </SView>
       {isApproximated && (
-        <SText className="text-sm text-text-secondary">(orig: {originalSpots})</SText>
+        <SText className="text-sm text-secondary">(orig: {originalSpots})</SText>
       )}
-      <SText className="text-sm text-text-secondary mt-2">{ageLabel.display || ageLabel}</SText>
+      <SText className="text-sm text-secondary mt-2">{ageLabel.display || ageLabel}</SText>
     </SView>
   );
 }
@@ -119,16 +119,16 @@ function DashboardContent() {
     let statusMessage = '';
 
     if (allOffline) {
-      colorClass = 'text-warning-dark';
+      colorClass = 'text-warning';
       statusMessage = 'All parking feeds appear offline';
     } else if (maxAge >= 15) {
-      colorClass = 'text-warning-dark';
+      colorClass = 'text-warning';
       statusMessage = 'Data outdated - figures may not reflect actual free spaces';
     } else if (maxAge > 5) {
       colorClass = 'text-amber-600';
       statusMessage = 'Data slightly outdated - refresh recommended';
     } else {
-      colorClass = 'text-success-dark';
+      colorClass = 'text-success';
       statusMessage = 'Data is current and reliable';
     }
 
@@ -179,7 +179,7 @@ function DashboardContent() {
         </SView>
       ) : realtimeError ? (
         <SView className="flex-1 items-center justify-center px-4">
-          <SText className="text-warning-light text-base text-center">{String(realtimeError)}</SText>
+          <SText className="text-text-warning text-base text-center">{String(realtimeError)}</SText>
         </SView>
       ) : (
         <SScroll
@@ -196,7 +196,7 @@ function DashboardContent() {
                 </SText>
                 {(() => {
                   const age = calculateDataAge(d.Timestamp, now);
-                  const colorClass = allOffline ? 'text-text-secondary-light' : (age >= 15 ? 'text-warning-light' : (age > 5 ? 'text-warning-medium' : 'text-success'));
+                  const colorClass = allOffline ? 'text-text-secondary' : (age >= 15 ? 'text-text-warning' : (age > 5 ? 'text-text-warning-medium' : 'text-text-success'));
                   const value = d.approximationInfo?.isApproximated ? d.approximationInfo.approximated : (d.CurrentFreeGroupCounterValue || 0);
                   return (
                     <SView className="flex-row items-center justify-center">
@@ -206,9 +206,9 @@ function DashboardContent() {
                   );
                 })()}
                 {d.approximationInfo?.isApproximated && (
-                  <SText className="text-sm text-text-secondary text-center mt-1">(orig: {d.approximationInfo?.original ?? d.CurrentFreeGroupCounterValue ?? 0})</SText>
+                  <SText className="text-sm text-secondary text-center mt-1">(orig: {d.approximationInfo?.original ?? d.CurrentFreeGroupCounterValue ?? 0})</SText>
                 )}
-                <SText className="text-sm text-text-secondary text-center mt-2">
+                <SText className="text-sm text-secondary text-center mt-2">
                   {(() => {
                     const age = calculateDataAge(d.Timestamp, now);
                     const { display } = formatAgeLabel(age);
@@ -233,7 +233,7 @@ function DashboardContent() {
                 <SText className={`text-3xl font-bold ${totalColorClass}`}>{totalSpaces}</SText>
               </SView>
               {hasApproximation && (
-                <SText className="text-xs text-text-secondary italic">
+                <SText className="text-xs text-secondary italic">
                   (orig: {originalTotal})
                 </SText>
               )}
@@ -253,7 +253,7 @@ function DashboardContent() {
               </SView>
 
               <TouchableOpacity onPress={onRefresh} activeOpacity={0.8} accessibilityRole="button" accessibilityLabel="Refresh data" style={{ alignSelf: 'center', justifyContent: 'center' }}>
-                <SView className="nav-btn px-3 py-2 rounded-md border border-border bg-bg-primary flex-row items-center">
+                <SView className="nav-btn px-3 py-2 rounded-md border border-border bg-primary flex-row items-center">
                   {refreshing || realtimeLoading ? (
                     <>
                       <ActivityIndicator size="small" color="#333333" />

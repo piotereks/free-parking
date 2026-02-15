@@ -12,9 +12,14 @@ module.exports = {
         'bg-secondary': '#ffffff',
         'bg-card': '#f8fafc',
         // Text colors
-        'text-primary': '#0f172a',
+        'primary': '#ff0000',
+        // 'text-primary': '#0f172a',
         'text-secondary': '#64748b',
         'text-muted': '#94a3b8',
+        'text-success': '#059669',
+        'text-warning': '#dc2626',
+        'text-warning-medium': '#d97706',
+
         // Accent and semantic colors
         'accent': {
           DEFAULT: '#00d9ff',
@@ -22,9 +27,7 @@ module.exports = {
           cyan: '#0891b2',
           'cyan-light': '#06b6d4',
         },
-        'success': '#059669',
-        'warning': '#dc2626',
-        'warning-medium': '#d97706',
+
         'notice': '#fefce8',
         'notice-border': '#fef08a',
         'notice-text': '#fde047',

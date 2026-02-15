@@ -4,10 +4,10 @@ import { useTheme } from '../context/ThemeContext';
 import { formatAgeLabel, calculateDataAge } from 'parking-shared';
 
 const getAgeColorClass = (ageMinutes) => {
-  if (ageMinutes === null || ageMinutes === Infinity) return 'text-text-secondary-light';
-  if (ageMinutes >= 15) return 'text-warning-light';
-  if (ageMinutes >= 5) return 'text-warning-medium-light';
-  return 'text-success-light';
+  if (ageMinutes === null || ageMinutes === Infinity) return 'text-secondary';
+  if (ageMinutes >= 15) return 'text-warning';
+  if (ageMinutes >= 5) return 'text-warning-medium';
+  return 'text-success';
 };
 
 const tryCopyToClipboard = async (text) => {
@@ -53,15 +53,15 @@ const ParkingCard = ({ data = {}, now = new Date(), allOffline = false }) => {
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
-      <View className={"p-3 border-b border-border-light dark:border-border-dark bg-bg-card-light dark:bg-bg-card-dark"}>
+      <View className={"p-3 border-b border-border bg-bg-card"}>
         <View className={"flex-row justify-between items-center"}>
-          <Text className={"text-base font-semibold text-text-primary-light dark:text-text-primary-dark"}>{name}</Text>
+          <Text className={"text-base font-semibold text-text-primary"}>{name}</Text>
           <Text className={`text-xs ${ageColorClass}`}>{ageDisplay}</Text>
         </View>
         <View className={"flex-row justify-between items-center mt-1.5"}>
-          <Text className={"text-sm text-text-primary-light dark:text-text-primary-dark"}>{capacity ? `${free} / ${capacity}` : free}</Text>
+          <Text className={"text-sm text-text-primary"}>{capacity ? `${free} / ${capacity}` : free}</Text>
           {approx ? (
-            <Text className={"text-xs px-1.5 py-0.5 rounded-md bg-bg-secondary-light dark:bg-bg-secondary-dark text-text-primary-light dark:text-text-primary-dark"}>Approx</Text>
+            <Text className={"text-xs px-1.5 py-0.5 rounded-md bg-bg-secondary text-text-primary"}>Approx</Text>
           ) : null}
         </View>
       </View>
