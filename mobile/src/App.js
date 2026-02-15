@@ -271,7 +271,7 @@ function DashboardContent() {
 
             <SView className="p-3 items-center">
               <SText className="text-xs text-text-secondary mb-1">Status</SText>
-              <SText className={`text-xl font-bold ${hasApproximation ? 'text-amber-600' : 'text-text-success'}`}>
+              <SText className={`text-xl font-bold ${hasApproximation ? 'text-text-warning-medium' : 'text-text-success'}`}>
                 {hasApproximation ? 'APPROX' : 'ONLINE'}
               </SText>
             </SView>
