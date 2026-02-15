@@ -20,8 +20,8 @@ const DEFAULT_THEME_MODE = 'dark';
  * Persists user preference in AsyncStorage.
  * Colors are managed by Tailwind CSS via tailwind.config.js - use NativeWind classes.
  */
-export function ThemeProvider({ children }) {
-  const [themeMode, setThemeMode] = useState(DEFAULT_THEME_MODE);
+export function ThemeProvider({ children, initialMode }) {
+  const [themeMode, setThemeMode] = useState(initialMode || DEFAULT_THEME_MODE);
   const systemColorScheme = useRNColorScheme() || 'dark';
 
   // Load theme preference from AsyncStorage on mount

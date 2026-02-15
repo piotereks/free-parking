@@ -120,16 +120,16 @@ function DashboardContent() {
     let statusMessage = '';
 
     if (allOffline) {
-      colorClass = 'text-text-warning';
+      colorClass = 'text-text-warning-light dark:text-text-warning-dark';
       statusMessage = 'All parking feeds appear offline';
     } else if (maxAge >= 15) {
-      colorClass = 'text-text-warning';
+      colorClass = 'text-text-warning-light dark:text-text-warning-dark';
       statusMessage = 'Data outdated - figures may not reflect actual free spaces';
     } else if (maxAge > 5) {
-      colorClass = 'text-text-warning-medium';
+      colorClass = 'text-text-warning-medium-light dark:text-text-warning-medium-dark';
       statusMessage = 'Data slightly outdated - refresh recommended';
     } else {
-      colorClass = 'text-text-success';
+      colorClass = 'text-text-success-light dark:text-text-success-dark';
       statusMessage = 'Data is current and reliable';
     }
 
@@ -291,9 +291,13 @@ const AppContent = () => {
   );
 };
 
+// Top-level app theme constant. Set to 'dark', 'light' or 'auto'.
+// Change this value to control the initial theme used by the app.
+const APP_THEME = 'dark';
+
 export default function App() {
   return (
-    <ThemeProvider>
+    <ThemeProvider initialMode={APP_THEME}>
       <ParkingDataProvider>
         <AppContent />
       </ParkingDataProvider>
