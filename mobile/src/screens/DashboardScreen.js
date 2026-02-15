@@ -1,16 +1,17 @@
 /* global setInterval, clearInterval */
 import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, FlatList, RefreshControl } from 'react-native';
-import { useTheme  } from '../context/ThemeContext';
-// import { buildColorMaps } from '../utils/colorMaps';
+import { useTheme } from '../context/ThemeContext';
 import useParkingStore from '../hooks/useParkingStore';
 import { applyApproximations, isValidParkingData, normalizeParkingName, calculateDataAge, formatAgeLabel, formatTime } from 'parking-shared';
 import { debugLog } from '../config/debug';
 import ParkingCard from '../components/ParkingCard';
 import LoadingSkeletonCard from '../components/LoadingSkeletonCard';
-import { allStyles } from '../App';
 
-import { logStyleUsage } from '../utils/allStylesLogger';
+/**
+ * DashboardScreen Component
+ * Alternative dashboard view showing parking data in a list
+ */
 const DashboardScreen = () => {
   const { isDark } = useTheme();
   const [now, setNow] = useState(() => new Date());
@@ -20,12 +21,14 @@ const DashboardScreen = () => {
   const realtimeError = useParkingStore((s) => s.realtimeError);
   const refreshCallback = useParkingStore((s) => s.refreshCallback);
 
-
-
-  // Trigger a refresh on mount if a refreshCallback is registered by the
-  // DataManager (this is a no-op if not provided).
+  // Update current time every second
   useEffect(() => {
-    let cancelled = false;
+    const timer = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Trigger refresh on mount
+  useEffect(() => {
     const doRefresh = async () => {
       if (typeof refreshCallback === 'function') {
         debugLog('DashboardScreen: mount-triggered refreshCallback invoking');
@@ -39,13 +42,10 @@ const DashboardScreen = () => {
         debugLog('DashboardScreen: no refreshCallback registered on mount');
       }
     };
-    // call after mount
     void doRefresh();
-    return () => {
-      cancelled = true;
-    };
   }, [refreshCallback]);
 
+  // Handle user-initiated refresh
   const onRefresh = async () => {
     if (typeof refreshCallback === 'function') {
       debugLog('DashboardScreen: user-initiated onRefresh invoking refreshCallback');
@@ -62,14 +62,12 @@ const DashboardScreen = () => {
 
   const data = useMemo(() => Array.isArray(realtimeData) ? realtimeData : [], [realtimeData]);
 
-  // Apply shared approximations to the realtime data for display (age-aware)
+  // Apply approximations and validate data
   const processedData = useMemo(() => {
     try {
-      // First apply approximations from shared (age-aware), then validate
       const approxed = Array.isArray(data) ? applyApproximations(data, now) : [];
       const validData = Array.isArray(approxed) ? approxed.filter(isValidParkingData) : [];
 
-      // Normalize and format data
       return validData.map((item) => {
         const ageMinutes = calculateDataAge(item.Timestamp, now);
         const { display: ageDisplay } = formatAgeLabel(ageMinutes);
@@ -88,7 +86,7 @@ const DashboardScreen = () => {
     }
   }, [data, now]);
 
-  // Calculate the most recent data timestamp (used for the header "Updated:" label)
+  // Calculate most recent data timestamp
   const lastDataDate = useMemo(() => {
     if (!Array.isArray(processedData) || processedData.length === 0) return null;
     let max = null;
@@ -108,44 +106,58 @@ const DashboardScreen = () => {
   useEffect(() => {
     debugLog('DashboardScreen: Realtime Data changed', Array.isArray(realtimeData) ? realtimeData.length : typeof realtimeData);
   }, [realtimeData]);
-  // Log the styles used by DashboardScreen (moved out of JSX)
-  ['bg-primary','bg-card','border','text-primary','text-secondary','text-warning','text-muted'].forEach(k => {
-    logStyleUsage('DashboardScreen', allStyles, k, k.startsWith('bg') ? 'bg-' : (k.startsWith('text') ? 'text-' : ''));
-  });
 
   return (
-    <View className={`${allStyles['bg-primary'] || 'bg-bg-primary-light'} flex-1`}>
-      <View className={`p-3 border-b ${allStyles['border'] || 'border-border-light'} ${allStyles['bg-card'] || 'bg-bg-card-light'}`}>
-        <Text className={`${allStyles['text-primary'] || 'text-text-primary-light'} text-lg font-bold`}>Parking Dashboard</Text>
-        <Text className={`${allStyles['text-secondary'] || 'text-text-secondary-light'} text-xs mt-1`}>{`Updated: ${formatTime(lastDataDate || now, 'pl-PL')}`}</Text>
+    <View className="bg-primary dark:bg-primary-dark flex-1">
+      {/* Header */}
+      <View className="p-3 border-b border-border dark:border-border-dark bg-card dark:bg-card-dark">
+        <Text className="text-foreground dark:text-foreground-dark text-lg font-bold">
+          Parking Dashboard
+        </Text>
+        <Text className="text-muted dark:text-muted-dark text-xs mt-1">
+          Updated: {formatTime(lastDataDate || now, 'pl-PL')}
+        </Text>
       </View>
 
+      {/* Loading State */}
       {realtimeLoading && (
         <FlatList
-          data={[1,2,3,4]}
+          data={[1, 2, 3, 4]}
           keyExtractor={(i) => String(i)}
           renderItem={() => <LoadingSkeletonCard />}
         />
       )}
 
+      {/* Error State */}
       {realtimeError && !realtimeLoading && (
         <View className="flex-1 items-center justify-center"> 
-          <Text className={`${allStyles['text-warning'] || 'text-text-warning-light'} text-sm`}>Error loading data. Pull to retry.</Text>
+          <Text className="text-warning dark:text-warning-dark text-sm">
+            Error loading data. Pull to retry.
+          </Text>
         </View>
       )}
 
+      {/* Empty State */}
       {!realtimeLoading && !realtimeError && data.length === 0 && (
         <View className="flex-1 items-center justify-center">
-          <Text className={`${allStyles['text-muted'] || 'text-text-muted'} text-sm`}>No parking data available.</Text>
+          <Text className="text-muted dark:text-muted-dark text-sm">
+            No parking data available.
+          </Text>
         </View>
       )}
 
+      {/* Data List */}
       {!realtimeLoading && processedData.length > 0 && (
         <FlatList
           data={processedData}
           keyExtractor={(item, idx) => item.id ? String(item.id) : String(idx)}
           renderItem={renderItem}
-          refreshControl={<RefreshControl refreshing={realtimeLoading} onRefresh={onRefresh} />}
+          refreshControl={
+            <RefreshControl 
+              refreshing={realtimeLoading} 
+              onRefresh={onRefresh} 
+            />
+          }
         />
       )}
     </View>

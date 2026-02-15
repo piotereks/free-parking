@@ -3,10 +3,6 @@ import { useColorScheme } from 'react-native';
 
 const ThemeContext = createContext();
 
-
-// Top-level constant for default theme
-const DEFAULT_THEME_MODE = 'dark';
-
 /**
  * ThemeProvider - Manages app theme (light/dark).
  *
@@ -15,58 +11,38 @@ const DEFAULT_THEME_MODE = 'dark';
  */
 export function ThemeProvider({ children, initialMode }) {
   const systemColorScheme = useColorScheme();
-  const initial = (initialMode === 'light' || initialMode === 'dark') ? initialMode : (systemColorScheme || DEFAULT_THEME_MODE);
-  // const initial = systemColorScheme;
-  const [themeMode, setThemeMode] = useState(initial);
-
-  // Use manual theme if set, otherwise system
-  const colorScheme = themeMode === 'system' ? (systemColorScheme || 'light') : themeMode;
-  // const colorScheme = systemColorScheme;
-  const isDark = colorScheme === 'dark';
-
-  // Immediate debug log for resolved scheme
-  console.log('🎨 ThemeProvider resolved colorScheme', {
-    initialMode,
-    systemColorScheme,
-    themeMode,
-    colorScheme,
-    isDark,
-  });
-
-  // Debug logging
+  
+  // Resolve initial color scheme
+  const getResolvedScheme = (mode) => {
+    if (mode === 'system') {
+      return systemColorScheme || 'light';
+    }
+    return mode;
+  };
+  
+  const [themeMode, setThemeMode] = useState(initialMode);
+  const [colorScheme, setColorScheme] = useState(getResolvedScheme(initialMode));
+  
+  // Update colorScheme when themeMode or system preference changes
   useEffect(() => {
-    console.log('🎨 [ThemeProvider] Mounted:', {
-      initialMode,
-      systemColorScheme,
-      initial,
-      themeMode,
-      colorScheme,
-      isDark,
-    });
-  }, []);
-
-  useEffect(() => {
-    console.log('🎨 [ThemeProvider] Theme changed:', {
-      themeMode,
-      systemColorScheme,
-      colorScheme,
-      isDark,
-    });
-  }, [themeMode, systemColorScheme, colorScheme, isDark]);
-
+    const resolved = getResolvedScheme(themeMode);
+    setColorScheme(resolved);
+  }, [themeMode, systemColorScheme]);
+  
   const setTheme = (mode) => {
     if (!['light', 'dark', 'system'].includes(mode)) return;
-    console.log('🎨 [ThemeProvider] setTheme called:', mode);
     setThemeMode(mode);
   };
-
+  
+  const isDark = colorScheme === 'dark';
+  
   const theme = {
     mode: themeMode,
     colorScheme,
     isDark,
     setTheme,
   };
-
+  
   return <ThemeContext.Provider value={theme}>{children}</ThemeContext.Provider>;
 }
 
@@ -74,19 +50,27 @@ export function ThemeProvider({ children, initialMode }) {
  * useTheme hook - Access theme context
  * 
  * Returns:
- * - mode: User preference ('light' | 'dark')
- * - colorScheme: Effective scheme ('light' | 'dark') - use this to apply 'dark' class
+ * - mode: User preference ('light' | 'dark' | 'system')
+ * - colorScheme: Effective scheme ('light' | 'dark')
  * - isDark: Boolean convenience
  * - setTheme(mode): Function to change theme
  * 
- * Use NativeWind classes with dark: prefix for styling (e.g., "bg-bg-primary-light dark:bg-bg-primary-dark")
- * All colors come from tailwind.config.js
+ * Usage with NativeWind:
+ * ```jsx
+ * const { isDark } = useTheme();
+ * 
+ * // Use dark: prefix for dark mode variants
+ * <View className="bg-primary dark:bg-primary-dark">
+ *   <Text className="text-foreground dark:text-foreground-dark">
+ *     Hello World
+ *   </Text>
+ * </View>
+ * ```
  */
-// export function useTheme() {
-//   const context = useContext(ThemeContext);
-//   if (!context) {
-//     throw new Error('useTheme must be used within ThemeProvider');
-//   }
-//   return context;
-// }
-
+export function useTheme() {
+  const context = useContext(ThemeContext);
+  if (!context) {
+    throw new Error('useTheme must be used within ThemeProvider');
+  }
+  return context;
+}
