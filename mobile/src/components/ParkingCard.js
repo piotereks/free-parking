@@ -4,10 +4,10 @@ import { useTheme } from '../context/ThemeContext';
 import { formatAgeLabel, calculateDataAge } from 'parking-shared';
 
 const getAgeColorClass = (ageMinutes) => {
-  if (ageMinutes === null || ageMinutes === Infinity) return 'text-secondary';
-  if (ageMinutes >= 15) return 'text-warning';
-  if (ageMinutes >= 5) return 'text-warning-medium';
-  return 'text-success';
+  if (ageMinutes === null || ageMinutes === Infinity) return 'text-text-secondary';
+  if (ageMinutes >= 15) return 'text-text-warning';
+  if (ageMinutes >= 5) return 'text-text-warning-medium';
+  return 'text-text-success';
 };
 
 const tryCopyToClipboard = async (text) => {

@@ -12,8 +12,8 @@ module.exports = {
         'bg-secondary': '#ffffff',
         'bg-card': '#f8fafc',
         // Text colors
-        'primary': '#ff0000',
-        // 'text-primary': '#0f172a',
+        // 'primary': '#ff0000',
+        'text-primary': '#0f172a',
         'text-secondary': '#64748b',
         'text-muted': '#94a3b8',
         'text-success': '#059669',

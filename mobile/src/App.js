@@ -28,21 +28,21 @@ function ParkingCard({ data, now, allOffline }) {
 
   // Color is based on age/allOffline only; approximation no longer affects color
   let ageClass = '';
-  if (allOffline) ageClass = 'text-secondary';
-  else if (age >= 15) ageClass = 'text-warning';
-  else if (age > 5) ageClass = 'text-warning-medium';
+  if (allOffline) ageClass = 'text-text-secondary';
+  else if (age >= 15) ageClass = 'text-text-warning';
+  else if (age > 5) ageClass = 'text-text-warning-medium';
 
   return (
-    <SView className="rounded-xl p-4 mb-3 flex flex-col items-center justify-center border border-border bg-secondary">
-      <SText className="text-base font-semibold mb-1 text-center text-primary">{name}</SText>
+    <SView className="rounded-xl p-4 mb-3 flex flex-col items-center justify-center border border-border bg-bg-secondary">
+      <SText className="text-base font-semibold mb-1 text-center text-text-primary">{name}</SText>
       <SView className="flex-row items-center justify-center">
         {isApproximated && <SText className="text-4xl text-amber-600 mr-1">≈</SText>}
-        <SText className={`text-4xl font-bold ${ageClass || 'text-success'}`}>{freeSpots}</SText>
+        <SText className={`text-4xl font-bold ${ageClass || 'text-text-success'}`}>{freeSpots}</SText>
       </SView>
       {isApproximated && (
-        <SText className="text-sm text-secondary">(orig: {originalSpots})</SText>
+        <SText className="text-sm text-text-secondary">(orig: {originalSpots})</SText>
       )}
-      <SText className="text-sm text-secondary mt-2">{ageLabel.display || ageLabel}</SText>
+      <SText className="text-sm text-text-secondary mt-2">{ageLabel.display || ageLabel}</SText>
     </SView>
   );
 }
@@ -119,16 +119,16 @@ function DashboardContent() {
     let statusMessage = '';
 
     if (allOffline) {
-      colorClass = 'text-warning';
+      colorClass = 'text-text-warning';
       statusMessage = 'All parking feeds appear offline';
     } else if (maxAge >= 15) {
-      colorClass = 'text-warning';
+      colorClass = 'text-text-warning';
       statusMessage = 'Data outdated - figures may not reflect actual free spaces';
     } else if (maxAge > 5) {
       colorClass = 'text-amber-600';
       statusMessage = 'Data slightly outdated - refresh recommended';
     } else {
-      colorClass = 'text-success';
+      colorClass = 'text-text-success';
       statusMessage = 'Data is current and reliable';
     }
 
@@ -206,9 +206,9 @@ function DashboardContent() {
                   );
                 })()}
                 {d.approximationInfo?.isApproximated && (
-                  <SText className="text-sm text-secondary text-center mt-1">(orig: {d.approximationInfo?.original ?? d.CurrentFreeGroupCounterValue ?? 0})</SText>
+                  <SText className="text-sm text-text-secondary text-center mt-1">(orig: {d.approximationInfo?.original ?? d.CurrentFreeGroupCounterValue ?? 0})</SText>
                 )}
-                <SText className="text-sm text-secondary text-center mt-2">
+                <SText className="text-sm text-text-secondary text-center mt-2">
                   {(() => {
                     const age = calculateDataAge(d.Timestamp, now);
                     const { display } = formatAgeLabel(age);
@@ -233,7 +233,7 @@ function DashboardContent() {
                 <SText className={`text-3xl font-bold ${totalColorClass}`}>{totalSpaces}</SText>
               </SView>
               {hasApproximation && (
-                <SText className="text-xs text-secondary italic">
+                <SText className="text-xs text-text-secondary italic">
                   (orig: {originalTotal})
                 </SText>
               )}
@@ -253,7 +253,7 @@ function DashboardContent() {
               </SView>
 
               <TouchableOpacity onPress={onRefresh} activeOpacity={0.8} accessibilityRole="button" accessibilityLabel="Refresh data" style={{ alignSelf: 'center', justifyContent: 'center' }}>
-                <SView className="nav-btn px-3 py-2 rounded-md border border-border bg-primary flex-row items-center">
+                <SView className="nav-btn px-3 py-2 rounded-md border border-border bg-bg-primary flex-row items-center">
                   {refreshing || realtimeLoading ? (
                     <>
                       <ActivityIndicator size="small" color="#333333" />
@@ -271,7 +271,7 @@ function DashboardContent() {
 
             <SView className="p-3 items-center">
               <SText className="text-xs text-text-secondary mb-1">Status</SText>
-              <SText className={`text-xl font-bold ${hasApproximation ? 'text-amber-600' : 'text-success'}`}>
+              <SText className={`text-xl font-bold ${hasApproximation ? 'text-amber-600' : 'text-text-success'}`}>
                 {hasApproximation ? 'APPROX' : 'ONLINE'}
               </SText>
             </SView>
