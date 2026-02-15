@@ -8,9 +8,9 @@ If both styles appear in a file it is marked in both columns.
 |---|:---:|:---:|
 | mobile/babel.config.js |  | ✅ |
 | mobile/eslint.config.js |  | ✅ |
-| mobile/vitest.setup.js | ✅ | ✅ |
+| mobile/vitest.setup.js | ✅ |  |
 | mobile/vitest.config.js | ✅ |  |
-| mobile/tailwind.config.js |  | ✅ |
+| mobile/tailwind.config.js | ✅ |  |
 | mobile/metro.config.cjs |  | ✅ |
 | mobile/jest.config.js |  | ✅ |
 | mobile/index.js | ✅ |  |
@@ -38,7 +38,7 @@ If both styles appear in a file it is marked in both columns.
 | mobile/test/screens/DashboardScreen.new.test.js.skip | ✅ |  |
 | mobile/test/screens/DashboardScreen.minimal.test.js.skip |  | ✅ |
 | mobile/vitest.config.js | ✅ |  |
-| mobile/vitest.setup.js | ✅ | ✅ |
+| mobile/vitest.setup.js | ✅ |  |
 
 ---
 Next steps:
