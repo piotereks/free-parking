@@ -1,58 +1,54 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useColorScheme as useRNColorScheme } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useColorScheme } from 'react-native';
 
 const ThemeContext = createContext();
 
-const STORAGE_KEY = 'parking_theme';
 
 // Top-level constant for default theme
 const DEFAULT_THEME_MODE = 'dark';
 
 /**
- * ThemeProvider - Manages app theme (light/dark) with system detection and user override
- * 
- * Theme modes:
- * - 'auto': Follow system preference
- * - 'light': Force light mode
- * - 'dark': Force dark mode (DEFAULT)
- * 
- * Persists user preference in AsyncStorage.
- * Colors are managed by Tailwind CSS via tailwind.config.js - use NativeWind classes.
+ * ThemeProvider - Manages app theme (light/dark).
+ *
+ * Only 'light' and 'dark' are supported. The provider uses system color scheme by default,
+ * but allows manual override. Pass `initialMode` to set the initial theme.
  */
 export function ThemeProvider({ children, initialMode }) {
-  const [themeMode, setThemeMode] = useState(initialMode || DEFAULT_THEME_MODE);
-  const systemColorScheme = useRNColorScheme() || 'dark';
+  const systemColorScheme = useColorScheme();
+  // const initial = (initialMode === 'light' || initialMode === 'dark') ? initialMode : (systemColorScheme || DEFAULT_THEME_MODE);
+  const initial = systemColorScheme;
+  const [themeMode, setThemeMode] = useState(initial);
 
-  // Load theme preference from AsyncStorage on mount
-  useEffect(() => {
-    const loadTheme = async () => {
-      try {
-        const stored = await AsyncStorage.getItem(STORAGE_KEY);
-        if (stored && ['auto', 'light', 'dark'].includes(stored)) {
-          setThemeMode(stored);
-        }
-      } catch (error) {
-        // Ignore storage errors, use default
-      }
-    };
-    void loadTheme();
-  }, []);
-
-  // Determine effective color scheme based on mode
-  const colorScheme = themeMode === 'auto' ? systemColorScheme : themeMode;
+  // Use manual theme if set, otherwise system
+  // const colorScheme = themeMode === 'system' ? (systemColorScheme || 'light') : themeMode;
+  const colorScheme = systemColorScheme;
   const isDark = colorScheme === 'dark';
 
-  const setTheme = async (mode) => {
-    if (!['auto', 'light', 'dark'].includes(mode)) {
-      return;
-    }
+  // Debug logging
+  useEffect(() => {
+    console.log('🎨 [ThemeProvider] Mounted:', {
+      initialMode,
+      systemColorScheme,
+      initial,
+      themeMode,
+      colorScheme,
+      isDark,
+    });
+  }, []);
+
+  useEffect(() => {
+    console.log('🎨 [ThemeProvider] Theme changed:', {
+      themeMode,
+      systemColorScheme,
+      colorScheme,
+      isDark,
+    });
+  }, [themeMode, systemColorScheme, colorScheme, isDark]);
+
+  const setTheme = (mode) => {
+    if (!['light', 'dark', 'system'].includes(mode)) return;
+    console.log('🎨 [ThemeProvider] setTheme called:', mode);
     setThemeMode(mode);
-    try {
-      await AsyncStorage.setItem(STORAGE_KEY, mode);
-    } catch (error) {
-      // Ignore storage errors
-    }
   };
 
   const theme = {
@@ -69,7 +65,7 @@ export function ThemeProvider({ children, initialMode }) {
  * useTheme hook - Access theme context
  * 
  * Returns:
- * - mode: User preference ('auto' | 'light' | 'dark')
+ * - mode: User preference ('light' | 'dark')
  * - colorScheme: Effective scheme ('light' | 'dark') - use this to apply 'dark' class
  * - isDark: Boolean convenience
  * - setTheme(mode): Function to change theme
@@ -83,4 +79,40 @@ export function useTheme() {
     throw new Error('useTheme must be used within ThemeProvider');
   }
   return context;
+}
+
+// Helper: build flattened color maps from tailwind config
+export function buildColorMaps() {
+  try {
+    // tailwind config lives at mobile/tailwind.config.js relative to this file
+    // (src/context -> ../.. -> mobile)
+    // Use require so this runs at runtime in React Native environment
+    // and picks up local config.
+    const tailwindConfig = require('../../tailwind.config.js');
+    const colorObj = tailwindConfig.theme?.extend?.colors || {};
+    const lightStyles = {};
+    const darkStyles = {};
+
+    Object.keys(colorObj).forEach((key) => {
+      const m = key.match(/^(.*)-(light|dark)$/);
+      if (m) {
+        const base = m[1];
+        const variant = m[2];
+        if (variant === 'light') {
+          lightStyles[base] = key;
+          if (`${base}-dark` in colorObj) darkStyles[base] = `${base}-dark`;
+        } else {
+          darkStyles[base] = key;
+          if (`${base}-light` in colorObj) lightStyles[base] = `${base}-light`;
+        }
+      } else {
+        lightStyles[key] = key;
+        darkStyles[key] = key;
+      }
+    });
+
+    return { lightStyles, darkStyles };
+  } catch (e) {
+    return { lightStyles: {}, darkStyles: {} };
+  }
 }
