@@ -24,34 +24,33 @@ const shared = {
     extend: {
       colors: {
         /* Backgrounds (flat DEFAULT + light/dark) */
-        'bg-primary': { DEFAULT: '#f1f5f9', light: '#f1f5f9', dark: '#0a0e27' },
-        'bg-secondary': { DEFAULT: '#ffffff', light: '#ffffff', dark: '#141937' },
-        'bg-card': { DEFAULT: '#f8fafc', light: '#f8fafc', dark: '#1e2749' },
+        'bg-primary': { light: '#f1f5f9', dark: '#0a0e27' },
+        'bg-secondary': { light: '#ffffff', dark: '#141937' },
+        'bg-card': { light: '#f8fafc', dark: '#1e2749' },
 
         /* Text */
-        'text-primary': { DEFAULT: '#0f172a', light: '#0f172a', dark: '#e0e6ff' },
-        'text-secondary': { DEFAULT: '#64748b', light: '#64748b', dark: '#8b95c9' },
-        'text-muted': { DEFAULT: '#94a3b8' },
-        'text-success': { DEFAULT: '#059669', light: '#059669', dark: '#00ff88' },
+        'text-primary': { light: '#0f172a', dark: '#e0e6ff' },
+        'text-secondary': { light: '#64748b', dark: '#8b95c9' },
+        'text-muted': '#94a3b8',
+        'text-success': { light: '#059669', dark: '#00ff88' },
 
         /* Warnings (both nested + flat "medium" token kept for mobile) */
         'text-warning': {
-          DEFAULT: '#dc2626',
           light: '#dc2626',
           dark: '#ff3366',
           medium: { light: '#d97706', dark: '#ffaa00' },
         },
-        'text-warning-medium': { DEFAULT: '#d97706', light: '#d97706', dark: '#ffaa00' },
+        'text-warning-medium': { light: '#d97706', dark: '#ffaa00' },
 
         /* Accent / semantic colors */
-        accent: { DEFAULT: '#00d9ff', light: '#00fff7', cyan: '#0891b2', 'cyan-light': '#06b6d4' },
+        accent: { light: '#00fff7', cyan: '#0891b2', 'cyan-light': '#06b6d4' },
 
-        notice: { DEFAULT: '#fefce8', light: '#fefce8', dark: '#713f12' },
-        'notice-border': { DEFAULT: '#fef08a', light: '#fef08a', dark: '#a16207' },
-        'notice-text': { DEFAULT: '#fde047', light: '#fde047', dark: '#854d0e' },
+        notice: { light: '#fefce8', dark: '#713f12' },
+        'notice-border': { light: '#fef08a', dark: '#a16207' },
+        'notice-text': { light: '#fde047', dark: '#854d0e' },
 
         /* Borders */
-        border: { DEFAULT: '#e2e8f0', light: '#e2e8f0', dark: '#2d3b6b' },
+        border: { light: '#e2e8f0', dark: '#2d3b6b' },
       },
 
       fontFamily: {
