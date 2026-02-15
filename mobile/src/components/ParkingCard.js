@@ -1,13 +1,15 @@
 import React, { useCallback, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Alert } from 'react-native';
-import { useTheme } from '../context/ThemeContext';
+// import { useTheme } from '../context/ThemeContext';
+import { allStyles } from '../../src/App';
 import { formatAgeLabel, calculateDataAge } from 'parking-shared';
 
+
 const getAgeColorClass = (ageMinutes) => {
-  if (ageMinutes === null || ageMinutes === Infinity) return 'text-text-secondary-light dark:text-text-secondary-dark';
-  if (ageMinutes >= 15) return 'text-text-warning-light dark:text-text-warning-dark';
-  if (ageMinutes >= 5) return 'text-text-warning-medium-light dark:text-text-warning-medium-dark';
-  return 'text-text-success-light dark:text-text-success-dark';
+  if (ageMinutes === null || ageMinutes === Infinity) return `text-${allStyles['text-secondary']}`;
+  if (ageMinutes >= 15) return `text-${allStyles['text-warning']}`;
+  if (ageMinutes >= 5) return `text-${allStyles['text-warning-medium']}`;
+  return `text-${allStyles['text-success']}`;
 };
 
 const tryCopyToClipboard = async (text) => {
@@ -27,7 +29,6 @@ const tryCopyToClipboard = async (text) => {
 };
 
 const ParkingCard = ({ data = {}, now = new Date(), allOffline = false }) => {
-  const { isDark } = useTheme();
 
   const name = data.name || data.parkingName || 'Unknown';
   const free = data.freeSpaces ?? data.free ?? '-';
@@ -53,15 +54,15 @@ const ParkingCard = ({ data = {}, now = new Date(), allOffline = false }) => {
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
-      <View className={"p-3 border-b border-border-light dark:border-border-dark bg-bg-card-light dark:bg-bg-card-dark"}>
+      <View className={`p-3 border-b border-${allStyles['border'] || 'border'} bg-${allStyles['bg-card'] || 'bg-card'}`}>
         <View className={"flex-row justify-between items-center"}>
-          <Text className={"text-base font-semibold text-text-primary-light dark:text-text-primary-dark"}>{name}</Text>
+          <Text className={`text-base font-semibold text-${allStyles['text-primary'] || 'text-primary'}`}>{name}</Text>
           <Text className={`text-xs ${ageColorClass}`}>{ageDisplay}</Text>
         </View>
         <View className={"flex-row justify-between items-center mt-1.5"}>
-          <Text className={"text-sm text-text-primary-light dark:text-text-primary-dark"}>{capacity ? `${free} / ${capacity}` : free}</Text>
+          <Text className={`text-sm text-${allStyles['text-primary'] || 'text-primary'}`}>{capacity ? `${free} / ${capacity}` : free}</Text>
           {approx ? (
-            <Text className={"text-xs px-1.5 py-0.5 rounded-md bg-bg-secondary-light dark:bg-bg-secondary-dark text-text-primary-light dark:text-text-primary-dark"}>Approx</Text>
+            <Text className={`text-xs px-1.5 py-0.5 rounded-md bg-${allStyles['bg-secondary'] || 'bg-secondary'} text-${allStyles['text-primary'] || 'text-primary'}`}>Approx</Text>
           ) : null}
         </View>
       </View>

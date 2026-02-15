@@ -1,6 +1,6 @@
 /**
  * Jest test suite for shared package integration
- * Validates that parking-shared imports resolve correctly via Metro bundler
+ * Validates that ../shared/src/index.js imports resolve correctly via Metro bundler
  */
 
 import {
@@ -15,11 +15,11 @@ import {
   parseTimestamp,
   createParkingStore,
   PARKING_MAX_CAPACITY,
-} from 'parking-shared';
+} from '../shared/src/index.js';
 
 describe('Shared Package Integration', () => {
   describe('Import Verification', () => {
-    it('should import all utilities from parking-shared', () => {
+    it('should import all utilities from ../shared/src/index.js', () => {
       const results = testSharedImports();
       
       expect(results.parkingUtils).toBe(true);
