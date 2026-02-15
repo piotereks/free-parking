@@ -37,11 +37,11 @@ export default {
           cyan: '#0891b2',
           'cyan-light': '#06b6d4',
         },
-        'success': {
+        'text-success': {
           light: '#059669',
           dark: '#00ff88',
         },
-        'warning': {
+        'text-warning': {
           light: '#dc2626',
           dark: '#ff3366',
           medium: {

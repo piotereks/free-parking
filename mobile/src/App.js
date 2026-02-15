@@ -36,7 +36,7 @@ function ParkingCard({ data, now, allOffline }) {
     <SView className="rounded-xl p-4 mb-3 flex flex-col items-center justify-center border border-border bg-bg-secondary">
       <SText className="text-base font-semibold mb-1 text-center text-text-primary">{name}</SText>
       <SView className="flex-row items-center justify-center">
-        {isApproximated && <SText className="text-4xl text-amber-600 mr-1">≈</SText>}
+        {isApproximated && <SText className="text-4xl text-text-warning-medium mr-1">≈</SText>}
         <SText className={`text-4xl font-bold ${ageClass || 'text-text-success'}`}>{freeSpots}</SText>
       </SView>
       {isApproximated && (
@@ -125,7 +125,7 @@ function DashboardContent() {
       colorClass = 'text-text-warning';
       statusMessage = 'Data outdated - figures may not reflect actual free spaces';
     } else if (maxAge > 5) {
-      colorClass = 'text-amber-600';
+      colorClass = 'text-text-warning-medium';
       statusMessage = 'Data slightly outdated - refresh recommended';
     } else {
       colorClass = 'text-text-success';
@@ -200,7 +200,7 @@ function DashboardContent() {
                   const value = d.approximationInfo?.isApproximated ? d.approximationInfo.approximated : (d.CurrentFreeGroupCounterValue || 0);
                   return (
                     <SView className="flex-row items-center justify-center">
-                      {d.approximationInfo?.isApproximated && <SText className="text-6xl text-amber-600 mr-1">≈</SText>}
+                      {d.approximationInfo?.isApproximated && <SText className="text-6xl text-text-warning-medium mr-1">≈</SText>}
                       <SText className={`text-6xl font-bold text-center ${colorClass}`}>{value}</SText>
                     </SView>
                   );
@@ -229,7 +229,7 @@ function DashboardContent() {
             <SView className="p-3 items-center border-b border-border">
               <SText className="text-xs text-text-secondary">Total Spaces</SText>
               <SView className="flex-row items-baseline mt-1">
-                {hasApproximation && <SText className="text-3xl text-amber-600 mr-1">≈</SText>}
+                {hasApproximation && <SText className="text-3xl text-text-warning-medium mr-1">≈</SText>}
                 <SText className={`text-3xl font-bold ${totalColorClass}`}>{totalSpaces}</SText>
               </SView>
               {hasApproximation && (

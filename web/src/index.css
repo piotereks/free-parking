@@ -356,28 +356,28 @@
   }
 
   .free-spots {
-    @apply text-spot-number font-bold text-success-dark;
+    @apply text-spot-number font-bold text-text-success-dark;
     @apply flex items-center justify-center gap-1;
   }
 
   body:not(.dark) .free-spots {
-    @apply text-success-light;
+    @apply text-text-success-light;
   }
 
   .free-spots.age-old {
-    @apply text-warning-dark;
+    @apply text-text-warning-dark;
   }
 
   body:not(.dark) .free-spots.age-old {
-    @apply text-warning-light;
+    @apply text-text-warning-light;
   }
 
   .free-spots.age-medium {
-    @apply text-warning-medium-dark;
+    @apply text-text-warning-medium-dark;
   }
 
   body:not(.dark) .free-spots.age-medium {
-    @apply text-warning-medium-light;
+    @apply text-text-warning-medium-light;
   }
 
   .status-icon-number {
@@ -394,25 +394,25 @@
 
   /* Approximation indicators */
   .approx-indicator {
-    @apply ml-1 text-warning-medium-light font-normal;
+    @apply ml-1 text-text-warning-medium-light font-normal;
     font-size: inherit;
     line-height: 1;
     vertical-align: baseline;
   }
 
   .dark .approx-indicator {
-    @apply text-warning-medium-dark;
+    @apply text-text-warning-medium-dark;
   }
 
   .approx-indicator-small {
-    @apply ml-1 text-warning-medium-light font-normal;
+    @apply ml-1 text-text-warning-medium-light font-normal;
     font-size: inherit;
     line-height: 1;
     vertical-align: baseline;
   }
 
   .dark .approx-indicator-small {
-    @apply text-warning-medium-dark;
+    @apply text-text-warning-medium-dark;
   }
 
   .original-value,
@@ -452,57 +452,57 @@
   }
 
   .status-value {
-    @apply text-3xl font-bold text-success-dark;
+    @apply text-3xl font-bold text-text-success-dark;
   }
 
   body:not(.dark) .status-value {
-    @apply text-success-light;
+    @apply text-text-success-light;
   }
 
   .status-value.age-old {
-    @apply text-warning-dark;
+    @apply text-text-warning-dark;
   }
 
   body:not(.dark) .status-value.age-old {
-    @apply text-warning-light;
+    @apply text-text-warning-light;
   }
 
   .status-value.age-medium {
-    @apply text-warning-medium-dark;
+    @apply text-text-warning-medium-dark;
   }
 
   body:not(.dark) .status-value.age-medium {
-    @apply text-warning-medium-light;
+    @apply text-text-warning-medium-light;
   }
 
   .status-description {
     @apply mt-4 mb-8 px-6 text-center font-bold w-full;
-    @apply text-success-dark;
+    @apply text-text-success-dark;
     font-size: 1.125rem; /* 18px for wide screen */
   }
 
   body:not(.dark) .status-description {
-    @apply text-success-light;
+    @apply text-text-success-light;
   }
 
   .dark .status-description {
-    @apply text-success-dark;
+    @apply text-text-success-dark;
   }
 
   .status-description.age-old {
-    @apply text-warning-dark;
+    @apply text-text-warning-dark;
   }
 
   body:not(.dark) .status-description.age-old {
-    @apply text-warning-light;
+    @apply text-text-warning-light;
   }
 
   .status-description.age-medium {
-    @apply text-warning-medium-dark;
+    @apply text-text-warning-medium-dark;
   }
 
   body:not(.dark) .status-description.age-medium {
-    @apply text-warning-medium-light;
+    @apply text-text-warning-medium-light;
   }
 
   .big-value {
@@ -523,13 +523,13 @@
 
   /* Error state */
   .error {
-    @apply rounded-lg p-4 mb-4 text-warning-dark;
+    @apply rounded-lg p-4 mb-4 text-text-warning-dark;
     background: rgba(239, 68, 68, 0.1);
     border: 1px solid currentColor;
   }
 
   body:not(.dark) .error {
-    @apply text-warning-light;
+    @apply text-text-warning-light;
   }
 
   /* Statistics */
