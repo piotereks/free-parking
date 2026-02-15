@@ -39,6 +39,11 @@ module.exports = {
       },
       boxShadow: {
         'custom-light': '0 1px 3px rgba(0, 0, 0, 0.1)',
+        'custom-dark': '0 1px 3px rgba(0, 0, 0, 0.4)',
+        'hover-light': '0 4px 6px rgba(0, 0, 0, 0.1)',
+        'hover-dark': '0 4px 6px rgba(0, 0, 0, 0.4)',
+        'header-light': '0 1px 10px rgba(0, 0, 0, 0.2)',
+        'header-dark': '0 1px 10px rgba(0, 0, 0, 0.2)',
       },
       fontSize: {
         'spot-number': '3.5rem',
