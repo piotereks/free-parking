@@ -10,6 +10,7 @@ import ParkingCard from '../components/ParkingCard';
 import LoadingSkeletonCard from '../components/LoadingSkeletonCard';
 import { allStyles } from '../App';
 
+import { logStyleUsage } from '../utils/allStylesLogger';
 const DashboardScreen = () => {
   const { isDark } = useTheme();
   const [now, setNow] = useState(() => new Date());
@@ -19,10 +20,7 @@ const DashboardScreen = () => {
   const realtimeError = useParkingStore((s) => s.realtimeError);
   const refreshCallback = useParkingStore((s) => s.refreshCallback);
 
-  useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(id);
-  }, []);
+
 
   // Trigger a refresh on mount if a refreshCallback is registered by the
   // DataManager (this is a no-op if not provided).
@@ -110,6 +108,10 @@ const DashboardScreen = () => {
   useEffect(() => {
     debugLog('DashboardScreen: Realtime Data changed', Array.isArray(realtimeData) ? realtimeData.length : typeof realtimeData);
   }, [realtimeData]);
+  // Log the styles used by DashboardScreen (moved out of JSX)
+  ['bg-primary','bg-card','border','text-primary','text-secondary','text-warning','text-muted'].forEach(k => {
+    logStyleUsage('DashboardScreen', allStyles, k, k.startsWith('bg') ? 'bg-' : (k.startsWith('text') ? 'text-' : ''));
+  });
 
   return (
     <View className={`flex-1 bg-${allStyles['bg-primary'] || 'bg-bg-primary-light'}`}>

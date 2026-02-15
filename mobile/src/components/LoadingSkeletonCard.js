@@ -1,6 +1,12 @@
 import React from 'react';
 import { View } from 'react-native';
 import { allStyles } from '../App';
+import { logStyleUsage } from '../utils/allStylesLogger';
+
+// Log the styles used by LoadingSkeletonCard
+['border','bg-card','bg-secondary'].forEach(k => {
+  logStyleUsage('LoadingSkeletonCard', allStyles, k, k.startsWith('bg') ? 'bg-' : (k.startsWith('text') ? 'text-' : ''));
+});
 
 
 

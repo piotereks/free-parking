@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { styled } from 'nativewind';
 import { ThemeProvider} from './context/ThemeContext';
 import { buildColorMaps } from './utils/colorMaps';
+import { logStyleUsage } from './utils/allStylesLogger';
 import ParkingDataProvider from './context/ParkingDataProvider';
 import { debugLog } from './config/debug';
 import useParkingStore from './hooks/useParkingStore';
@@ -13,6 +14,11 @@ import { applyApproximations, calculateDataAge, formatAgeLabel, parseTimestamp, 
 export const APP_THEME = 'dark'; // 'light', 'dark', or 'auto' (system)
 
 export const { allStyles, colorScheme, isDark }  = buildColorMaps(APP_THEME);
+
+// Debug log common style keys used in this file
+['bg-primary','bg-secondary','border','text-primary','text-secondary','text-warning','text-warning-medium','text-success','bg-container','text-example'].forEach(k => {
+  logStyleUsage('App', allStyles, k, k.startsWith('bg') ? 'bg-' : (k.startsWith('text') ? 'text-' : ''));
+});
 
 const SSafeArea = styled(SafeAreaView);
 const SView = styled(View);

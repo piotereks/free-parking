@@ -2,6 +2,12 @@ import React, { useCallback, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Alert } from 'react-native';
 // import { useTheme } from '../context/ThemeContext';
 import { allStyles } from '../../src/App';
+import { logStyleUsage } from '../utils/allStylesLogger';
+
+// Log the styles used by ParkingCard
+['border','bg-card','bg-secondary','text-primary','text-secondary','text-warning','text-warning-medium','text-success'].forEach(k => {
+  logStyleUsage('ParkingCard', allStyles, k, k.startsWith('bg') ? 'bg-' : (k.startsWith('text') ? 'text-' : ''));
+});
 import { formatAgeLabel, calculateDataAge } from 'parking-shared';
 
 
