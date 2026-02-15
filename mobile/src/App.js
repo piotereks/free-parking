@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { APP_THEME } from '../App';
 import { Text, View, StatusBar, ScrollView, RefreshControl, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styled } from 'nativewind';
@@ -293,7 +294,6 @@ const AppContent = () => {
 
 // Top-level app theme constant. Set to 'dark', 'light' or 'auto'.
 // Change this value to control the initial theme used by the app.
-const APP_THEME = 'dark';
 
 export default function App() {
   return (
