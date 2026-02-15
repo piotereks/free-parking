@@ -1,4 +1,7 @@
 {
   "name": "free-parking-root",
-  "private": true
+  "private": true,
+  "scripts": {
+    "prepare": "git config core.hooksPath .githooks || true"
+  }
 }
