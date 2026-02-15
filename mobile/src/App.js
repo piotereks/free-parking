@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-// import { APP_THEME } from '../App';
 import { Text, View, StatusBar, ScrollView, RefreshControl, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
@@ -165,7 +164,7 @@ function DashboardContent() {
   const totalColorClass = statusColorClass;
 
   return (
-    <SafeAreaView className="flex-1 bg-primary dark:bg-primary-dark">
+    <SafeAreaView className={`flex-1 bg-primary dark:bg-primary-dark ${isDark ? 'dark' : ''}`}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
       {/* Header */}
@@ -333,6 +332,8 @@ const AppContent = () => {
 /**
  * App Component
  * Root component with providers
+ * 
+ * Change APP_THEME constant above to switch between 'light', 'dark', or 'system'
  */
 export default function App() {
   return (

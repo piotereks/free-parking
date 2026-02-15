@@ -1,15 +1,19 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useColorScheme } from 'react-native';
+import { useColorScheme, Appearance } from 'react-native';
 
 const ThemeContext = createContext();
 
 /**
- * ThemeProvider - Manages app theme (light/dark).
- *
- * Only 'light' and 'dark' are supported. The provider uses system color scheme by default,
- * but allows manual override. Pass `initialMode` to set the initial theme.
+ * ThemeProvider - Simple theme management with NativeWind
+ * 
+ * This provider manages the color scheme and ensures NativeWind's
+ * dark: variants are applied correctly by setting the system appearance.
+ * 
+ * @param {Object} props
+ * @param {ReactNode} props.children - Child components
+ * @param {string} props.initialMode - Initial theme mode: 'light', 'dark', or 'system'
  */
-export function ThemeProvider({ children, initialMode }) {
+export function ThemeProvider({ children, initialMode = 'dark' }) {
   const systemColorScheme = useColorScheme();
   
   // Resolve initial color scheme
@@ -24,9 +28,18 @@ export function ThemeProvider({ children, initialMode }) {
   const [colorScheme, setColorScheme] = useState(getResolvedScheme(initialMode));
   
   // Update colorScheme when themeMode or system preference changes
+  // AND set the Appearance so NativeWind picks it up
   useEffect(() => {
     const resolved = getResolvedScheme(themeMode);
     setColorScheme(resolved);
+    
+    // CRITICAL: Tell React Native (and NativeWind) about the color scheme
+    // This makes the dark: variants work
+    try {
+      Appearance.setColorScheme(resolved);
+    } catch (e) {
+      console.warn('Failed to set appearance:', e);
+    }
   }, [themeMode, systemColorScheme]);
   
   const setTheme = (mode) => {
