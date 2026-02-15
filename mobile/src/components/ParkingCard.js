@@ -12,10 +12,10 @@ import { formatAgeLabel, calculateDataAge } from 'parking-shared';
 
 
 const getAgeColorClass = (ageMinutes) => {
-  if (ageMinutes === null || ageMinutes === Infinity) return `text-${allStyles['text-secondary']}`;
-  if (ageMinutes >= 15) return `text-${allStyles['text-warning']}`;
-  if (ageMinutes >= 5) return `text-${allStyles['text-warning-medium']}`;
-  return `text-${allStyles['text-success']}`;
+  if (ageMinutes === null || ageMinutes === Infinity) return `${allStyles['text-secondary']}`;
+  if (ageMinutes >= 15) return `${allStyles['text-warning']}`;
+  if (ageMinutes >= 5) return `${allStyles['text-warning-medium']}`;
+  return `${allStyles['text-success']}`;
 };
 
 const tryCopyToClipboard = async (text) => {
@@ -60,15 +60,15 @@ const ParkingCard = ({ data = {}, now = new Date(), allOffline = false }) => {
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
-      <View className={`p-3 border-b border-${allStyles['border'] || 'border'} bg-${allStyles['bg-card'] || 'bg-card'}`}>
+      <View className={`p-3 border-b ${allStyles['border'] || 'border'} ${allStyles['bg-card'] || 'bg-card'}`}>
         <View className={"flex-row justify-between items-center"}>
-          <Text className={`text-base font-semibold text-${allStyles['text-primary'] || 'text-primary'}`}>{name}</Text>
-          <Text className={`text-xs ${ageColorClass}`}>{ageDisplay}</Text>
+          <Text className={`${allStyles['text-primary'] || 'text-primary'} text-base font-semibold`}>{name}</Text>
+          <Text className={`${ageColorClass} text-xs`}>{ageDisplay}</Text>
         </View>
         <View className={"flex-row justify-between items-center mt-1.5"}>
-          <Text className={`text-sm text-${allStyles['text-primary'] || 'text-primary'}`}>{capacity ? `${free} / ${capacity}` : free}</Text>
+          <Text className={`${allStyles['text-primary'] || 'text-primary'} text-sm`}>{capacity ? `${free} / ${capacity}` : free}</Text>
           {approx ? (
-            <Text className={`text-xs px-1.5 py-0.5 rounded-md bg-${allStyles['bg-secondary'] || 'bg-secondary'} text-${allStyles['text-primary'] || 'text-primary'}`}>Approx</Text>
+            <Text className={`text-xs px-1.5 py-0.5 rounded-md ${allStyles['bg-secondary'] || 'bg-secondary'} ${allStyles['text-primary'] || 'text-primary'}`}>Approx</Text>
           ) : null}
         </View>
       </View>

@@ -12,11 +12,11 @@ import { logStyleUsage } from '../utils/allStylesLogger';
 
 const LoadingSkeletonCard = () => {
   return (
-    <View className={`p-3 border-b border-${allStyles['border']} bg-${allStyles['bg-card']}`}>
-      <View className={`h-3 w-2/5 rounded bg-${allStyles['border']} mb-2`} />
-      <View className={`h-2.5 w-4/5 rounded bg-${allStyles['bg-secondary']} mb-2`} />
-      <View className={`h-2.5 w-11/20 rounded bg-${allStyles['border']} mb-2`} />
-      <View className={`h-2.5 w-4/5 rounded bg-${allStyles['bg-secondary']}`} />
+    <View className={`p-3 border-b ${allStyles['border']} ${allStyles['bg-card']}`}>
+      <View className={`h-3 w-2/5 rounded ${allStyles['border']} mb-2`} />
+      <View className={`h-2.5 w-4/5 rounded ${allStyles['bg-secondary']} mb-2`} />
+      <View className={`h-2.5 w-11/20 rounded ${allStyles['border']} mb-2`} />
+      <View className={`h-2.5 w-4/5 rounded ${allStyles['bg-secondary']}`} />
     </View>
   );
 };

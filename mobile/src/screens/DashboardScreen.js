@@ -114,10 +114,10 @@ const DashboardScreen = () => {
   });
 
   return (
-    <View className={`flex-1 bg-${allStyles['bg-primary'] || 'bg-bg-primary-light'}`}>
-      <View className={`p-3 border-b border-${allStyles['border'] || 'border-border-light'} bg-${allStyles['bg-card'] || 'bg-bg-card-light'}`}>
-        <Text className={`text-lg font-bold text-${allStyles['text-primary'] || 'text-text-primary-light'}`}>Parking Dashboard</Text>
-        <Text className={`text-xs mt-1 text-${allStyles['text-secondary'] || 'text-text-secondary-light'}`}>{`Updated: ${formatTime(lastDataDate || now, 'pl-PL')}`}</Text>
+    <View className={`${allStyles['bg-primary'] || 'bg-bg-primary-light'} flex-1`}>
+      <View className={`p-3 border-b ${allStyles['border'] || 'border-border-light'} ${allStyles['bg-card'] || 'bg-bg-card-light'}`}>
+        <Text className={`${allStyles['text-primary'] || 'text-text-primary-light'} text-lg font-bold`}>Parking Dashboard</Text>
+        <Text className={`${allStyles['text-secondary'] || 'text-text-secondary-light'} text-xs mt-1`}>{`Updated: ${formatTime(lastDataDate || now, 'pl-PL')}`}</Text>
       </View>
 
       {realtimeLoading && (
@@ -130,13 +130,13 @@ const DashboardScreen = () => {
 
       {realtimeError && !realtimeLoading && (
         <View className="flex-1 items-center justify-center"> 
-          <Text className={`text-sm text-${allStyles['text-warning'] || 'text-text-warning-light'}`}>Error loading data. Pull to retry.</Text>
+          <Text className={`${allStyles['text-warning'] || 'text-text-warning-light'} text-sm`}>Error loading data. Pull to retry.</Text>
         </View>
       )}
 
       {!realtimeLoading && !realtimeError && data.length === 0 && (
         <View className="flex-1 items-center justify-center">
-          <Text className={`text-sm text-${allStyles['text-muted'] || 'text-text-muted'}`}>No parking data available.</Text>
+          <Text className={`${allStyles['text-muted'] || 'text-text-muted'} text-sm`}>No parking data available.</Text>
         </View>
       )}
 
