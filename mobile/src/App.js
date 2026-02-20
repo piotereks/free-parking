@@ -34,7 +34,7 @@ function ParkingTile({ data, now, allOffline }) {
   const displayName = data.ParkingGroupName === 'Bank_1' ? 'Uni Wroc' : data.ParkingGroupName;
 
   return (
-    <View className="flex-1 rounded-lg p-3 border border-border dark:border-border-dark bg-secondary dark:bg-secondary-dark">
+    <View className="flex-1 mb-2 rounded-lg p-3 border border-border dark:border-border-dark bg-secondary dark:bg-secondary-dark">
       <Text className="text-base font-semibold text-center text-foreground dark:text-foreground-dark mb-2">
         {displayName}
       </Text>
@@ -204,7 +204,7 @@ function DashboardContent() {
           }
         >
           {/* Parking Tiles */}
-          <View className="flex-row gap-2 mb-3">
+          <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12, marginTop: 8 }}>
             {processed.map((d, i) => (
               <ParkingTile 
                 key={d.ParkingGroupName || i} 
