@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { useColorScheme as useRNColorScheme, Appearance } from 'react-native';
-import { useColorScheme as useNWColorScheme } from 'nativewind';
+import { useColorScheme as useNWColorScheme, NativeWindStyleSheet } from 'nativewind';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ThemeContext = createContext();
 
@@ -21,6 +22,9 @@ export function ThemeProvider({ children, initialMode = 'dark' }) {
   const nw = useNWColorScheme();          // NativeWind's own hook
   const didInit = useRef(false);
 
+  // persisted theme key
+  const STORAGE_KEY = 'parking_theme';
+
   // Resolve effective scheme
   const getResolvedScheme = (mode) => {
     if (mode === 'system') return systemColorScheme || 'light';
@@ -30,14 +34,32 @@ export function ThemeProvider({ children, initialMode = 'dark' }) {
   const [themeMode, setThemeMode] = useState(initialMode);
   const [colorScheme, setLocalColorScheme] = useState(getResolvedScheme(initialMode));
 
+  // load persisted preference on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const saved = await AsyncStorage.getItem(STORAGE_KEY);
+        if (saved && ['light','dark','system'].includes(saved)) {
+          setThemeMode(saved);
+          setLocalColorScheme(getResolvedScheme(saved));
+          NativeWindStyleSheet.setColorScheme(getResolvedScheme(saved));
+          Appearance.setColorScheme(getResolvedScheme(saved));
+        }
+      } catch (e) {
+        console.warn('[ThemeProvider] failed to load theme from storage', e);
+      }
+    })();
+  }, []);
+
   // ── Sync NativeWind + RN Appearance on every theme change ──
   useEffect(() => {
     const resolved = getResolvedScheme(themeMode);
     setLocalColorScheme(resolved);
 
-    // 1) Tell NativeWind directly (this is the critical call)
+    // 1) Tell NativeWind directly (this is the critical call).
+    // Use the static API rather than the hook object to avoid freezing issues.
     try {
-      nw.setColorScheme(resolved);
+      NativeWindStyleSheet.setColorScheme(resolved);
     } catch (e) {
       console.warn('[ThemeProvider] NativeWind setColorScheme failed:', e);
     }
@@ -48,6 +70,15 @@ export function ThemeProvider({ children, initialMode = 'dark' }) {
     } catch (e) {
       console.warn('[ThemeProvider] Appearance.setColorScheme failed:', e);
     }
+
+    // persist the user choice (not system)
+    (async () => {
+      try {
+        await AsyncStorage.setItem(STORAGE_KEY, themeMode);
+      } catch (e) {
+        console.warn('[ThemeProvider] failed to save theme to storage', e);
+      }
+    })();
 
     // ── Diagnostic log (safe to remove once dark mode works) ──
     if (!didInit.current) {

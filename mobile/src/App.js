@@ -66,8 +66,11 @@ function ParkingTile({ data, now, allOffline }) {
  * Main dashboard displaying parking data
  */
 function DashboardContent() {
-  const { isDark } = useTheme();
+  const { isDark, setTheme } = useTheme();
   const title = 'Parking Monitor';
+  
+  // helper to toggle
+  const toggleTheme = () => setTheme(isDark ? 'light' : 'dark');
   
   // Store state
   const realtimeData = useParkingStore((state) => state.realtimeData);
@@ -168,7 +171,7 @@ function DashboardContent() {
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
       {/* Header */}
-      <View className="w-full bg-secondary dark:bg-secondary-dark flex-row items-center justify-center py-3 px-4 border-b border-border dark:border-border-dark">
+      <View className="w-full bg-secondary dark:bg-secondary-dark flex-row items-center justify-between py-3 px-4 border-b border-border dark:border-border-dark">
         <Image 
           source={require('../assets/favicon.png')} 
           style={{ width: 36, height: 36, marginRight: 12 }} 
@@ -181,6 +184,17 @@ function DashboardContent() {
             Real-time • GD-Uni Wrocław
           </Text>
         </View>
+        <TouchableOpacity
+          onPress={toggleTheme}
+          accessibilityRole="button"
+          accessibilityLabel={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
+          className="flex items-center justify-center rounded-lg border bg-bg-primary-light border-border-light dark:bg-bg-primary-dark dark:border-border-dark shadow-custom-light dark:shadow-custom-dark"
+          style={{ width: 44, height: 44 }}
+        >
+          <Text className="text-2xl">
+            {isDark ? '☀️' : '🌙'}
+          </Text>
+        </TouchableOpacity>
       </View>
 
       {/* Loading State */}
