@@ -8,29 +8,27 @@ import { debugLog } from '../config/debug';
 import ParkingCard from '../components/ParkingCard';
 import LoadingSkeletonCard from '../components/LoadingSkeletonCard';
 
+/**
+ * DashboardScreen Component
+ * Alternative dashboard view showing parking data in a list
+ */
 const DashboardScreen = () => {
-  const { colors, isDark } = useTheme();
+  const { isDark } = useTheme();
   const [now, setNow] = useState(() => new Date());
-
-  // Debug: Log theme colors
-  useEffect(() => {
-    debugLog('DashboardScreen: Theme applied', { isDark, background: colors.background, text: colors.text });
-  }, [isDark, colors]);
 
   const realtimeData = useParkingStore((s) => s.realtimeData);
   const realtimeLoading = useParkingStore((s) => s.realtimeLoading);
   const realtimeError = useParkingStore((s) => s.realtimeError);
   const refreshCallback = useParkingStore((s) => s.refreshCallback);
 
+  // Update current time every second
   useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(id);
+    const timer = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(timer);
   }, []);
 
-  // Trigger a refresh on mount if a refreshCallback is registered by the
-  // DataManager (this is a no-op if not provided).
+  // Trigger refresh on mount
   useEffect(() => {
-    let cancelled = false;
     const doRefresh = async () => {
       if (typeof refreshCallback === 'function') {
         debugLog('DashboardScreen: mount-triggered refreshCallback invoking');
@@ -44,13 +42,10 @@ const DashboardScreen = () => {
         debugLog('DashboardScreen: no refreshCallback registered on mount');
       }
     };
-    // call after mount
     void doRefresh();
-    return () => {
-      cancelled = true;
-    };
   }, [refreshCallback]);
 
+  // Handle user-initiated refresh
   const onRefresh = async () => {
     if (typeof refreshCallback === 'function') {
       debugLog('DashboardScreen: user-initiated onRefresh invoking refreshCallback');
@@ -67,14 +62,12 @@ const DashboardScreen = () => {
 
   const data = useMemo(() => Array.isArray(realtimeData) ? realtimeData : [], [realtimeData]);
 
-  // Apply shared approximations to the realtime data for display (age-aware)
+  // Apply approximations and validate data
   const processedData = useMemo(() => {
     try {
-      // First apply approximations from shared (age-aware), then validate
       const approxed = Array.isArray(data) ? applyApproximations(data, now) : [];
       const validData = Array.isArray(approxed) ? approxed.filter(isValidParkingData) : [];
 
-      // Normalize and format data
       return validData.map((item) => {
         const ageMinutes = calculateDataAge(item.Timestamp, now);
         const { display: ageDisplay } = formatAgeLabel(ageMinutes);
@@ -93,7 +86,7 @@ const DashboardScreen = () => {
     }
   }, [data, now]);
 
-  // Calculate the most recent data timestamp (used for the header "Updated:" label)
+  // Calculate most recent data timestamp
   const lastDataDate = useMemo(() => {
     if (!Array.isArray(processedData) || processedData.length === 0) return null;
     let max = null;
@@ -115,38 +108,56 @@ const DashboardScreen = () => {
   }, [realtimeData]);
 
   return (
-    <View className="flex-1 bg-bg-primary-light dark:bg-bg-primary-dark">
-      <View className="p-3 border-b border-border-light dark:border-border-dark bg-bg-card-light dark:bg-bg-card-dark">
-        <Text className="text-lg font-bold text-text-primary-light dark:text-text-primary-dark">Parking Dashboard</Text>
-        <Text className="text-xs mt-1 text-text-secondary-light dark:text-text-secondary-dark">{`Updated: ${formatTime(lastDataDate || now, 'pl-PL')}`}</Text>
+    <View className="bg-primary dark:bg-primary-dark flex-1">
+      {/* Header */}
+      <View className="p-3 border-b border-border dark:border-border-dark bg-card dark:bg-card-dark">
+        <Text className="text-foreground dark:text-foreground-dark text-lg font-bold">
+          Parking Dashboard
+        </Text>
+        <Text className="text-muted dark:text-muted-dark text-xs mt-1">
+          Updated: {formatTime(lastDataDate || now, 'pl-PL')}
+        </Text>
       </View>
 
+      {/* Loading State */}
       {realtimeLoading && (
         <FlatList
-          data={[1,2,3,4]}
+          data={[1, 2, 3, 4]}
           keyExtractor={(i) => String(i)}
           renderItem={() => <LoadingSkeletonCard />}
         />
       )}
 
+      {/* Error State */}
       {realtimeError && !realtimeLoading && (
         <View className="flex-1 items-center justify-center"> 
-          <Text className="text-sm text-warning-light dark:text-warning-dark">Error loading data. Pull to retry.</Text>
+          <Text className="text-warning dark:text-warning-dark text-sm">
+            Error loading data. Pull to retry.
+          </Text>
         </View>
       )}
 
+      {/* Empty State */}
       {!realtimeLoading && !realtimeError && data.length === 0 && (
         <View className="flex-1 items-center justify-center">
-          <Text className="text-sm text-text-muted-light dark:text-text-muted-dark">No parking data available.</Text>
+          <Text className="text-muted dark:text-muted-dark text-sm">
+            No parking data available.
+          </Text>
         </View>
       )}
 
+      {/* Data List */}
       {!realtimeLoading && processedData.length > 0 && (
         <FlatList
           data={processedData}
           keyExtractor={(item, idx) => item.id ? String(item.id) : String(idx)}
           renderItem={renderItem}
-          refreshControl={<RefreshControl refreshing={realtimeLoading} onRefresh={onRefresh} />}
+          refreshControl={
+            <RefreshControl 
+              refreshing={realtimeLoading} 
+              onRefresh={onRefresh} 
+            />
+          }
         />
       )}
     </View>

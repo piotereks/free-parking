@@ -9,7 +9,7 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 
 let _rehydrated = { realtime: null, history: null };
 
-jest.mock('parking-shared', () => ({
+jest.mock('../shared/src/index.js', () => ({
   createParkingStore: (adapters) => {
     // trigger hydration calls to adapters.storage so tests can observe
     setImmediate(() => {

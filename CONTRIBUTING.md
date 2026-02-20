@@ -161,6 +161,8 @@ docs: update installation instructions
 refactor: extract utility functions to separate module
 ```
 
+> Note: this repository includes client-side git hooks in `.githooks/`. Running `npm install` (or `npm run prepare`) will configure them locally by setting `core.hooksPath` to `.githooks`.
+
 ## 🏗️ Project Structure
 
 ```

@@ -1,54 +1,78 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Text, View, StatusBar, ScrollView, RefreshControl, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { styled } from 'nativewind';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import ParkingDataProvider from './context/ParkingDataProvider';
 import { debugLog } from './config/debug';
 import useParkingStore from './hooks/useParkingStore';
-import { applyApproximations, calculateDataAge, formatAgeLabel, parseTimestamp, formatTime, createRefreshHelper } from 'parking-shared';
+import { applyApproximations, calculateDataAge, formatAgeLabel, formatTime, createRefreshHelper } from 'parking-shared';
 
-const SSafeArea = styled(SafeAreaView);
-const SView = styled(View);
-const SText = styled(Text);
-const SScroll = styled(ScrollView);
+// Top-level app theme constant. Set to 'dark', 'light' or 'system'.
+export const APP_THEME = 'dark';
 
-function ParkingCard({ data, now, allOffline }) {
-  let name = data.ParkingGroupName;
-  if (name === 'Bank_1') name = 'Uni Wroc';
-
-  const approximationInfo = data.approximationInfo || {};
-  const isApproximated = Boolean(approximationInfo.isApproximated);
-  const freeSpots = isApproximated ? approximationInfo.approximated : (data.CurrentFreeGroupCounterValue || 0);
-  const originalSpots = approximationInfo.original ?? data.CurrentFreeGroupCounterValue ?? 0;
-
-  const ts = parseTimestamp(data.Timestamp);
+/**
+ * ParkingTile Component
+ * Displays individual parking lot information
+ */
+function ParkingTile({ data, now, allOffline }) {
   const age = calculateDataAge(data.Timestamp, now);
-  const ageLabel = formatAgeLabel(age);
+  const { display } = formatAgeLabel(age);
+  
+  // Determine color based on age - use ternary with complete static class strings
+  const ageColorClass = allOffline 
+    ? "text-muted dark:text-muted-dark"
+    : age >= 15 
+      ? "text-warning dark:text-warning-dark"
+      : age > 5 
+        ? "text-warning-medium dark:text-warning-medium-dark"
+        : "text-success dark:text-success-dark";
+  
+  const value = data.approximationInfo?.isApproximated 
+    ? data.approximationInfo.approximated 
+    : (data.CurrentFreeGroupCounterValue || 0);
 
-  // Color is based on age/allOffline only; approximation no longer affects color
-  let ageClass = '';
-  if (allOffline) ageClass = 'text-text-secondary-dark';
-  else if (age >= 15) ageClass = 'text-warning-dark';
-  else if (age > 5) ageClass = 'text-amber-600';
+  const displayName = data.ParkingGroupName === 'Bank_1' ? 'Uni Wroc' : data.ParkingGroupName;
 
   return (
-    <SView className="rounded-xl p-4 mb-3 flex flex-col items-center justify-center border border-border-dark bg-bg-secondary-dark shadow-lg">
-      <SText className="text-base font-semibold mb-1 text-center text-text-primary-dark">{name}</SText>
-      <SView className="flex-row items-center justify-center">
-        {isApproximated && <SText className="text-4xl text-amber-600 mr-1">≈</SText>}
-        <SText className={`text-4xl font-bold ${ageClass || 'text-success-dark'}`}>{freeSpots}</SText>
-      </SView>
-      {isApproximated && (
-        <SText className="text-sm text-text-secondary-dark">(orig: {originalSpots})</SText>
+    <View className="flex-1 mb-2 rounded-lg p-3 border border-border dark:border-border-dark bg-secondary dark:bg-secondary-dark">
+      <Text className="text-base font-semibold text-center text-foreground dark:text-foreground-dark mb-2">
+        {displayName}
+      </Text>
+      
+      <View className="flex-row items-center justify-center">
+        {data.approximationInfo?.isApproximated && (
+          <Text className="text-6xl text-warning-medium dark:text-warning-medium-dark mr-1">≈</Text>
+        )}
+        <Text className={`text-6xl font-bold text-center ${ageColorClass}`}>
+          {value}
+        </Text>
+      </View>
+      
+      {data.approximationInfo?.isApproximated && (
+        <Text className="text-sm text-muted dark:text-muted-dark text-center mt-1">
+          (orig: {data.approximationInfo?.original ?? data.CurrentFreeGroupCounterValue ?? 0})
+        </Text>
       )}
-      <SText className="text-sm text-text-secondary-dark mt-2">{ageLabel.display || ageLabel}</SText>
-    </SView>
+      
+      <Text className="text-sm text-muted dark:text-muted-dark text-center mt-2">
+        {display}
+      </Text>
+    </View>
   );
 }
 
+/**
+ * DashboardContent Component
+ * Main dashboard displaying parking data
+ */
 function DashboardContent() {
+  const { isDark, setTheme } = useTheme();
   const title = 'Parking Monitor';
+  
+  // helper to toggle
+  const toggleTheme = () => setTheme(isDark ? 'light' : 'dark');
+  
+  // Store state
   const realtimeData = useParkingStore((state) => state.realtimeData);
   const realtimeLoading = useParkingStore((state) => state.realtimeLoading);
   const realtimeError = useParkingStore((state) => state.realtimeError);
@@ -57,25 +81,23 @@ function DashboardContent() {
   const [now, setNow] = useState(new Date());
   const [refreshing, setRefreshing] = useState(false);
 
+  // Update current time every second
   useEffect(() => {
     const timer = global.setInterval(() => setNow(new Date()), 1000);
     return () => global.clearInterval(timer);
   }, []);
 
+  // Apply approximations to data
   const processed = useMemo(() => {
     return applyApproximations(realtimeData, now);
   }, [realtimeData, now]);
 
-  // refresh helper calls the fetch callback wired by ParkingDataProvider
+  // Create refresh helper
   const refreshHelper = useMemo(() => {
-    const base = createRefreshHelper(useParkingStore);
-    return async () => {
-      debugLog('refreshHelper: invoked');
-      await base();
-      debugLog('refreshHelper: completed');
-    };
+    return createRefreshHelper(useParkingStore);
   }, []);
 
+  // Handle refresh
   const onRefresh = useCallback(async () => {
     try {
       setRefreshing(true);
@@ -89,13 +111,16 @@ function DashboardContent() {
     }
   }, [refreshHelper]);
 
+  // Check if all feeds are offline
   const allOffline = processed.length > 0 && processed.every((d) => {
     const age = calculateDataAge(d.Timestamp, now);
     return age >= 1440;
   });
 
+  // Check if any data is approximated
   const hasApproximation = processed.some(d => d.approximationInfo?.isApproximated);
 
+  // Calculate totals
   const totalSpaces = processed.reduce((sum, d) => {
     const info = d.approximationInfo || {};
     const value = info.isApproximated ? info.approximated : (d.CurrentFreeGroupCounterValue || 0);
@@ -104,197 +129,229 @@ function DashboardContent() {
 
   const originalTotal = processed.reduce((sum, d) => sum + (d.CurrentFreeGroupCounterValue || 0), 0);
 
+  // Determine aggregated status
   const getAggregatedStatus = () => {
     if (processed.length === 0) {
-      return { colorClass: '', statusMessage: 'No data available' };
+      return { 
+        colorClass: "text-muted dark:text-muted-dark", 
+        statusMessage: 'No data available' 
+      };
     }
 
-    let maxAge = 0;
-    processed.forEach((d) => {
-      const age = calculateDataAge(d.Timestamp, now);
-      maxAge = Math.max(maxAge, age);
-    });
-
-    let colorClass = '';
-    let statusMessage = '';
-
+    const maxAge = Math.max(...processed.map(d => calculateDataAge(d.Timestamp, now)));
+    
     if (allOffline) {
-      colorClass = 'text-warning-dark';
-      statusMessage = 'All parking feeds appear offline';
+      return {
+        colorClass: "text-warning dark:text-warning-dark",
+        statusMessage: 'All parking feeds appear offline'
+      };
     } else if (maxAge >= 15) {
-      colorClass = 'text-warning-dark';
-      statusMessage = 'Data outdated - figures may not reflect actual free spaces';
+      return {
+        colorClass: "text-warning dark:text-warning-dark",
+        statusMessage: 'Data outdated - figures may not reflect actual free spaces'
+      };
     } else if (maxAge > 5) {
-      colorClass = 'text-amber-600';
-      statusMessage = 'Data slightly outdated - refresh recommended';
+      return {
+        colorClass: "text-warning-medium dark:text-warning-medium-dark",
+        statusMessage: 'Data slightly outdated - refresh recommended'
+      };
     } else {
-      colorClass = 'text-success-dark';
-      statusMessage = 'Data is current and reliable';
+      return {
+        colorClass: "text-success dark:text-success-dark",
+        statusMessage: 'Data is current and reliable'
+      };
     }
-
-    return { colorClass, statusMessage };
   };
 
-  const { colorClass: totalColorClass, statusMessage } = getAggregatedStatus();
-
-  useEffect(() => {
-    // Log only when processed content or totals change (not every tick)
-    try {
-      debugLog('[Parking] Processed items:', processed.length);
-      processed.forEach((d, idx) => {
-        const name = d?.ParkingGroupName || `<unknown-${idx}>`;
-        const age = calculateDataAge(d?.Timestamp); // uses current time internally
-        const approx = d?.approximationInfo || {};
-        debugLog(`[Parking] ${name}: ts=${d?.Timestamp} age=${age}m isApproximated=${!!approx.isApproximated} original=${approx.original ?? d?.CurrentFreeGroupCounterValue ?? 0} approximated=${approx.approximated ?? d?.CurrentFreeGroupCounterValue ?? 0}`);
-      });
-
-      debugLog('[Parking] Totals:', { totalSpaces, originalTotal });
-
-      let maxAgeForLog = 0;
-      processed.forEach((d) => {
-        const a = calculateDataAge(d?.Timestamp);
-        if (a > maxAgeForLog) maxAgeForLog = a;
-      });
-      debugLog('[Parking] Max age (min):', maxAgeForLog, 'All offline:', allOffline);
-    } catch (e) {
-      console.error('[Parking] debug logging failed', e);
-    }
-  }, [processed, totalSpaces, originalTotal, lastRealtimeUpdate]);
+  const { colorClass: statusColorClass, statusMessage } = getAggregatedStatus();
+  const totalColorClass = statusColorClass;
 
   return (
-    <SSafeArea className="flex-1 bg-bg-primary-dark">
-      <StatusBar barStyle="light-content" />
+    <SafeAreaView className={`flex-1 bg-primary dark:bg-primary-dark ${isDark ? 'dark' : ''}`}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
-      <SView className="w-full bg-bg-secondary-dark flex-row items-center justify-center py-3 px-4 border-b border-border-dark">
-        <Image source={require('../assets/favicon.png')} style={{ width: 36, height: 36, marginRight: 12 }} />
-        <SView className="items-center">
-          <SText className="text-text-primary-dark text-lg font-semibold">{title}</SText>
-          <SText className="text-text-secondary-dark text-xs mt-0.5">Real-time • GD-Uni Wrocław</SText>
-        </SView>
-      </SView>
+      {/* Header */}
+      <View className="w-full bg-secondary dark:bg-secondary-dark flex-row items-center justify-between py-3 px-4 border-b border-border dark:border-border-dark">
+        <Image 
+          source={require('../assets/favicon.png')} 
+          style={{ width: 36, height: 36, marginRight: 12 }} 
+        />
+        <View className="items-center">
+          <Text className="text-foreground dark:text-foreground-dark text-lg font-semibold">
+            {title}
+          </Text>
+          <Text className="text-muted dark:text-muted-dark text-xs mt-0.5">
+            Real-time • GD-Uni Wrocław
+          </Text>
+        </View>
+        <TouchableOpacity
+          onPress={toggleTheme}
+          accessibilityRole="button"
+          accessibilityLabel={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
+          className="flex items-center justify-center rounded-lg border bg-bg-primary-light border-border-light dark:bg-bg-primary-dark dark:border-border-dark shadow-custom-light dark:shadow-custom-dark"
+          style={{ width: 44, height: 44 }}
+        >
+          <Text className="text-2xl">
+            {isDark ? '☀️' : '🌙'}
+          </Text>
+        </TouchableOpacity>
+      </View>
 
+      {/* Loading State */}
       {realtimeLoading && processed.length === 0 ? (
-        <SView className="flex-1 items-center justify-center">
-          <SText className="text-text-secondary-dark text-lg">Loading parking data...</SText>
-        </SView>
+        <View className="flex-1 items-center justify-center">
+          <Text className="text-muted dark:text-muted-dark text-lg">
+            Loading parking data...
+          </Text>
+        </View>
       ) : realtimeError ? (
-        <SView className="flex-1 items-center justify-center px-4">
-          <SText className="text-warning-dark text-base text-center">{String(realtimeError)}</SText>
-        </SView>
+        <View className="flex-1 items-center justify-center px-4">
+          <Text className="text-warning dark:text-warning-dark text-base text-center">
+            {String(realtimeError)}
+          </Text>
+        </View>
       ) : (
-        <SScroll
+        <ScrollView
           className="flex-1 px-3 py-2"
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
         >
-          <SView className="flex-row gap-2 mb-3">
+          {/* Parking Tiles */}
+          <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12, marginTop: 8 }}>
             {processed.map((d, i) => (
-              <SView key={d.ParkingGroupName || i} className="flex-1 rounded-lg p-3 border border-border-dark bg-bg-secondary-dark">
-                <SText className="text-base font-semibold text-center text-text-primary-dark mb-2">
-                  {d.ParkingGroupName === 'Bank_1' ? 'Uni Wroc' : d.ParkingGroupName}
-                </SText>
-                {(() => {
-                  const age = calculateDataAge(d.Timestamp, now);
-                  const colorClass = allOffline ? 'text-text-secondary-dark' : (age >= 15 ? 'text-warning-dark' : (age > 5 ? 'text-amber-600' : 'text-success-dark'));
-                  const value = d.approximationInfo?.isApproximated ? d.approximationInfo.approximated : (d.CurrentFreeGroupCounterValue || 0);
-                  return (
-                    <SView className="flex-row items-center justify-center">
-                      {d.approximationInfo?.isApproximated && <SText className="text-6xl text-amber-600 mr-1">≈</SText>}
-                      <SText className={`text-6xl font-bold text-center ${colorClass}`}>{value}</SText>
-                    </SView>
-                  );
-                })()}
-                {d.approximationInfo?.isApproximated && (
-                  <SText className="text-sm text-text-secondary-dark text-center mt-1">(orig: {d.approximationInfo?.original ?? d.CurrentFreeGroupCounterValue ?? 0})</SText>
-                )}
-                <SText className="text-sm text-text-secondary-dark text-center mt-2">
-                  {(() => {
-                    const age = calculateDataAge(d.Timestamp, now);
-                    const { display } = formatAgeLabel(age);
-                    return display;
-                  })()}
-                </SText>
-              </SView>
+              <ParkingTile 
+                key={d.ParkingGroupName || i} 
+                data={d} 
+                now={now} 
+                allOffline={allOffline} 
+              />
             ))}
-          </SView>
+          </View>
 
-          <SView className="mb-2">
-            <SText className={`text-sm font-semibold text-center ${totalColorClass}`}>
+          {/* Status Message */}
+          <View className="mb-2">
+            <Text className={`text-sm font-semibold text-center ${statusColorClass}`}>
               {statusMessage}
-            </SText>
-          </SView>
+            </Text>
+          </View>
 
-          <SView className="rounded-lg bg-bg-secondary-dark border border-border-dark overflow-hidden">
-            <SView className="p-3 items-center border-b border-border-dark">
-              <SText className="text-xs text-text-secondary-dark">Total Spaces</SText>
-              <SView className="flex-row items-baseline mt-1">
-                {hasApproximation && <SText className="text-3xl text-amber-600 mr-1">≈</SText>}
-                <SText className={`text-3xl font-bold ${totalColorClass}`}>{totalSpaces}</SText>
-              </SView>
+          {/* Summary Card */}
+          <View className="rounded-lg bg-secondary dark:bg-secondary-dark border border-border dark:border-border-dark overflow-hidden">
+            {/* Total Spaces */}
+            <View className="p-3 items-center border-b border-border dark:border-border-dark">
+              <Text className="text-xs text-muted dark:text-muted-dark">
+                Total Spaces
+              </Text>
+              <View className="flex-row items-baseline mt-1">
+                {hasApproximation && (
+                  <Text className="text-3xl text-warning-medium dark:text-warning-medium-dark mr-1">
+                    ≈
+                  </Text>
+                )}
+                <Text className={`text-3xl font-bold ${totalColorClass}`}>
+                  {totalSpaces}
+                </Text>
+              </View>
               {hasApproximation && (
-                <SText className="text-xs text-text-secondary-dark italic">
+                <Text className="text-xs text-muted dark:text-muted-dark italic">
                   (orig: {originalTotal})
-                </SText>
+                </Text>
               )}
-            </SView>
+            </View>
 
-              <SView className="p-3 border-b border-border-dark flex-row items-center justify-center gap-2">
-              <SView className="items-center">
-                <SText className="text-xs text-text-secondary-dark mb-1 text-center">Last Update / Current</SText>
-                <SView className="flex-row items-baseline gap-2 justify-center py-1">
-                  <SText className="text-base font-bold text-text-primary-dark text-center">
+            {/* Update Time & Refresh Button */}
+            <View className="p-3 border-b border-border dark:border-border-dark flex-row items-center justify-center gap-2">
+              <View className="items-center">
+                <Text className="text-xs text-muted dark:text-muted-dark mb-1 text-center">
+                  Last Update / Current
+                </Text>
+                <View className="flex-row items-baseline gap-2 justify-center py-1">
+                  <Text className="text-base font-bold text-foreground dark:text-foreground-dark text-center">
                     {lastRealtimeUpdate ? formatTime(lastRealtimeUpdate, 'pl-PL') : '--:--:--'}
-                  </SText>
-                  <SText className="text-sm text-text-secondary-dark text-center">
+                  </Text>
+                  <Text className="text-sm text-muted dark:text-muted-dark text-center">
                     {now.toLocaleTimeString('pl-PL')}
-                  </SText>
-                </SView>
-              </SView>
+                  </Text>
+                </View>
+              </View>
 
-              <TouchableOpacity onPress={onRefresh} activeOpacity={0.8} accessibilityRole="button" accessibilityLabel="Refresh data" style={{ alignSelf: 'center', justifyContent: 'center' }}>
-                <SView className="nav-btn px-3 py-2 rounded-md border border-border-dark bg-bg-primary-dark flex-row items-center">
+              <TouchableOpacity 
+                onPress={onRefresh} 
+                activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel="Refresh data"
+                style={{ alignSelf: 'center', justifyContent: 'center' }}
+              >
+                <View className="px-3 py-2 rounded-md border border-border dark:border-border-dark bg-primary dark:bg-primary-dark flex-row items-center">
                   {refreshing || realtimeLoading ? (
                     <>
-                      <ActivityIndicator size="small" color="#ffffff" />
-                      <SText className="btn-text ml-2 text-text-primary-dark">Refreshing</SText>
+                      <ActivityIndicator 
+                        size="small" 
+                        color={isDark ? '#e0e6ff' : '#333333'} 
+                      />
+                      <Text className="ml-2 text-foreground dark:text-foreground-dark">
+                        Refreshing
+                      </Text>
                     </>
                   ) : (
                     <>
-                      <SText accessibilityRole="image" accessibilityLabel="Refresh icon" className="btn-icon mr-2 text-text-primary-dark">⟳</SText>
-                      <SText className="btn-text text-text-primary-dark">Refresh</SText>
+                      <Text 
+                        accessibilityRole="image" 
+                        accessibilityLabel="Refresh icon"
+                        className="mr-2 text-foreground dark:text-foreground-dark"
+                      >
+                        ⟳
+                      </Text>
+                      <Text className="text-foreground dark:text-foreground-dark">
+                        Refresh
+                      </Text>
                     </>
                   )}
-                </SView>
+                </View>
               </TouchableOpacity>
-            </SView>
+            </View>
 
-            <SView className="p-3 items-center">
-              <SText className="text-xs text-text-secondary-dark mb-1">Status</SText>
-              <SText className={`text-xl font-bold ${hasApproximation ? 'text-amber-600' : 'text-success-dark'}`}>
+            {/* Status Badge */}
+            <View className="p-3 items-center">
+              <Text className="text-xs text-muted dark:text-muted-dark mb-1">
+                Status
+              </Text>
+              <Text className={`text-xl font-bold ${hasApproximation 
+                ? 'text-warning-medium dark:text-warning-medium-dark' 
+                : 'text-success dark:text-success-dark'}`}
+              >
                 {hasApproximation ? 'APPROX' : 'ONLINE'}
-              </SText>
-            </SView>
-          </SView>
-        </SScroll>
+              </Text>
+            </View>
+          </View>
+        </ScrollView>
       )}
-    </SSafeArea>
+    </SafeAreaView>
   );
 }
 
+/**
+ * AppContent Component
+ * Wrapper for dashboard
+ */
 const AppContent = () => {
-  const { colorScheme } = useTheme();
-
   return (
-    <View className={colorScheme} style={{ flex: 1 }}>
+    <View style={{ flex: 1 }}>
       <DashboardContent />
     </View>
   );
 };
 
+/**
+ * App Component
+ * Root component with providers
+ * 
+ * Change APP_THEME constant above to switch between 'light', 'dark', or 'system'
+ */
 export default function App() {
   return (
-    <ThemeProvider>
+    <ThemeProvider initialMode={APP_THEME}>
       <ParkingDataProvider>
         <AppContent />
       </ParkingDataProvider>

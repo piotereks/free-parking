@@ -1,5 +1,6 @@
 {
   "configurations": [
+
     {
       "name": "Vite React: Debug",
       "type": "pwa-chrome",
@@ -26,6 +27,13 @@
         "<node_internals>/**",
         "${workspaceFolder}/node_modules/**"
       ]
-    }
+    },
+    {
+      "name": "Debug Expo (Android)",
+      "type": "reactnative",
+      "request": "attach",
+      "cwd": "${workspaceFolder}",
+      "platform": "android"
+    },
   ]
 }

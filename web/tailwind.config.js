@@ -37,17 +37,29 @@ export default {
           cyan: '#0891b2',
           'cyan-light': '#06b6d4',
         },
-        'success': {
+        'text-success': {
           light: '#059669',
           dark: '#00ff88',
         },
-        'warning': {
+        'text-warning': {
           light: '#dc2626',
           dark: '#ff3366',
           medium: {
             light: '#d97706',
             dark: '#ffaa00',
           }
+        },
+        'notice': {
+          light: '#fefce8',
+          dark: '#713f12',
+        },
+        'notice-border': {
+          light: '#fef08a',
+          dark: '#a16207',
+        },
+        'notice-text': {
+          light: '#fde047',
+          dark: '#854d0e',
         },
         // Border colors
         'border': {

@@ -1,43 +1,48 @@
-## Copilot Guide (fresh)
 
-### Purpose
-Give Copilot the minimal context to work safely and productively in this React/Vite parking availability app, and to follow the ongoing migration toward `repo-web`, `shared`, and `repo-mobile`.
+# Copilot Instructions (2026-02-15)
 
-### Quick start
-- Install Node 22.12.0 (see `.nvmrc`).
-- Install deps: `npm install`
-- Dev server: `npm run dev`
-- Lint: `npm run lint`
-- Build: `npm run build`
+## Purpose
+Enable safe, efficient Copilot/model use in a multi-subproject React/Vite/Expo repo.
 
-### Architecture snapshot
-- Entry: `src/main.jsx` -> `src/App.jsx`; theme via `src/ThemeContext.jsx`.
-- Data layer: `src/ParkingDataManager.jsx` fetches real-time (API_URLS with CORS proxy), parses CSV history (PapaParse), caches to localStorage keys `parking_realtime_cache` and `parking_history_cache`, and can POST to Google Forms (FORM_ENTRIES are placeholders).
-- State: `src/store/parkingStore.js` (Zustand); utilities in `src/utils/parkingUtils.js`, `dateUtils.js`, `storageUtils.js`.
-- UI: `src/Dashboard.jsx` (real-time + echarts), `src/Statistics.jsx` (historical), styles in `src/index.css` and `src/App.css`.
-- Tests: Vitest + Testing Library under `test/` (jsdom).
+## Quick Start
+- Node 22.12.0 (see .nvmrc)
+- npm install
+- npm run dev / lint / build
 
-### Conventions
-- Use `ParkingDataProvider`/`useParkingData()` instead of ad-hoc fetches.
-- Keep CORS proxy usage when adding external fetches.
-- Normalize timestamps with `replace(' ', 'T')` before `new Date(...)`.
-- Theme state stored in localStorage key `parking_theme`; body class toggles live in ThemeContext.
-- Do not hardcode Google Form IDs or secrets; `FORM_ENTRIES` are placeholders.
+## Subproject Context
+- Always run lint/tests/build in the relevant subproject folder (mobile/, shared/, web/).
+- Detect context from file path, PR tags, or changed files.
+- Examples:
+  - cd mobile && npm run lint
+  - cd shared && npm test
+  - cd web && npm run build
 
-### Migration guidance
-- Roadmap lives in `MIGRATION_PLAN.md`; update the Iteration Log when completing steps.
-- Goal: separate repos: `repo-web` (current app), `shared` (plain JS, no React/DOM), `repo-mobile` (Expo RN).
-- Extract only framework-agnostic logic into `shared`; require adapters for storage, fetch, time, logging.
-- Web adapters own `localStorage`/`document` usage; mobile adapters own AsyncStorage/fetch without CORS proxy.
-- Preserve web CI (lint/test/build, GH Pages) when adopting `shared`.
+## Skip Folders
+- Never scan or modify:
+  - node_modules/
+  - build/
+  - dist/
+  - .expo/
+  - android/**/build/
+  - ios/**/build/
+  - .git/
 
-### Safety and PR checklist
-- Run lint/tests before PRs (`npm run lint`, `npm test` if added).
-- If changing fetch URLs or CSV headers, adjust `ParkingDataManager` helpers (e.g., `getLastTimestamps`).
-- Avoid DOM-only libs in shared/mobile paths; echarts is web-only.
-- Keep credentials out of source; prefer env or secrets.
+## Conventions
+- Use ParkingDataProvider/useParkingData() for data access.
+- Keep CORS proxy for external fetches.
+- Normalize timestamps with replace(' ', 'T').
+- Store theme in localStorage key parking_theme.
+- Never hardcode secrets or Google Form IDs.
 
-### If unclear
-- Confirm Google Form entry mapping before submission changes.
-- Check whether `parking-deploy/docs/html/parking/` artifacts are authoritative before modifying build outputs.
+## Coding Delivery
+- All code must pass lint and unit tests in the correct subproject before merge.
+- Do not finish until all lint and unit test errors are fixed.
+- Fix root causes, not just silence errors.
+- Update or add tests and docs for changed behavior.
+- If unsure, ask for clarification or open an issue.
+- PRs must have clear descriptions, related issues, and test steps.
 
+## Automation & PR Policy
+- Models/agents must NOT create branches, push commits, open PRs, or merge automatically.
+- Do NOT offer or auto-suggest PR creation unless using an approved cloud agent with explicit user opt-in.
+- All model-generated suggestions are drafts and require human approval.

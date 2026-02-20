@@ -1,20 +1,29 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { View, Text, TouchableOpacity, Alert } from 'react-native';
-import { useTheme } from '../context/ThemeContext';
 import { formatAgeLabel, calculateDataAge } from 'parking-shared';
 
+/**
+ * Get color class based on data age
+ * Returns complete static class strings for NativeWind
+ */
 const getAgeColorClass = (ageMinutes) => {
-  if (ageMinutes === null || ageMinutes === Infinity) return 'text-text-secondary-light dark:text-text-secondary-dark';
-  if (ageMinutes >= 15) return 'text-warning-light dark:text-warning-dark';
-  if (ageMinutes >= 5) return 'text-warning-medium-light dark:text-warning-medium-dark';
-  return 'text-success-light dark:text-success-dark';
+  if (ageMinutes === null || ageMinutes === Infinity) {
+    return "text-muted dark:text-muted-dark";
+  }
+  if (ageMinutes >= 15) {
+    return "text-warning dark:text-warning-dark";
+  }
+  if (ageMinutes >= 5) {
+    return "text-warning-medium dark:text-warning-medium-dark";
+  }
+  return "text-success dark:text-success-dark";
 };
 
+/**
+ * Try to copy text to clipboard
+ */
 const tryCopyToClipboard = async (text) => {
   try {
-    // try to use expo-clipboard if available
-    // dynamically require to avoid hard dependency in tests
-    // eslint-disable-next-line global-require
     const Clipboard = require('expo-clipboard');
     if (Clipboard && Clipboard.setStringAsync) {
       await Clipboard.setStringAsync(String(text));
@@ -26,9 +35,11 @@ const tryCopyToClipboard = async (text) => {
   }
 };
 
+/**
+ * ParkingCard Component
+ * Displays parking information in a card format
+ */
 const ParkingCard = ({ data = {}, now = new Date(), allOffline = false }) => {
-  const { isDark } = useTheme();
-
   const name = data.name || data.parkingName || 'Unknown';
   const free = data.freeSpaces ?? data.free ?? '-';
   const capacity = data.capacity ?? data.max ?? null;
@@ -44,24 +55,33 @@ const ParkingCard = ({ data = {}, now = new Date(), allOffline = false }) => {
     const ok = await tryCopyToClipboard(text);
     if (ok) {
       try {
-        Alert.alert('Copied', 'Parking info copied to clipboard'); // Ensure no invalid Unicode characters
+        Alert.alert('Copied', 'Parking info copied to clipboard');
       } catch (err) {
-        // ignore clipboard/alert failures in tests or minimal environments
+        // Ignore clipboard/alert failures in tests or minimal environments
       }
     }
   }, [name, free, capacity]);
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
-      <View className={"p-3 border-b border-border-light dark:border-border-dark bg-bg-card-light dark:bg-bg-card-dark"}>
-        <View className={"flex-row justify-between items-center"}>
-          <Text className={"text-base font-semibold text-text-primary-light dark:text-text-primary-dark"}>{name}</Text>
-          <Text className={`text-xs ${ageColorClass}`}>{ageDisplay}</Text>
+      <View className="p-3 border-b border-border dark:border-border-dark bg-card dark:bg-card-dark">
+        <View className="flex-row justify-between items-center">
+          <Text className="text-foreground dark:text-foreground-dark text-base font-semibold">
+            {name}
+          </Text>
+          <Text className={`${ageColorClass} text-xs`}>
+            {ageDisplay}
+          </Text>
         </View>
-        <View className={"flex-row justify-between items-center mt-1.5"}>
-          <Text className={"text-sm text-text-primary-light dark:text-text-primary-dark"}>{capacity ? `${free} / ${capacity}` : free}</Text>
+        
+        <View className="flex-row justify-between items-center mt-1.5">
+          <Text className="text-foreground dark:text-foreground-dark text-sm">
+            {capacity ? `${free} / ${capacity}` : free}
+          </Text>
           {approx ? (
-            <Text className={"text-xs px-1.5 py-0.5 rounded-md bg-bg-secondary-light dark:bg-bg-secondary-dark text-text-primary-light dark:text-text-primary-dark"}>Approx</Text>
+            <Text className="text-xs px-1.5 py-0.5 rounded-md bg-secondary dark:bg-secondary-dark text-foreground dark:text-foreground-dark">
+              Approx
+            </Text>
           ) : null}
         </View>
       </View>

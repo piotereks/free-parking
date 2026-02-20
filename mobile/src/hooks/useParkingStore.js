@@ -1,4 +1,4 @@
-import { createParkingStore } from "parking-shared";
+import { createParkingStore } from "../../../shared/src/index.js";
 import { createMobileStorageAdapter } from "../adapters/mobileStorageAdapter";
 import { createMobileFetchAdapter } from "../adapters/mobileFetchAdapter";
 
