@@ -4,7 +4,11 @@ module.exports = {
     "./App.{js,jsx,ts,tsx}",
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
-  darkMode: 'class', // NativeWind uses class-based dark mode
+  // DO NOT set darkMode here.
+  // NativeWind v2 registers its own "dark" variant via addVariant("dark","&::dark")
+  // and sets the Tailwind preset to darkMode:"off" internally.
+  // Setting darkMode:'class' overrides NativeWind's preset and causes Tailwind
+  // to emit :is(.dark *) selectors that NativeWind's runtime cannot parse.
   theme: {
     extend: {
       colors: {
