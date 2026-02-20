@@ -1,5 +1,5 @@
 ---
-name: 🐛 Bug report
+name: 🐛 Mobile - Bug report
 about: Report a bug in the project
 title: "[Mobile] "
 labels: ["mobile", "bug"]

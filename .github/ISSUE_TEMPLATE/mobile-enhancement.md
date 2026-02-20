@@ -1,5 +1,5 @@
 ---
-name: ✨ Enhancement
+name: ✨ Mobile - Enhancement
 about: Propose a new feature or improvement
 title: "[Mobile] "
 labels: ["mobile", "enhancement"]

@@ -1,8 +1,8 @@
 ---
-name: ✨ Shared - Enhancement
+name: ✨ Web - Enhancement
 about: Propose a new feature or improvement
-title: "[Shared] "
-labels: ["shared", "enhancement"]
+title: "[Web] "
+labels: ["web", "enhancement"]
 
 ---
 
