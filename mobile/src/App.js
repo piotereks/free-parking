@@ -291,7 +291,7 @@ function DashboardContent() {
                     {title}
                   </Text>
                 </View>
-                <Text className="text-muted dark:text-muted-dark" style={{ fontSize: 8 }} numberOfLines={2}>
+                <Text className="text-muted dark:text-muted-dark" style={{ fontSize: 14 }} numberOfLines={2}>
                   Real-time • GD-Uni Wrocław
                 </Text>
               </View>
