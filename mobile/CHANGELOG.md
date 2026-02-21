@@ -2,6 +2,43 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.1.0](https://github.com/piotereks/free-parking/compare/v2.0.0...v2.1.0) (2026-02-21)
+
+
+### Features
+
+* **mobile:** 70% larger parking value digits; fix doubled SafeAreaView system-bar padding ([3fb51a8](https://github.com/piotereks/free-parking/commit/3fb51a89f8e7076f1a86c19427041d842ffb2599))
+* **mobile:** add Buy me ☕ donate button to portrait and landscape headers ([f2732e7](https://github.com/piotereks/free-parking/commit/f2732e7ea1fc6a7be7477f001d44c72fe24f0e79))
+* **mobile:** add landscape mode runtime orientation support ([aa808c6](https://github.com/piotereks/free-parking/commit/aa808c64a66b01a65b12eb9f7f3e936ac55dbd92))
+* **mobile:** add Real-time • GD-Uni Wrocław subtitle below title in landscape header ([5dda236](https://github.com/piotereks/free-parking/commit/5dda23665edea7cde0185ffb9215f7f951b6e648))
+* **mobile:** AdTile container adapts to actual loaded ad dimensions ([e525f16](https://github.com/piotereks/free-parking/commit/e525f164ce08fca0a33db96106c3397c3498ae6e))
+* **mobile:** cap AdTile width at 2/5 of screen width (AD_TILE_MAX_WIDTH_RATIO) ([3a9ae12](https://github.com/piotereks/free-parking/commit/3a9ae12a02e528e8868b4b50deddc1343e696983))
+* **mobile:** landscape header 25% width, tile value 2/3, orig/age aligned in right column ([b4bad8a](https://github.com/piotereks/free-parking/commit/b4bad8a4174de03973dd92f4b0c0d1f1934c3b1f))
+* **mobile:** landscape header column inline with parking tiles ([4832983](https://github.com/piotereks/free-parking/commit/48329839cb91cf62a79c5f5aef8f2b2eb1f712e3))
+* **mobile:** landscape header title and tile names 50% bigger (12→18px, 14→21px) ([05eb846](https://github.com/piotereks/free-parking/commit/05eb84606483ab0b632408d841f7e59f14c6c256))
+* **mobile:** landscape inline ad tile at left of parking tiles (INLINE_ADAPTIVE_BANNER) ([32c1bb0](https://github.com/piotereks/free-parking/commit/32c1bb093b43ec8b3b7b0aa052e65f6f6f9fe416))
+* **mobile:** landscape refresh in header, row-oriented tiles, single-page flex layout ([c602a60](https://github.com/piotereks/free-parking/commit/c602a60da775551d0307cc35f2adcfd02d44f22d))
+* **mobile:** landscape skyscraper ad on left side (160x600) ([869bde9](https://github.com/piotereks/free-parking/commit/869bde9f308642ae9fd501361378e5de576cc28e))
+* **mobile:** landscape uses same BANNER as portrait, remove inline ad tile from tiles row ([4e1cc5a](https://github.com/piotereks/free-parking/commit/4e1cc5a1b6bc15467fe8287f290bfbb23b896526))
+* **mobile:** move landscape status message between tiles row and summary card ([8f5f40e](https://github.com/piotereks/free-parking/commit/8f5f40ee56a7e47b6e2d68f63c0943368032575d))
+* **mobile:** row-oriented landscape layout — status top, tiles row, summary row ([5fde1b5](https://github.com/piotereks/free-parking/commit/5fde1b5019af428ba6511475317aac533301f731))
+* persistence implementation ([9ed07ac](https://github.com/piotereks/free-parking/commit/9ed07ac76616ab1842cc0a4310c49ede1b85f9c3))
+
+
+### Bug Fixes
+
+* devcontainer folder entry ([cfa355e](https://github.com/piotereks/free-parking/commit/cfa355e36e23643cc310e766b7e6ae85f9d9c416))
+* **mobile:** button borders use same border-border color as tile borders in light mode ([1547693](https://github.com/piotereks/free-parking/commit/1547693a56d936ac1e83db28573ebcea2651c6a2))
+* **mobile:** increase landscape subtitle font 70% (8px → 14px) ([dafbde4](https://github.com/piotereks/free-parking/commit/dafbde47b5a139e3188f9fdd9fa528dcc6e070fb))
+* **mobile:** landscape buttons reordered — theme, reload, Buy me ☕ (full text) ([1af552b](https://github.com/piotereks/free-parking/commit/1af552b2fea539e64d773de40e55290c9a9f14b4))
+* **mobile:** landscape header — logo icon and title on same row ([5b0e828](https://github.com/piotereks/free-parking/commit/5b0e8285d7d5289ec5bb4f62afd68f85913836d7))
+* **mobile:** landscape header — theme toggle and reload on same row, Buy me ☕ below ([095cd65](https://github.com/piotereks/free-parking/commit/095cd65f3096f42de2d6dedd4fdc192018166db6))
+* **mobile:** move banner inside themed SafeAreaView so it matches app background ([7f66c82](https://github.com/piotereks/free-parking/commit/7f66c82f82edd83b1f958fbeb47cf69cd8867edd))
+* **mobile:** portrait total tile shows orig on separate line below value ([24fc8ce](https://github.com/piotereks/free-parking/commit/24fc8ce1c8c697bffa6908e5973fb257083a44a0))
+* **mobile:** revert portrait parking tile font to original text-6xl ([59a7d1d](https://github.com/piotereks/free-parking/commit/59a7d1d7d5be4a45a49c65162992558ea283e03e))
+* **mobile:** show (orig: total) inline with total value in summary card ([fb54457](https://github.com/piotereks/free-parking/commit/fb54457067ac062ef70b7bbc4949cba81837696e))
+* **mobile:** switch landscape ad from WIDE_SKYSCRAPER to ADAPTIVE_BANNER, fill screen height ([cc160b6](https://github.com/piotereks/free-parking/commit/cc160b6c5612c59c22db1b011debd4a5b2c787cb))
+
 ## [2.0.0](https://github.com/piotereks/free-parking/compare/v1.2.1...v2.0.0) (2026-02-21)
 
 ### [1.2.1](https://github.com/piotereks/free-parking/compare/v1.2.0...v1.2.1) (2026-02-21)
