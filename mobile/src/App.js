@@ -270,13 +270,18 @@ function DashboardContent() {
               style={{ width: Math.floor(screenWidth * 0.25), padding: 8, justifyContent: 'space-between', alignItems: 'center' }}
             >
               {/* Logo + title on same row */}
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                <Image
-                  source={require('../assets/favicon.png')}
-                  style={{ width: 24, height: 24, flexShrink: 0 }}
-                />
-                <Text className="text-foreground dark:text-foreground-dark text-xs font-semibold" numberOfLines={2} style={{ flexShrink: 1 }}>
-                  {title}
+              <View style={{ alignItems: 'center', gap: 2 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <Image
+                    source={require('../assets/favicon.png')}
+                    style={{ width: 24, height: 24, flexShrink: 0 }}
+                  />
+                  <Text className="text-foreground dark:text-foreground-dark text-xs font-semibold" numberOfLines={2} style={{ flexShrink: 1 }}>
+                    {title}
+                  </Text>
+                </View>
+                <Text className="text-muted dark:text-muted-dark" style={{ fontSize: 8 }} numberOfLines={2}>
+                  Real-time • GD-Uni Wrocław
                 </Text>
               </View>
               <View style={{ gap: 6, alignItems: 'center' }}>
