@@ -11,6 +11,28 @@ import { applyApproximations, calculateDataAge, formatAgeLabel, formatTime, crea
 // Top-level app theme constant. Set to 'dark', 'light' or 'system'.
 export const APP_THEME = 'dark';
 
+// Lazy-load the AdTile to avoid native module crashes in environments without AdMob
+let AdTile = null;
+try {
+  AdTile = require('../AdMobManager').AdTile;
+} catch (e) {
+  // AdMob not available — ad tile omitted in landscape
+}
+
+/**
+ * AdPlaceholderTile — shown in landscape when AdMob is unavailable
+ */
+function AdPlaceholderTile() {
+  return (
+    <View
+      className="flex-1 rounded-lg border border-border dark:border-border-dark bg-secondary dark:bg-secondary-dark"
+      style={{ padding: 8, alignItems: 'center', justifyContent: 'center' }}
+    >
+      <Text className="text-xs text-muted dark:text-muted-dark">Ad</Text>
+    </View>
+  );
+}
+
 /**
  * ParkingTile Component
  * Displays individual parking lot information
@@ -280,8 +302,10 @@ function DashboardContent() {
             {statusMessage}
           </Text>
 
-          {/* Tiles row */}
+          {/* Tiles row — ad tile first, then parking tiles */}
           <View style={{ flexDirection: 'row', gap: 8, flex: 1, marginBottom: 8 }}>
+            {/* Ad tile — left-most position in landscape */}
+            {AdTile ? <AdTile /> : <AdPlaceholderTile />}
             {processed.map((d, i) => (
               <ParkingTile
                 key={d.ParkingGroupName || i}

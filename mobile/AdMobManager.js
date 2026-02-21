@@ -3,8 +3,6 @@ import { StyleSheet, View, Platform } from 'react-native';
 import mobileAds, { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
 
 // Use official Google demo banner ad unit for both platforms outside dev.
-// const useTestAd = false;
-// const BANNER_AD_UNIT_ID = useTestAd
 const BANNER_AD_UNIT_ID = __DEV__
   ? TestIds.BANNER
   : Platform.select({
@@ -12,7 +10,10 @@ const BANNER_AD_UNIT_ID = __DEV__
       android: 'ca-app-pub-4295926250176261/3717620167'
     });
 
-const AdMobManager = ({ isLandscape, style }) => {
+/**
+ * AdMobManager — bottom banner (portrait)
+ */
+const AdMobManager = ({ style }) => {
   useEffect(() => {
     try {
       mobileAds().initialize().then(() => {
@@ -25,13 +26,27 @@ const AdMobManager = ({ isLandscape, style }) => {
     }
   }, []);
 
-  const adSize = isLandscape ? BannerAdSize.ADAPTIVE_BANNER : BannerAdSize.BANNER;
-
   return (
-    <View style={[isLandscape ? styles.skyscraperContainer : styles.container, style]}>
+    <View style={[styles.container, style]}>
       <BannerAd
         unitId={BANNER_AD_UNIT_ID}
-        size={adSize}
+        size={BannerAdSize.BANNER}
+        requestOptions={{ requestNonPersonalizedAdsOnly: true }}
+      />
+    </View>
+  );
+};
+
+/**
+ * AdTile — inline adaptive banner styled as a tile, for the landscape tiles row.
+ * Renders an INLINE_ADAPTIVE_BANNER that fills the tile's flex-1 width.
+ */
+export const AdTile = () => {
+  return (
+    <View style={styles.adTile}>
+      <BannerAd
+        unitId={BANNER_AD_UNIT_ID}
+        size={BannerAdSize.INLINE_ADAPTIVE_BANNER}
         requestOptions={{ requestNonPersonalizedAdsOnly: true }}
       />
     </View>
@@ -43,10 +58,12 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
   },
-  skyscraperContainer: {
+  adTile: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    flex: 1,
+    borderRadius: 8,
+    overflow: 'hidden',
   },
 });
 
