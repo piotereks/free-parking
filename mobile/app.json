@@ -41,7 +41,7 @@
       "bundleIdentifier": "app.piotereks.freeparking"
     },
     "android": {
-      "versionCode": 1,
+      "versionCode": 30,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
