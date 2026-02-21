@@ -334,10 +334,10 @@ function DashboardContent() {
                   <Text className="text-xl text-warning-medium dark:text-warning-medium-dark" style={{ marginRight: 2 }}>≈</Text>
                 )}
                 <Text className={`text-2xl font-bold ${totalColorClass}`}>{totalSpaces}</Text>
+                {hasApproximation && (
+                  <Text className="text-xs text-muted dark:text-muted-dark italic" style={{ marginLeft: 4 }}>(orig: {originalTotal})</Text>
+                )}
               </View>
-              {hasApproximation && (
-                <Text className="text-xs text-muted dark:text-muted-dark italic">(orig: {originalTotal})</Text>
-              )}
             </View>
 
             {/* Last Update */}
@@ -411,12 +411,12 @@ function DashboardContent() {
                 <Text className={`text-3xl font-bold ${totalColorClass}`}>
                   {totalSpaces}
                 </Text>
+                {hasApproximation && (
+                  <Text className="text-xs text-muted dark:text-muted-dark italic ml-1">
+                    (orig: {originalTotal})
+                  </Text>
+                )}
               </View>
-              {hasApproximation && (
-                <Text className="text-xs text-muted dark:text-muted-dark italic">
-                  (orig: {originalTotal})
-                </Text>
-              )}
             </View>
 
             {/* Update Time & Refresh Button */}
