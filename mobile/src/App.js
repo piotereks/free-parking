@@ -415,17 +415,19 @@ function DashboardContent() {
               <Text className="text-xs text-muted dark:text-muted-dark">
                 Total Spaces
               </Text>
-              <View className="flex-row items-baseline mt-1">
-                {hasApproximation && (
-                  <Text className="text-3xl text-warning-medium dark:text-warning-medium-dark mr-1">
-                    ≈
+              <View className="items-center mt-1">
+                <View className="flex-row items-baseline">
+                  {hasApproximation && (
+                    <Text className="text-3xl text-warning-medium dark:text-warning-medium-dark mr-1">
+                      ≈
+                    </Text>
+                  )}
+                  <Text className={`text-3xl font-bold ${totalColorClass}`}>
+                    {totalSpaces}
                   </Text>
-                )}
-                <Text className={`text-3xl font-bold ${totalColorClass}`}>
-                  {totalSpaces}
-                </Text>
+                </View>
                 {hasApproximation && (
-                  <Text className="text-xs text-muted dark:text-muted-dark italic ml-1">
+                  <Text className="text-xs text-muted dark:text-muted-dark italic">
                     (orig: {originalTotal})
                   </Text>
                 )}
