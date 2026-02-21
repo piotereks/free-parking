@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Text, View, StatusBar, ScrollView, RefreshControl, TouchableOpacity, ActivityIndicator, Image, useWindowDimensions } from 'react-native';
+import { Text, View, StatusBar, ScrollView, RefreshControl, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import ParkingDataProvider from './context/ParkingDataProvider';
@@ -10,34 +10,6 @@ import { applyApproximations, calculateDataAge, formatAgeLabel, formatTime, crea
 
 // Top-level app theme constant. Set to 'dark', 'light' or 'system'.
 export const APP_THEME = 'dark';
-
-// Lazy-load the AdTile to avoid native module crashes in environments without AdMob
-let AdTile = null;
-let AD_TILE_MAX_WIDTH_RATIO = 0.4;
-try {
-  const adMobModule = require('../AdMobManager');
-  AdTile = adMobModule.AdTile;
-  AD_TILE_MAX_WIDTH_RATIO = adMobModule.AD_TILE_MAX_WIDTH_RATIO ?? 0.4;
-} catch (e) {
-  // AdMob not available — ad tile omitted in landscape
-}
-
-/**
- * AdPlaceholderTile — shown in landscape when AdMob is unavailable.
- * Width is capped at 2/5 of screen width to match the real AdTile constraint.
- */
-function AdPlaceholderTile() {
-  const { width: screenWidth } = useWindowDimensions();
-  const maxWidth = Math.floor(screenWidth * AD_TILE_MAX_WIDTH_RATIO);
-  return (
-    <View
-      className="rounded-lg border border-border dark:border-border-dark bg-secondary dark:bg-secondary-dark"
-      style={{ width: maxWidth, minHeight: 50, alignItems: 'center', justifyContent: 'center', padding: 8 }}
-    >
-      <Text className="text-xs text-muted dark:text-muted-dark">Ad</Text>
-    </View>
-  );
-}
 
 /**
  * ParkingTile Component
@@ -308,10 +280,8 @@ function DashboardContent() {
             {statusMessage}
           </Text>
 
-          {/* Tiles row — ad tile first, then parking tiles */}
+          {/* Tiles row */}
           <View style={{ flexDirection: 'row', gap: 8, flex: 1, marginBottom: 8 }}>
-            {/* Ad tile — left-most position in landscape */}
-            {AdTile ? <AdTile /> : <AdPlaceholderTile />}
             {processed.map((d, i) => (
               <ParkingTile
                 key={d.ParkingGroupName || i}

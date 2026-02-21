@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import App from './src/App';
@@ -15,7 +15,7 @@ try {
 
 /**
  * PlaceholderBanner Component
- * Displays a placeholder when AdMob is not available (portrait only).
+ * Displays a placeholder when AdMob is not available.
  */
 function PlaceholderBanner({ style }) {
   return (
@@ -30,28 +30,21 @@ function PlaceholderBanner({ style }) {
 /**
  * Root Component
  * App entry point with SafeAreaView and AdMob banner.
- * - Portrait: banner at the bottom (horizontal strip)
- * - Landscape: ad tile is rendered inside the tiles row (see src/App.js); no bottom banner
+ * The same BANNER format is used in both portrait and landscape.
  */
 export default function Root() {
-  const { width, height } = useWindowDimensions();
-  const isLandscape = width > height;
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <App />
       </View>
-      {/* Bottom banner — portrait only; landscape uses inline ad tile inside src/App.js */}
-      {!isLandscape && (
-        <View style={styles.bannerContainer}>
-          {AdMobManager ? (
-            <AdMobManager style={{ marginTop: 10 }} />
-          ) : (
-            <PlaceholderBanner style={{ marginTop: 10 }} />
-          )}
-        </View>
-      )}
+      <View style={styles.bannerContainer}>
+        {AdMobManager ? (
+          <AdMobManager style={{ marginTop: 10 }} />
+        ) : (
+          <PlaceholderBanner style={{ marginTop: 10 }} />
+        )}
+      </View>
     </SafeAreaView>
   );
 }
