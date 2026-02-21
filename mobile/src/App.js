@@ -267,9 +267,6 @@ function DashboardContent() {
                 <Text className="text-foreground dark:text-foreground-dark text-xs font-semibold text-center">
                   {title}
                 </Text>
-                <Text className={`text-xs font-semibold text-center mt-1 ${statusColorClass}`}>
-                  {statusMessage}
-                </Text>
               </View>
               <View style={{ gap: 6, alignItems: 'center' }}>
                 <TouchableOpacity
@@ -317,6 +314,11 @@ function DashboardContent() {
               />
             ))}
           </View>
+
+          {/* Status message — between tiles and summary card */}
+          <Text className={`text-xs font-semibold text-center my-1 ${statusColorClass}`}>
+            {statusMessage}
+          </Text>
 
           {/* Summary card — horizontal */}
           <View
