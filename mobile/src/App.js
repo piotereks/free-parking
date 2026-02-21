@@ -15,7 +15,7 @@ export const APP_THEME = 'dark';
  * ParkingTile Component
  * Displays individual parking lot information
  */
-function ParkingTile({ data, now, allOffline }) {
+function ParkingTile({ data, now, allOffline, isLandscape }) {
   const age = calculateDataAge(data.Timestamp, now);
   const { display } = formatAgeLabel(age);
   
@@ -33,6 +33,40 @@ function ParkingTile({ data, now, allOffline }) {
     : (data.CurrentFreeGroupCounterValue || 0);
 
   const displayName = data.ParkingGroupName === 'Bank_1' ? 'Uni Wroc' : data.ParkingGroupName;
+
+  if (isLandscape) {
+    // Compact row-oriented tile for landscape:
+    //   Name
+    //   [≈ value]  |  [(orig: X)]
+    //              |  [age]
+    return (
+      <View className="flex-1 rounded-lg border border-border dark:border-border-dark bg-secondary dark:bg-secondary-dark" style={{ padding: 8 }}>
+        <Text className="text-sm font-semibold text-foreground dark:text-foreground-dark mb-1">
+          {displayName}
+        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'flex-start', flex: 1 }}>
+          {/* Left: value */}
+          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
+              {data.approximationInfo?.isApproximated && (
+                <Text className="text-2xl text-warning-medium dark:text-warning-medium-dark" style={{ marginRight: 2 }}>≈</Text>
+              )}
+              <Text className={`text-4xl font-bold ${ageColorClass}`}>{value}</Text>
+            </View>
+          </View>
+          {/* Right: orig + age */}
+          <View style={{ flex: 1, paddingLeft: 8, borderLeftWidth: 1, borderLeftColor: 'rgba(128,128,128,0.3)', justifyContent: 'center' }}>
+            {data.approximationInfo?.isApproximated && (
+              <Text className="text-xs text-muted dark:text-muted-dark">
+                orig: {data.approximationInfo?.original ?? data.CurrentFreeGroupCounterValue ?? 0}
+              </Text>
+            )}
+            <Text className={`text-xs ${ageColorClass}`}>{display}</Text>
+          </View>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 mb-2 rounded-lg p-3 border border-border dark:border-border-dark bg-secondary dark:bg-secondary-dark">
@@ -187,17 +221,42 @@ function DashboardContent() {
             Real-time • GD-Uni Wrocław
           </Text>
         </View>
-        <TouchableOpacity
-          onPress={toggleTheme}
-          accessibilityRole="button"
-          accessibilityLabel={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
-          className="flex items-center justify-center rounded-lg border bg-bg-primary-light border-border-light dark:bg-bg-primary-dark dark:border-border-dark shadow-custom-light dark:shadow-custom-dark"
-          style={{ width: 44, height: 44 }}
-        >
-          <Text className="text-2xl">
-            {isDark ? '☀️' : '🌙'}
-          </Text>
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          {/* Refresh button in header — landscape only */}
+          {isLandscape && (
+            <TouchableOpacity
+              onPress={onRefresh}
+              activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel="Refresh data"
+              className="flex items-center justify-center rounded-lg border bg-bg-primary-light border-border-light dark:bg-bg-primary-dark dark:border-border-dark shadow-custom-light dark:shadow-custom-dark"
+              style={{ width: 44, height: 44 }}
+            >
+              {refreshing || realtimeLoading ? (
+                <ActivityIndicator size="small" color={isDark ? '#e0e6ff' : '#333333'} />
+              ) : (
+                <Text
+                  accessibilityRole="image"
+                  accessibilityLabel="Refresh icon"
+                  className="text-2xl text-foreground dark:text-foreground-dark"
+                >
+                  ⟳
+                </Text>
+              )}
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity
+            onPress={toggleTheme}
+            accessibilityRole="button"
+            accessibilityLabel={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
+            className="flex items-center justify-center rounded-lg border bg-bg-primary-light border-border-light dark:bg-bg-primary-dark dark:border-border-dark shadow-custom-light dark:shadow-custom-dark"
+            style={{ width: 44, height: 44 }}
+          >
+            <Text className="text-2xl">
+              {isDark ? '☀️' : '🌙'}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Loading State */}
@@ -213,24 +272,87 @@ function DashboardContent() {
             {String(realtimeError)}
           </Text>
         </View>
+      ) : isLandscape ? (
+        /* ── LANDSCAPE: fixed flex layout, no scroll, fits one page ── */
+        <View style={{ flex: 1, paddingHorizontal: 12, paddingVertical: 6 }}>
+          {/* Status message */}
+          <Text className={`text-xs font-semibold text-center mb-2 ${statusColorClass}`}>
+            {statusMessage}
+          </Text>
+
+          {/* Tiles row */}
+          <View style={{ flexDirection: 'row', gap: 8, flex: 1, marginBottom: 8 }}>
+            {processed.map((d, i) => (
+              <ParkingTile
+                key={d.ParkingGroupName || i}
+                data={d}
+                now={now}
+                allOffline={allOffline}
+                isLandscape
+              />
+            ))}
+          </View>
+
+          {/* Summary card — horizontal, no refresh button (it's in header) */}
+          <View
+            className="rounded-lg bg-secondary dark:bg-secondary-dark border border-border dark:border-border-dark overflow-hidden"
+            style={{ flexDirection: 'row' }}
+          >
+            {/* Total Spaces */}
+            <View
+              className="p-2 items-center justify-center border-border dark:border-border-dark"
+              style={{ flex: 1, borderRightWidth: 1 }}
+            >
+              <Text className="text-xs text-muted dark:text-muted-dark">Total</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'baseline', marginTop: 2 }}>
+                {hasApproximation && (
+                  <Text className="text-xl text-warning-medium dark:text-warning-medium-dark" style={{ marginRight: 2 }}>≈</Text>
+                )}
+                <Text className={`text-2xl font-bold ${totalColorClass}`}>{totalSpaces}</Text>
+              </View>
+              {hasApproximation && (
+                <Text className="text-xs text-muted dark:text-muted-dark italic">(orig: {originalTotal})</Text>
+              )}
+            </View>
+
+            {/* Last Update */}
+            <View
+              className="p-2 items-center justify-center border-border dark:border-border-dark"
+              style={{ flex: 2, borderRightWidth: 1 }}
+            >
+              <Text className="text-xs text-muted dark:text-muted-dark">Last Update / Current</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6, marginTop: 2 }}>
+                <Text className="text-sm font-bold text-foreground dark:text-foreground-dark">
+                  {lastRealtimeUpdate ? formatTime(lastRealtimeUpdate, 'pl-PL') : '--:--:--'}
+                </Text>
+                <Text className="text-xs text-muted dark:text-muted-dark">
+                  {now.toLocaleTimeString('pl-PL')}
+                </Text>
+              </View>
+            </View>
+
+            {/* Status Badge */}
+            <View className="p-2 items-center justify-center" style={{ flex: 1 }}>
+              <Text className="text-xs text-muted dark:text-muted-dark">Status</Text>
+              <Text className={`text-base font-bold mt-0.5 ${hasApproximation
+                ? 'text-warning-medium dark:text-warning-medium-dark'
+                : 'text-success dark:text-success-dark'}`}
+              >
+                {hasApproximation ? 'APPROX' : 'ONLINE'}
+              </Text>
+            </View>
+          </View>
+        </View>
       ) : (
+        /* ── PORTRAIT: scrollable layout ── */
         <ScrollView
           className="flex-1 px-3 py-2"
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
         >
-          {/* Status Message — always at the top in landscape, below tiles in portrait */}
-          {isLandscape && (
-            <View className="mb-2 mt-1">
-              <Text className={`text-sm font-semibold text-center ${statusColorClass}`}>
-                {statusMessage}
-              </Text>
-            </View>
-          )}
-
-          {/* Parking Tiles — always in a row */}
-          <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12, marginTop: isLandscape ? 0 : 8 }}>
+          {/* Parking Tiles */}
+          <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12, marginTop: 8 }}>
             {processed.map((d, i) => (
               <ParkingTile 
                 key={d.ParkingGroupName || i} 
@@ -241,27 +363,17 @@ function DashboardContent() {
             ))}
           </View>
 
-          {/* Status Message — below tiles in portrait only */}
-          {!isLandscape && (
-            <View className="mb-2">
-              <Text className={`text-sm font-semibold text-center ${statusColorClass}`}>
-                {statusMessage}
-              </Text>
-            </View>
-          )}
+          {/* Status Message */}
+          <View className="mb-2">
+            <Text className={`text-sm font-semibold text-center ${statusColorClass}`}>
+              {statusMessage}
+            </Text>
+          </View>
 
-          {/* Summary Card — row-oriented in landscape, stacked in portrait */}
-          <View
-            className="rounded-lg bg-secondary dark:bg-secondary-dark border border-border dark:border-border-dark overflow-hidden"
-            style={isLandscape ? { flexDirection: 'row' } : null}
-          >
+          {/* Summary Card */}
+          <View className="rounded-lg bg-secondary dark:bg-secondary-dark border border-border dark:border-border-dark overflow-hidden">
             {/* Total Spaces */}
-            <View
-              className="p-3 items-center border-border dark:border-border-dark"
-              style={isLandscape
-                ? { flex: 1, borderRightWidth: 1 }
-                : { borderBottomWidth: 1 }}
-            >
+            <View className="p-3 items-center border-b border-border dark:border-border-dark">
               <Text className="text-xs text-muted dark:text-muted-dark">
                 Total Spaces
               </Text>
@@ -283,12 +395,7 @@ function DashboardContent() {
             </View>
 
             {/* Update Time & Refresh Button */}
-            <View
-              className="p-3 flex-row items-center justify-center gap-2 border-border dark:border-border-dark"
-              style={isLandscape
-                ? { flex: 1, borderRightWidth: 1 }
-                : { borderBottomWidth: 1 }}
-            >
+            <View className="p-3 border-b border-border dark:border-border-dark flex-row items-center justify-center gap-2">
               <View className="items-center">
                 <Text className="text-xs text-muted dark:text-muted-dark mb-1 text-center">
                   Last Update / Current
@@ -340,10 +447,7 @@ function DashboardContent() {
             </View>
 
             {/* Status Badge */}
-            <View
-              className="p-3 items-center"
-              style={isLandscape ? { flex: 1 } : null}
-            >
+            <View className="p-3 items-center">
               <Text className="text-xs text-muted dark:text-muted-dark mb-1">
                 Status
               </Text>
