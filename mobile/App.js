@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import App from './src/App';
@@ -15,13 +15,14 @@ try {
 
 /**
  * PlaceholderBanner Component
- * Displays a placeholder when AdMob is not available
+ * Displays a placeholder when AdMob is not available.
+ * Shows a skyscraper (120×600) in landscape, standard banner (320×50) in portrait.
  */
-function PlaceholderBanner({ style }) {
+function PlaceholderBanner({ isLandscape, style }) {
   return (
-    <View style={[styles.bannerContainer, style]}>
-      <View style={styles.banner}>
-        <Text style={styles.bannerText}>Ad Placeholder</Text>
+    <View style={[isLandscape ? styles.skyscraperContainer : styles.bannerContainer, style]}>
+      <View style={isLandscape ? styles.skyscraper : styles.banner}>
+        <Text style={styles.bannerText}>{isLandscape ? 'Ad' : 'Ad Placeholder'}</Text>
       </View>
     </View>
   );
@@ -29,38 +30,76 @@ function PlaceholderBanner({ style }) {
 
 /**
  * Root Component
- * App entry point with SafeAreaView and AdMob banner
+ * App entry point with SafeAreaView and AdMob banner.
+ * - Portrait: banner at the bottom (horizontal strip)
+ * - Landscape: banner on the left (vertical skyscraper)
  */
 export default function Root() {
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, isLandscape && styles.containerRow]}>
+      {/* Skyscraper ad on the left — landscape only */}
+      {isLandscape && (
+        <View style={styles.skyscraperContainer}>
+          {AdMobManager ? (
+            <AdMobManager isLandscape />
+          ) : (
+            <PlaceholderBanner isLandscape />
+          )}
+        </View>
+      )}
+
       <View style={styles.content}>
         <App />
       </View>
-      <View style={styles.bannerContainer}>
-        {AdMobManager ? (
-          <AdMobManager style={{ marginTop: 10 }} />
-        ) : (
-          <PlaceholderBanner style={{ marginTop: 10 }} />
-        )}
-      </View>
+
+      {/* Bottom banner — portrait only */}
+      {!isLandscape && (
+        <View style={styles.bannerContainer}>
+          {AdMobManager ? (
+            <AdMobManager style={{ marginTop: 10 }} />
+          ) : (
+            <PlaceholderBanner style={{ marginTop: 10 }} />
+          )}
+        </View>
+      )}
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1 
+  container: {
+    flex: 1,
   },
-  content: { 
-    flex: 1 
+  containerRow: {
+    flexDirection: 'row',
+  },
+  content: {
+    flex: 1,
   },
   bannerContainer: {
     alignSelf: 'stretch',
   },
+  skyscraperContainer: {
+    width: 160,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   banner: {
     width: 320,
     height: 50,
+    backgroundColor: '#f0f0f0',
+    borderColor: '#ddd',
+    borderWidth: 1,
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  skyscraper: {
+    width: 160,
+    height: 600,
     backgroundColor: '#f0f0f0',
     borderColor: '#ddd',
     borderWidth: 1,

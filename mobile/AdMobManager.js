@@ -12,7 +12,7 @@ const BANNER_AD_UNIT_ID = __DEV__
       android: 'ca-app-pub-4295926250176261/3717620167'
     });
 
-const AdMobManager = ({ style }) => {
+const AdMobManager = ({ isLandscape, style }) => {
   useEffect(() => {
     try {
       mobileAds().initialize().then(() => {
@@ -25,11 +25,13 @@ const AdMobManager = ({ style }) => {
     }
   }, []);
 
+  const adSize = isLandscape ? BannerAdSize.WIDE_SKYSCRAPER : BannerAdSize.BANNER;
+
   return (
-    <View style={[styles.container, style]}>
+    <View style={[isLandscape ? styles.skyscraperContainer : styles.container, style]}>
       <BannerAd
         unitId={BANNER_AD_UNIT_ID}
-        size={BannerAdSize.BANNER}
+        size={adSize}
         requestOptions={{ requestNonPersonalizedAdsOnly: true }}
       />
     </View>
@@ -40,6 +42,11 @@ const styles = StyleSheet.create({
   container: {
     width: '100%',
     alignItems: 'center',
+  },
+  skyscraperContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
   },
 });
 
