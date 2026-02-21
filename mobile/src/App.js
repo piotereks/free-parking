@@ -52,9 +52,9 @@ function ParkingTile({ data, now, allOffline, isLandscape }) {
           <View style={{ flex: 2, alignItems: 'center', justifyContent: 'center' }}>
             <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
               {data.approximationInfo?.isApproximated && (
-                <Text className="text-2xl text-warning-medium dark:text-warning-medium-dark" style={{ marginRight: 2 }}>≈</Text>
+                <Text className="text-2xl text-warning-medium dark:text-warning-medium-dark" style={{ marginRight: 2, fontSize: 28 }}>≈</Text>
               )}
-              <Text className={`text-5xl font-bold ${ageColorClass}`}>{value}</Text>
+              <Text className={`font-bold ${ageColorClass}`} style={{ fontSize: 82 }}>{value}</Text>
             </View>
           </View>
           {/* Right: orig (or blank placeholder for alignment) + age — 1/3 width */}
@@ -77,9 +77,9 @@ function ParkingTile({ data, now, allOffline, isLandscape }) {
       
       <View className="flex-row items-center justify-center">
         {data.approximationInfo?.isApproximated && (
-          <Text className="text-6xl text-warning-medium dark:text-warning-medium-dark mr-1">≈</Text>
+          <Text className="text-warning-medium dark:text-warning-medium-dark mr-1" style={{ fontSize: 102 }}>≈</Text>
         )}
-        <Text className={`text-6xl font-bold text-center ${ageColorClass}`}>
+        <Text className={`font-bold text-center ${ageColorClass}`} style={{ fontSize: 102 }}>
           {value}
         </Text>
       </View>

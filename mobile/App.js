@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+
 
 import App from './src/App';
 
@@ -34,7 +34,7 @@ function PlaceholderBanner({ style }) {
  */
 export default function Root() {
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.content}>
         <App />
       </View>
@@ -45,7 +45,7 @@ export default function Root() {
           <PlaceholderBanner style={{ marginTop: 10 }} />
         )}
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
