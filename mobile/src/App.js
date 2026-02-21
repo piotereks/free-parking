@@ -297,6 +297,17 @@ function DashboardContent() {
               </View>
               <View style={{ gap: 6, alignItems: 'center' }}>
                 <TouchableOpacity
+                  onPress={toggleTheme}
+                  accessibilityRole="button"
+                  accessibilityLabel={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
+                  className="flex items-center justify-center rounded-lg border bg-bg-primary-light border-border dark:bg-bg-primary-dark dark:border-border-dark"
+                  style={{ width: 36, height: 36 }}
+                >
+                  <Text className="text-xl">
+                    {isDark ? '☀️' : '🌙'}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
                   onPress={onRefresh}
                   activeOpacity={0.8}
                   accessibilityRole="button"
@@ -317,24 +328,14 @@ function DashboardContent() {
                   )}
                 </TouchableOpacity>
                 <TouchableOpacity
-                  onPress={toggleTheme}
-                  accessibilityRole="button"
-                  accessibilityLabel={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
-                  className="flex items-center justify-center rounded-lg border bg-bg-primary-light border-border dark:bg-bg-primary-dark dark:border-border-dark"
-                  style={{ width: 36, height: 36 }}
-                >
-                  <Text className="text-xl">
-                    {isDark ? '☀️' : '🌙'}
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
                   onPress={openDonate}
                   accessibilityRole="link"
                   accessibilityLabel="Buy me a coffee — support development"
                   className="flex-row items-center justify-center rounded-lg border border-border dark:border-border-dark"
-                  style={{ height: 30, paddingHorizontal: 6, backgroundColor: isDark ? 'rgba(250,204,21,0.12)' : 'rgba(250,204,21,0.20)' }}
+                  style={{ height: 36, paddingHorizontal: 6, backgroundColor: isDark ? 'rgba(250,204,21,0.12)' : 'rgba(250,204,21,0.20)' }}
                 >
-                  <Text className="text-xs font-semibold text-foreground dark:text-foreground-dark" style={{ marginRight: 2 }}>☕</Text>
+                  <Text className="text-xs font-semibold text-foreground dark:text-foreground-dark" style={{ marginRight: 2 }}>Buy me</Text>
+                  <Text style={{ fontSize: 18 }}>☕</Text>
                 </TouchableOpacity>
               </View>
             </View>
