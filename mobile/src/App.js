@@ -1,20 +1,29 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Text, View, StatusBar, ScrollView, RefreshControl, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
+import { Text, View, StatusBar, ScrollView, RefreshControl, TouchableOpacity, ActivityIndicator, Image, Linking, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import ParkingDataProvider from './context/ParkingDataProvider';
 import { debugLog } from './config/debug';
 import useParkingStore from './hooks/useParkingStore';
+import useOrientation from './hooks/useOrientation';
 import { applyApproximations, calculateDataAge, formatAgeLabel, formatTime, createRefreshHelper } from 'parking-shared';
 
 // Top-level app theme constant. Set to 'dark', 'light' or 'system'.
 export const APP_THEME = 'dark';
 
+// Lazy/guarded require so AdMob load failures don't crash the module.
+let AdMobManager = null;
+try {
+  AdMobManager = require('../AdMobManager').default;
+} catch (e) {
+  console.warn('AdMobManager failed to load:', e && e.message ? e.message : e);
+}
+
 /**
  * ParkingTile Component
  * Displays individual parking lot information
  */
-function ParkingTile({ data, now, allOffline }) {
+function ParkingTile({ data, now, allOffline, isLandscape }) {
   const age = calculateDataAge(data.Timestamp, now);
   const { display } = formatAgeLabel(age);
   
@@ -32,6 +41,41 @@ function ParkingTile({ data, now, allOffline }) {
     : (data.CurrentFreeGroupCounterValue || 0);
 
   const displayName = data.ParkingGroupName === 'Bank_1' ? 'Uni Wroc' : data.ParkingGroupName;
+
+  if (isLandscape) {
+    // Compact row-oriented tile for landscape:
+    //   Name
+    //   [≈ value (2/3)]  |  [orig: X or blank (1/3)]
+    //                    |  [age                    ]
+    const origValue = data.approximationInfo?.isApproximated
+      ? (data.approximationInfo?.original ?? data.CurrentFreeGroupCounterValue ?? 0)
+      : null;
+    return (
+      <View className="flex-1 rounded-lg border border-border dark:border-border-dark bg-secondary dark:bg-secondary-dark" style={{ padding: 8 }}>
+        <Text className="font-semibold text-foreground dark:text-foreground-dark mb-1" numberOfLines={1} style={{ fontSize: 21 }}>
+          {displayName}
+        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'flex-start', flex: 1 }}>
+          {/* Left: value — 2/3 width */}
+          <View style={{ flex: 2, alignItems: 'center', justifyContent: 'center' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
+              {data.approximationInfo?.isApproximated && (
+                <Text className="text-2xl text-warning-medium dark:text-warning-medium-dark" style={{ marginRight: 2, fontSize: 28 }}>≈</Text>
+              )}
+              <Text className={`font-bold ${ageColorClass}`} style={{ fontSize: 82 }}>{value}</Text>
+            </View>
+          </View>
+          {/* Right: orig (or blank placeholder for alignment) + age — 1/3 width */}
+          <View style={{ flex: 1, paddingLeft: 6, borderLeftWidth: 1, borderLeftColor: 'rgba(128,128,128,0.3)', justifyContent: 'center' }}>
+            <Text className="text-xs text-muted dark:text-muted-dark" numberOfLines={1}>
+              {origValue !== null ? `orig: ${origValue}` : ' '}
+            </Text>
+            <Text className={`text-xs ${ageColorClass}`}>{display}</Text>
+          </View>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 mb-2 rounded-lg p-3 border border-border dark:border-border-dark bg-secondary dark:bg-secondary-dark">
@@ -67,10 +111,14 @@ function ParkingTile({ data, now, allOffline }) {
  */
 function DashboardContent() {
   const { isDark, setTheme } = useTheme();
+  const orientation = useOrientation();
+  const isLandscape = orientation === 'landscape';
+  const { width: screenWidth } = useWindowDimensions();
   const title = 'Parking Monitor';
   
   // helper to toggle
   const toggleTheme = () => setTheme(isDark ? 'light' : 'dark');
+  const openDonate = () => Linking.openURL('https://buycoffee.to/piotereks');
   
   // Store state
   const realtimeData = useParkingStore((state) => state.realtimeData);
@@ -170,32 +218,44 @@ function DashboardContent() {
     <SafeAreaView className={`flex-1 bg-primary dark:bg-primary-dark ${isDark ? 'dark' : ''}`}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
-      {/* Header */}
-      <View className="w-full bg-secondary dark:bg-secondary-dark flex-row items-center justify-between py-3 px-4 border-b border-border dark:border-border-dark">
-        <Image 
-          source={require('../assets/favicon.png')} 
-          style={{ width: 36, height: 36, marginRight: 12 }} 
-        />
-        <View className="items-center">
-          <Text className="text-foreground dark:text-foreground-dark text-lg font-semibold">
-            {title}
-          </Text>
-          <Text className="text-muted dark:text-muted-dark text-xs mt-0.5">
-            Real-time • GD-Uni Wrocław
-          </Text>
+      {/* Full-width header — portrait only */}
+      {!isLandscape && (
+        <View className="w-full bg-secondary dark:bg-secondary-dark flex-row items-center justify-between py-3 px-4 border-b border-border dark:border-border-dark">
+          <Image 
+            source={require('../assets/favicon.png')} 
+            style={{ width: 36, height: 36, marginRight: 12 }} 
+          />
+          <View className="items-center">
+            <Text className="text-foreground dark:text-foreground-dark text-lg font-semibold">
+              {title}
+            </Text>
+            <Text className="text-muted dark:text-muted-dark text-xs mt-0.5">
+              Real-time • GD-Uni Wrocław
+            </Text>
+          </View>
+          <TouchableOpacity
+            onPress={toggleTheme}
+            accessibilityRole="button"
+            accessibilityLabel={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
+            className="flex items-center justify-center rounded-lg border bg-bg-primary-light border-border dark:bg-bg-primary-dark dark:border-border-dark shadow-custom-light dark:shadow-custom-dark"
+            style={{ width: 44, height: 44 }}
+          >
+            <Text className="text-2xl">
+              {isDark ? '☀️' : '🌙'}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={openDonate}
+            accessibilityRole="link"
+            accessibilityLabel="Buy me a coffee — support development"
+            className="flex-row items-center justify-center rounded-lg border border-border dark:border-border-dark"
+            style={{ height: 44, paddingHorizontal: 10, marginLeft: 8, backgroundColor: isDark ? 'rgba(250,204,21,0.12)' : 'rgba(250,204,21,0.20)' }}
+          >
+            <Text className="text-sm font-semibold text-foreground dark:text-foreground-dark" style={{ marginRight: 4 }}>Buy me</Text>
+            <Text style={{ fontSize: 22 }}>☕</Text>
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity
-          onPress={toggleTheme}
-          accessibilityRole="button"
-          accessibilityLabel={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
-          className="flex items-center justify-center rounded-lg border bg-bg-primary-light border-border-light dark:bg-bg-primary-dark dark:border-border-dark shadow-custom-light dark:shadow-custom-dark"
-          style={{ width: 44, height: 44 }}
-        >
-          <Text className="text-2xl">
-            {isDark ? '☀️' : '🌙'}
-          </Text>
-        </TouchableOpacity>
-      </View>
+      )}
 
       {/* Loading State */}
       {realtimeLoading && processed.length === 0 ? (
@@ -210,7 +270,149 @@ function DashboardContent() {
             {String(realtimeError)}
           </Text>
         </View>
+      ) : isLandscape ? (
+        /* ── LANDSCAPE: header column + tiles on same row ── */
+        <View style={{ flex: 1, paddingHorizontal: 8, paddingVertical: 6 }}>
+          {/* Row: narrow header column on the left, tiles on the right */}
+          <View style={{ flexDirection: 'row', gap: 8, flex: 1, marginBottom: 8 }}>
+            {/* Header column */}
+            <View
+              className="rounded-lg bg-secondary dark:bg-secondary-dark border border-border dark:border-border-dark"
+              style={{ width: Math.floor(screenWidth * 0.25), padding: 8, justifyContent: 'space-between', alignItems: 'center' }}
+            >
+              {/* Logo + title on same row */}
+              <View style={{ alignItems: 'center', gap: 2 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <Image
+                    source={require('../assets/favicon.png')}
+                    style={{ width: 24, height: 24, flexShrink: 0 }}
+                  />
+                  <Text className="text-foreground dark:text-foreground-dark font-semibold" numberOfLines={2} style={{ flexShrink: 1, fontSize: 18 }}>
+                    {title}
+                  </Text>
+                </View>
+                <Text className="text-muted dark:text-muted-dark" style={{ fontSize: 14 }} numberOfLines={2}>
+                  Real-time • GD-Uni Wrocław
+                </Text>
+              </View>
+              <View style={{ gap: 6, alignItems: 'center' }}>
+                {/* Theme toggle + Reload on the same row */}
+                <View style={{ flexDirection: 'row', gap: 6 }}>
+                  <TouchableOpacity
+                    onPress={toggleTheme}
+                    accessibilityRole="button"
+                    accessibilityLabel={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
+                    className="flex items-center justify-center rounded-lg border bg-bg-primary-light border-border dark:bg-bg-primary-dark dark:border-border-dark"
+                    style={{ width: 36, height: 36 }}
+                  >
+                    <Text className="text-xl">
+                      {isDark ? '☀️' : '🌙'}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={onRefresh}
+                    activeOpacity={0.8}
+                    accessibilityRole="button"
+                    accessibilityLabel="Refresh data"
+                    className="flex items-center justify-center rounded-lg border bg-bg-primary-light border-border dark:bg-bg-primary-dark dark:border-border-dark"
+                    style={{ width: 36, height: 36 }}
+                  >
+                    {refreshing || realtimeLoading ? (
+                      <ActivityIndicator size="small" color={isDark ? '#e0e6ff' : '#333333'} />
+                    ) : (
+                      <Text
+                        accessibilityRole="image"
+                        accessibilityLabel="Refresh icon"
+                        className="text-xl text-foreground dark:text-foreground-dark"
+                      >
+                        ⟳
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+                {/* Buy me ☕ on its own row below */}
+                <TouchableOpacity
+                  onPress={openDonate}
+                  accessibilityRole="link"
+                  accessibilityLabel="Buy me a coffee — support development"
+                  className="flex-row items-center justify-center rounded-lg border border-border dark:border-border-dark"
+                  style={{ height: 36, paddingHorizontal: 6, backgroundColor: isDark ? 'rgba(250,204,21,0.12)' : 'rgba(250,204,21,0.20)' }}
+                >
+                  <Text className="text-xs font-semibold text-foreground dark:text-foreground-dark" style={{ marginRight: 2 }}>Buy me</Text>
+                  <Text style={{ fontSize: 18 }}>☕</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Tiles */}
+            {processed.map((d, i) => (
+              <ParkingTile
+                key={d.ParkingGroupName || i}
+                data={d}
+                now={now}
+                allOffline={allOffline}
+                isLandscape
+              />
+            ))}
+          </View>
+
+          {/* Status message — between tiles and summary card */}
+          <Text className={`text-xs font-semibold text-center my-1 ${statusColorClass}`}>
+            {statusMessage}
+          </Text>
+
+          {/* Summary card — horizontal */}
+          <View
+            className="rounded-lg bg-secondary dark:bg-secondary-dark border border-border dark:border-border-dark overflow-hidden"
+            style={{ flexDirection: 'row' }}
+          >
+            {/* Total Spaces */}
+            <View
+              className="p-2 items-center justify-center border-border dark:border-border-dark"
+              style={{ flex: 1, borderRightWidth: 1 }}
+            >
+              <Text className="text-xs text-muted dark:text-muted-dark">Total</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'baseline', marginTop: 2 }}>
+                {hasApproximation && (
+                  <Text className="text-xl text-warning-medium dark:text-warning-medium-dark" style={{ marginRight: 2 }}>≈</Text>
+                )}
+                <Text className={`text-2xl font-bold ${totalColorClass}`}>{totalSpaces}</Text>
+                {hasApproximation && (
+                  <Text className="text-xs text-muted dark:text-muted-dark italic" style={{ marginLeft: 4 }}>(orig: {originalTotal})</Text>
+                )}
+              </View>
+            </View>
+
+            {/* Last Update */}
+            <View
+              className="p-2 items-center justify-center border-border dark:border-border-dark"
+              style={{ flex: 2, borderRightWidth: 1 }}
+            >
+              <Text className="text-xs text-muted dark:text-muted-dark">Last Update / Current</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6, marginTop: 2 }}>
+                <Text className="text-sm font-bold text-foreground dark:text-foreground-dark">
+                  {lastRealtimeUpdate ? formatTime(lastRealtimeUpdate, 'pl-PL') : '--:--:--'}
+                </Text>
+                <Text className="text-xs text-muted dark:text-muted-dark">
+                  {now.toLocaleTimeString('pl-PL')}
+                </Text>
+              </View>
+            </View>
+
+            {/* Status Badge */}
+            <View className="p-2 items-center justify-center" style={{ flex: 1 }}>
+              <Text className="text-xs text-muted dark:text-muted-dark">Status</Text>
+              <Text className={`text-base font-bold mt-0.5 ${hasApproximation
+                ? 'text-warning-medium dark:text-warning-medium-dark'
+                : 'text-success dark:text-success-dark'}`}
+              >
+                {hasApproximation ? 'APPROX' : 'ONLINE'}
+              </Text>
+            </View>
+          </View>
+        </View>
       ) : (
+        /* ── PORTRAIT: scrollable layout ── */
         <ScrollView
           className="flex-1 px-3 py-2"
           refreshControl={
@@ -243,21 +445,23 @@ function DashboardContent() {
               <Text className="text-xs text-muted dark:text-muted-dark">
                 Total Spaces
               </Text>
-              <View className="flex-row items-baseline mt-1">
+              <View className="items-center mt-1">
+                <View className="flex-row items-baseline">
+                  {hasApproximation && (
+                    <Text className="text-3xl text-warning-medium dark:text-warning-medium-dark mr-1">
+                      ≈
+                    </Text>
+                  )}
+                  <Text className={`text-3xl font-bold ${totalColorClass}`}>
+                    {totalSpaces}
+                  </Text>
+                </View>
                 {hasApproximation && (
-                  <Text className="text-3xl text-warning-medium dark:text-warning-medium-dark mr-1">
-                    ≈
+                  <Text className="text-xs text-muted dark:text-muted-dark italic">
+                    (orig: {originalTotal})
                   </Text>
                 )}
-                <Text className={`text-3xl font-bold ${totalColorClass}`}>
-                  {totalSpaces}
-                </Text>
               </View>
-              {hasApproximation && (
-                <Text className="text-xs text-muted dark:text-muted-dark italic">
-                  (orig: {originalTotal})
-                </Text>
-              )}
             </View>
 
             {/* Update Time & Refresh Button */}
@@ -326,6 +530,13 @@ function DashboardContent() {
             </View>
           </View>
         </ScrollView>
+      )}
+
+      {/* Ad Banner — inside themed SafeAreaView so its background matches the app */}
+      {AdMobManager && (
+        <View className="items-center bg-primary dark:bg-primary-dark">
+          <AdMobManager />
+        </View>
       )}
     </SafeAreaView>
   );
