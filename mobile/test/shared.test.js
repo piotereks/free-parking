@@ -15,7 +15,7 @@ import {
   parseTimestamp,
   createParkingStore,
   PARKING_MAX_CAPACITY,
-} from '../shared/src/index.js';
+} from '../../shared/src/index.js';
 
 describe('Shared Package Integration', () => {
   describe('Import Verification', () => {

@@ -565,6 +565,7 @@ export default function App() {
     <ThemeProvider initialMode={APP_THEME}>
       <ParkingDataProvider>
         <AppContent />
+        {/* demo removed */}
       </ParkingDataProvider>
     </ThemeProvider>
   );
