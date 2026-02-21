@@ -207,44 +207,21 @@ function DashboardContent() {
     <SafeAreaView className={`flex-1 bg-primary dark:bg-primary-dark ${isDark ? 'dark' : ''}`}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
-      {/* Header */}
-      <View className="w-full bg-secondary dark:bg-secondary-dark flex-row items-center justify-between py-3 px-4 border-b border-border dark:border-border-dark">
-        <Image 
-          source={require('../assets/favicon.png')} 
-          style={{ width: 36, height: 36, marginRight: 12 }} 
-        />
-        <View className="items-center">
-          <Text className="text-foreground dark:text-foreground-dark text-lg font-semibold">
-            {title}
-          </Text>
-          <Text className="text-muted dark:text-muted-dark text-xs mt-0.5">
-            Real-time • GD-Uni Wrocław
-          </Text>
-        </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          {/* Refresh button in header — landscape only */}
-          {isLandscape && (
-            <TouchableOpacity
-              onPress={onRefresh}
-              activeOpacity={0.8}
-              accessibilityRole="button"
-              accessibilityLabel="Refresh data"
-              className="flex items-center justify-center rounded-lg border bg-bg-primary-light border-border-light dark:bg-bg-primary-dark dark:border-border-dark shadow-custom-light dark:shadow-custom-dark"
-              style={{ width: 44, height: 44 }}
-            >
-              {refreshing || realtimeLoading ? (
-                <ActivityIndicator size="small" color={isDark ? '#e0e6ff' : '#333333'} />
-              ) : (
-                <Text
-                  accessibilityRole="image"
-                  accessibilityLabel="Refresh icon"
-                  className="text-2xl text-foreground dark:text-foreground-dark"
-                >
-                  ⟳
-                </Text>
-              )}
-            </TouchableOpacity>
-          )}
+      {/* Full-width header — portrait only */}
+      {!isLandscape && (
+        <View className="w-full bg-secondary dark:bg-secondary-dark flex-row items-center justify-between py-3 px-4 border-b border-border dark:border-border-dark">
+          <Image 
+            source={require('../assets/favicon.png')} 
+            style={{ width: 36, height: 36, marginRight: 12 }} 
+          />
+          <View className="items-center">
+            <Text className="text-foreground dark:text-foreground-dark text-lg font-semibold">
+              {title}
+            </Text>
+            <Text className="text-muted dark:text-muted-dark text-xs mt-0.5">
+              Real-time • GD-Uni Wrocław
+            </Text>
+          </View>
           <TouchableOpacity
             onPress={toggleTheme}
             accessibilityRole="button"
@@ -257,7 +234,7 @@ function DashboardContent() {
             </Text>
           </TouchableOpacity>
         </View>
-      </View>
+      )}
 
       {/* Loading State */}
       {realtimeLoading && processed.length === 0 ? (
@@ -273,15 +250,63 @@ function DashboardContent() {
           </Text>
         </View>
       ) : isLandscape ? (
-        /* ── LANDSCAPE: fixed flex layout, no scroll, fits one page ── */
-        <View style={{ flex: 1, paddingHorizontal: 12, paddingVertical: 6 }}>
-          {/* Status message */}
-          <Text className={`text-xs font-semibold text-center mb-2 ${statusColorClass}`}>
-            {statusMessage}
-          </Text>
-
-          {/* Tiles row */}
+        /* ── LANDSCAPE: header column + tiles on same row ── */
+        <View style={{ flex: 1, paddingHorizontal: 8, paddingVertical: 6 }}>
+          {/* Row: narrow header column on the left, tiles on the right */}
           <View style={{ flexDirection: 'row', gap: 8, flex: 1, marginBottom: 8 }}>
+            {/* Header column */}
+            <View
+              className="rounded-lg bg-secondary dark:bg-secondary-dark border border-border dark:border-border-dark"
+              style={{ width: 90, padding: 8, justifyContent: 'space-between', alignItems: 'center' }}
+            >
+              <Image 
+                source={require('../assets/favicon.png')} 
+                style={{ width: 28, height: 28 }} 
+              />
+              <View style={{ alignItems: 'center' }}>
+                <Text className="text-foreground dark:text-foreground-dark text-xs font-semibold text-center">
+                  {title}
+                </Text>
+                <Text className={`text-xs font-semibold text-center mt-1 ${statusColorClass}`}>
+                  {statusMessage}
+                </Text>
+              </View>
+              <View style={{ gap: 6, alignItems: 'center' }}>
+                <TouchableOpacity
+                  onPress={onRefresh}
+                  activeOpacity={0.8}
+                  accessibilityRole="button"
+                  accessibilityLabel="Refresh data"
+                  className="flex items-center justify-center rounded-lg border bg-bg-primary-light border-border-light dark:bg-bg-primary-dark dark:border-border-dark"
+                  style={{ width: 36, height: 36 }}
+                >
+                  {refreshing || realtimeLoading ? (
+                    <ActivityIndicator size="small" color={isDark ? '#e0e6ff' : '#333333'} />
+                  ) : (
+                    <Text
+                      accessibilityRole="image"
+                      accessibilityLabel="Refresh icon"
+                      className="text-xl text-foreground dark:text-foreground-dark"
+                    >
+                      ⟳
+                    </Text>
+                  )}
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={toggleTheme}
+                  accessibilityRole="button"
+                  accessibilityLabel={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
+                  className="flex items-center justify-center rounded-lg border bg-bg-primary-light border-border-light dark:bg-bg-primary-dark dark:border-border-dark"
+                  style={{ width: 36, height: 36 }}
+                >
+                  <Text className="text-xl">
+                    {isDark ? '☀️' : '🌙'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Tiles */}
             {processed.map((d, i) => (
               <ParkingTile
                 key={d.ParkingGroupName || i}
@@ -293,7 +318,7 @@ function DashboardContent() {
             ))}
           </View>
 
-          {/* Summary card — horizontal, no refresh button (it's in header) */}
+          {/* Summary card — horizontal */}
           <View
             className="rounded-lg bg-secondary dark:bg-secondary-dark border border-border dark:border-border-dark overflow-hidden"
             style={{ flexDirection: 'row' }}
