@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Text, View, StatusBar, ScrollView, RefreshControl, TouchableOpacity, ActivityIndicator, Image, useWindowDimensions } from 'react-native';
+import { Text, View, StatusBar, ScrollView, RefreshControl, TouchableOpacity, ActivityIndicator, Image, Linking, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import ParkingDataProvider from './context/ParkingDataProvider';
@@ -118,6 +118,7 @@ function DashboardContent() {
   
   // helper to toggle
   const toggleTheme = () => setTheme(isDark ? 'light' : 'dark');
+  const openDonate = () => Linking.openURL('https://buycoffee.to/piotereks');
   
   // Store state
   const realtimeData = useParkingStore((state) => state.realtimeData);
@@ -243,6 +244,16 @@ function DashboardContent() {
               {isDark ? '☀️' : '🌙'}
             </Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            onPress={openDonate}
+            accessibilityRole="link"
+            accessibilityLabel="Buy me a coffee — support development"
+            className="flex-row items-center justify-center rounded-lg border border-border dark:border-border-dark"
+            style={{ height: 44, paddingHorizontal: 10, marginLeft: 8, backgroundColor: isDark ? 'rgba(250,204,21,0.12)' : 'rgba(250,204,21,0.20)' }}
+          >
+            <Text className="text-sm font-semibold text-foreground dark:text-foreground-dark" style={{ marginRight: 4 }}>Buy me</Text>
+            <Text style={{ fontSize: 22 }}>☕</Text>
+          </TouchableOpacity>
         </View>
       )}
 
@@ -315,6 +326,15 @@ function DashboardContent() {
                   <Text className="text-xl">
                     {isDark ? '☀️' : '🌙'}
                   </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={openDonate}
+                  accessibilityRole="link"
+                  accessibilityLabel="Buy me a coffee — support development"
+                  className="flex-row items-center justify-center rounded-lg border border-border dark:border-border-dark"
+                  style={{ height: 30, paddingHorizontal: 6, backgroundColor: isDark ? 'rgba(250,204,21,0.12)' : 'rgba(250,204,21,0.20)' }}
+                >
+                  <Text className="text-xs font-semibold text-foreground dark:text-foreground-dark" style={{ marginRight: 2 }}>☕</Text>
                 </TouchableOpacity>
               </View>
             </View>
