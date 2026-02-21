@@ -13,7 +13,7 @@
     ],
     "name": "free-parking",
     "slug": "free-parking",
-    "version": "1.1.0",
+    "version": "2.0.0",
     "orientation": "portrait",
     "icon": "./assets/favicon.png",
     "userInterfaceStyle": "dark",
@@ -41,6 +41,7 @@
       "bundleIdentifier": "app.piotereks.freeparking"
     },
     "android": {
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
