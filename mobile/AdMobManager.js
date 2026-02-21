@@ -25,7 +25,7 @@ const AdMobManager = ({ isLandscape, style }) => {
     }
   }, []);
 
-  const adSize = isLandscape ? BannerAdSize.WIDE_SKYSCRAPER : BannerAdSize.BANNER;
+  const adSize = isLandscape ? BannerAdSize.ADAPTIVE_BANNER : BannerAdSize.BANNER;
 
   return (
     <View style={[isLandscape ? styles.skyscraperContainer : styles.container, style]}>

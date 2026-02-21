@@ -16,7 +16,8 @@ try {
 /**
  * PlaceholderBanner Component
  * Displays a placeholder when AdMob is not available.
- * Shows a skyscraper (120×600) in landscape, standard banner (320×50) in portrait.
+ * In landscape: a narrow full-height column on the left.
+ * In portrait: standard horizontal banner strip.
  */
 function PlaceholderBanner({ isLandscape, style }) {
   return (
@@ -31,8 +32,8 @@ function PlaceholderBanner({ isLandscape, style }) {
 /**
  * Root Component
  * App entry point with SafeAreaView and AdMob banner.
- * - Portrait: banner at the bottom (horizontal strip)
- * - Landscape: banner on the left (vertical skyscraper)
+ * - Portrait: banner at the bottom (horizontal strip, BANNER format)
+ * - Landscape: banner on the left (full-height column, ADAPTIVE_BANNER format)
  */
 export default function Root() {
   const { width, height } = useWindowDimensions();
@@ -84,6 +85,7 @@ const styles = StyleSheet.create({
   },
   skyscraperContainer: {
     width: 160,
+    alignSelf: 'stretch',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -99,7 +101,7 @@ const styles = StyleSheet.create({
   },
   skyscraper: {
     width: 160,
-    height: 600,
+    flex: 1,
     backgroundColor: '#f0f0f0',
     borderColor: '#ddd',
     borderWidth: 1,
