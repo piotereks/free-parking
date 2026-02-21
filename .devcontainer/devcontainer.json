@@ -1,6 +1,7 @@
 {
   "name": "Free Parking Dev Container",
   "image": "mcr.microsoft.com/vscode/devcontainers/javascript-node:0-20",
+  "workspaceFolder": "/workspaces/free-parking",
   "postCreateCommand": "npm ci --no-audit --no-fund",
   "postStartCommand": "npm ci --no-audit --no-fund",
   "customizations": {
