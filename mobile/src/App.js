@@ -236,7 +236,7 @@ function DashboardContent() {
             onPress={toggleTheme}
             accessibilityRole="button"
             accessibilityLabel={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
-            className="flex items-center justify-center rounded-lg border bg-bg-primary-light border-border-light dark:bg-bg-primary-dark dark:border-border-dark shadow-custom-light dark:shadow-custom-dark"
+            className="flex items-center justify-center rounded-lg border bg-bg-primary-light border-border dark:bg-bg-primary-dark dark:border-border-dark shadow-custom-light dark:shadow-custom-dark"
             style={{ width: 44, height: 44 }}
           >
             <Text className="text-2xl">
@@ -285,7 +285,7 @@ function DashboardContent() {
                   activeOpacity={0.8}
                   accessibilityRole="button"
                   accessibilityLabel="Refresh data"
-                  className="flex items-center justify-center rounded-lg border bg-bg-primary-light border-border-light dark:bg-bg-primary-dark dark:border-border-dark"
+                  className="flex items-center justify-center rounded-lg border bg-bg-primary-light border-border dark:bg-bg-primary-dark dark:border-border-dark"
                   style={{ width: 36, height: 36 }}
                 >
                   {refreshing || realtimeLoading ? (
@@ -304,7 +304,7 @@ function DashboardContent() {
                   onPress={toggleTheme}
                   accessibilityRole="button"
                   accessibilityLabel={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
-                  className="flex items-center justify-center rounded-lg border bg-bg-primary-light border-border-light dark:bg-bg-primary-dark dark:border-border-dark"
+                  className="flex items-center justify-center rounded-lg border bg-bg-primary-light border-border dark:bg-bg-primary-dark dark:border-border-dark"
                   style={{ width: 36, height: 36 }}
                 >
                   <Text className="text-xl">
