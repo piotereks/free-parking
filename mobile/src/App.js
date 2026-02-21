@@ -11,6 +11,14 @@ import { applyApproximations, calculateDataAge, formatAgeLabel, formatTime, crea
 // Top-level app theme constant. Set to 'dark', 'light' or 'system'.
 export const APP_THEME = 'dark';
 
+// Lazy/guarded require so AdMob load failures don't crash the module.
+let AdMobManager = null;
+try {
+  AdMobManager = require('../AdMobManager').default;
+} catch (e) {
+  console.warn('AdMobManager failed to load:', e && e.message ? e.message : e);
+}
+
 /**
  * ParkingTile Component
  * Displays individual parking lot information
@@ -490,6 +498,13 @@ function DashboardContent() {
             </View>
           </View>
         </ScrollView>
+      )}
+
+      {/* Ad Banner — inside themed SafeAreaView so its background matches the app */}
+      {AdMobManager && (
+        <View className="items-center bg-primary dark:bg-primary-dark">
+          <AdMobManager />
+        </View>
       )}
     </SafeAreaView>
   );
