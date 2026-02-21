@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Platform } from 'react-native';
 import mobileAds, { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
 
@@ -38,16 +38,25 @@ const AdMobManager = ({ style }) => {
 };
 
 /**
- * AdTile — inline adaptive banner styled as a tile, for the landscape tiles row.
- * Renders an INLINE_ADAPTIVE_BANNER that fills the tile's flex-1 width.
+ * AdTile — inline adaptive banner for the landscape tiles row.
+ * The container adapts to the actual loaded ad dimensions via onAdLoaded / onSizeChange.
+ * While loading, a minimum placeholder size is used so the layout doesn't jump.
  */
 export const AdTile = () => {
+  const [adSize, setAdSize] = useState(null);
+
+  const handleAdSize = ({ width, height }) => {
+    setAdSize({ width, height });
+  };
+
   return (
-    <View style={styles.adTile}>
+    <View style={[styles.adTile, adSize ? { width: adSize.width, height: adSize.height } : styles.adTilePlaceholder]}>
       <BannerAd
         unitId={BANNER_AD_UNIT_ID}
         size={BannerAdSize.INLINE_ADAPTIVE_BANNER}
         requestOptions={{ requestNonPersonalizedAdsOnly: true }}
+        onAdLoaded={handleAdSize}
+        onSizeChange={handleAdSize}
       />
     </View>
   );
@@ -59,11 +68,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   adTile: {
-    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 8,
     overflow: 'hidden',
+  },
+  adTilePlaceholder: {
+    // Minimum footprint while ad is loading — avoids a layout hole
+    minWidth: 100,
+    minHeight: 50,
   },
 });
 

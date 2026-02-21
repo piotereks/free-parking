@@ -20,13 +20,14 @@ try {
 }
 
 /**
- * AdPlaceholderTile — shown in landscape when AdMob is unavailable
+ * AdPlaceholderTile — shown in landscape when AdMob is unavailable.
+ * Uses a fixed minimum size matching the AdTile placeholder dimensions.
  */
 function AdPlaceholderTile() {
   return (
     <View
-      className="flex-1 rounded-lg border border-border dark:border-border-dark bg-secondary dark:bg-secondary-dark"
-      style={{ padding: 8, alignItems: 'center', justifyContent: 'center' }}
+      className="rounded-lg border border-border dark:border-border-dark bg-secondary dark:bg-secondary-dark"
+      style={{ minWidth: 100, minHeight: 50, alignItems: 'center', justifyContent: 'center', padding: 8 }}
     >
       <Text className="text-xs text-muted dark:text-muted-dark">Ad</Text>
     </View>
