@@ -296,37 +296,41 @@ function DashboardContent() {
                 </Text>
               </View>
               <View style={{ gap: 6, alignItems: 'center' }}>
-                <TouchableOpacity
-                  onPress={toggleTheme}
-                  accessibilityRole="button"
-                  accessibilityLabel={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
-                  className="flex items-center justify-center rounded-lg border bg-bg-primary-light border-border dark:bg-bg-primary-dark dark:border-border-dark"
-                  style={{ width: 36, height: 36 }}
-                >
-                  <Text className="text-xl">
-                    {isDark ? '☀️' : '🌙'}
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={onRefresh}
-                  activeOpacity={0.8}
-                  accessibilityRole="button"
-                  accessibilityLabel="Refresh data"
-                  className="flex items-center justify-center rounded-lg border bg-bg-primary-light border-border dark:bg-bg-primary-dark dark:border-border-dark"
-                  style={{ width: 36, height: 36 }}
-                >
-                  {refreshing || realtimeLoading ? (
-                    <ActivityIndicator size="small" color={isDark ? '#e0e6ff' : '#333333'} />
-                  ) : (
-                    <Text
-                      accessibilityRole="image"
-                      accessibilityLabel="Refresh icon"
-                      className="text-xl text-foreground dark:text-foreground-dark"
-                    >
-                      ⟳
+                {/* Theme toggle + Reload on the same row */}
+                <View style={{ flexDirection: 'row', gap: 6 }}>
+                  <TouchableOpacity
+                    onPress={toggleTheme}
+                    accessibilityRole="button"
+                    accessibilityLabel={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
+                    className="flex items-center justify-center rounded-lg border bg-bg-primary-light border-border dark:bg-bg-primary-dark dark:border-border-dark"
+                    style={{ width: 36, height: 36 }}
+                  >
+                    <Text className="text-xl">
+                      {isDark ? '☀️' : '🌙'}
                     </Text>
-                  )}
-                </TouchableOpacity>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={onRefresh}
+                    activeOpacity={0.8}
+                    accessibilityRole="button"
+                    accessibilityLabel="Refresh data"
+                    className="flex items-center justify-center rounded-lg border bg-bg-primary-light border-border dark:bg-bg-primary-dark dark:border-border-dark"
+                    style={{ width: 36, height: 36 }}
+                  >
+                    {refreshing || realtimeLoading ? (
+                      <ActivityIndicator size="small" color={isDark ? '#e0e6ff' : '#333333'} />
+                    ) : (
+                      <Text
+                        accessibilityRole="image"
+                        accessibilityLabel="Refresh icon"
+                        className="text-xl text-foreground dark:text-foreground-dark"
+                      >
+                        ⟳
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+                {/* Buy me ☕ on its own row below */}
                 <TouchableOpacity
                   onPress={openDonate}
                   accessibilityRole="link"
