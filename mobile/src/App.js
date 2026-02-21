@@ -220,121 +220,139 @@ function DashboardContent() {
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
         >
-          {/* Main content: side-by-side in landscape, stacked in portrait */}
-          <View style={isLandscape ? { flexDirection: 'row', gap: 8, alignItems: 'flex-start' } : null}>
-            {/* Parking Tiles */}
-            <View style={[
-              { flexDirection: 'row', gap: 8, marginBottom: 12, marginTop: 8 },
-              isLandscape && { flex: 1, flexDirection: 'column' },
-            ]}>
-              {processed.map((d, i) => (
-                <ParkingTile 
-                  key={d.ParkingGroupName || i} 
-                  data={d} 
-                  now={now} 
-                  allOffline={allOffline} 
-                />
-              ))}
+          {/* Status Message — always at the top in landscape, below tiles in portrait */}
+          {isLandscape && (
+            <View className="mb-2 mt-1">
+              <Text className={`text-sm font-semibold text-center ${statusColorClass}`}>
+                {statusMessage}
+              </Text>
             </View>
+          )}
 
-            {/* Right column in landscape: status + summary */}
-            <View style={isLandscape ? { flex: 1, marginTop: 8 } : null}>
-              {/* Status Message */}
-              <View className="mb-2">
-                <Text className={`text-sm font-semibold text-center ${statusColorClass}`}>
-                  {statusMessage}
+          {/* Parking Tiles — always in a row */}
+          <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12, marginTop: isLandscape ? 0 : 8 }}>
+            {processed.map((d, i) => (
+              <ParkingTile 
+                key={d.ParkingGroupName || i} 
+                data={d} 
+                now={now} 
+                allOffline={allOffline} 
+              />
+            ))}
+          </View>
+
+          {/* Status Message — below tiles in portrait only */}
+          {!isLandscape && (
+            <View className="mb-2">
+              <Text className={`text-sm font-semibold text-center ${statusColorClass}`}>
+                {statusMessage}
+              </Text>
+            </View>
+          )}
+
+          {/* Summary Card — row-oriented in landscape, stacked in portrait */}
+          <View
+            className="rounded-lg bg-secondary dark:bg-secondary-dark border border-border dark:border-border-dark overflow-hidden"
+            style={isLandscape ? { flexDirection: 'row' } : null}
+          >
+            {/* Total Spaces */}
+            <View
+              className="p-3 items-center border-border dark:border-border-dark"
+              style={isLandscape
+                ? { flex: 1, borderRightWidth: 1 }
+                : { borderBottomWidth: 1 }}
+            >
+              <Text className="text-xs text-muted dark:text-muted-dark">
+                Total Spaces
+              </Text>
+              <View className="flex-row items-baseline mt-1">
+                {hasApproximation && (
+                  <Text className="text-3xl text-warning-medium dark:text-warning-medium-dark mr-1">
+                    ≈
+                  </Text>
+                )}
+                <Text className={`text-3xl font-bold ${totalColorClass}`}>
+                  {totalSpaces}
                 </Text>
               </View>
+              {hasApproximation && (
+                <Text className="text-xs text-muted dark:text-muted-dark italic">
+                  (orig: {originalTotal})
+                </Text>
+              )}
+            </View>
 
-              {/* Summary Card */}
-              <View className="rounded-lg bg-secondary dark:bg-secondary-dark border border-border dark:border-border-dark overflow-hidden">
-                {/* Total Spaces */}
-                <View className="p-3 items-center border-b border-border dark:border-border-dark">
-                  <Text className="text-xs text-muted dark:text-muted-dark">
-                    Total Spaces
+            {/* Update Time & Refresh Button */}
+            <View
+              className="p-3 flex-row items-center justify-center gap-2 border-border dark:border-border-dark"
+              style={isLandscape
+                ? { flex: 1, borderRightWidth: 1 }
+                : { borderBottomWidth: 1 }}
+            >
+              <View className="items-center">
+                <Text className="text-xs text-muted dark:text-muted-dark mb-1 text-center">
+                  Last Update / Current
+                </Text>
+                <View className="flex-row items-baseline gap-2 justify-center py-1">
+                  <Text className="text-base font-bold text-foreground dark:text-foreground-dark text-center">
+                    {lastRealtimeUpdate ? formatTime(lastRealtimeUpdate, 'pl-PL') : '--:--:--'}
                   </Text>
-                  <View className="flex-row items-baseline mt-1">
-                    {hasApproximation && (
-                      <Text className="text-3xl text-warning-medium dark:text-warning-medium-dark mr-1">
-                        ≈
-                      </Text>
-                    )}
-                    <Text className={`text-3xl font-bold ${totalColorClass}`}>
-                      {totalSpaces}
-                    </Text>
-                  </View>
-                  {hasApproximation && (
-                    <Text className="text-xs text-muted dark:text-muted-dark italic">
-                      (orig: {originalTotal})
-                    </Text>
-                  )}
-                </View>
-
-                {/* Update Time & Refresh Button */}
-                <View className="p-3 border-b border-border dark:border-border-dark flex-row items-center justify-center gap-2">
-                  <View className="items-center">
-                    <Text className="text-xs text-muted dark:text-muted-dark mb-1 text-center">
-                      Last Update / Current
-                    </Text>
-                    <View className="flex-row items-baseline gap-2 justify-center py-1">
-                      <Text className="text-base font-bold text-foreground dark:text-foreground-dark text-center">
-                        {lastRealtimeUpdate ? formatTime(lastRealtimeUpdate, 'pl-PL') : '--:--:--'}
-                      </Text>
-                      <Text className="text-sm text-muted dark:text-muted-dark text-center">
-                        {now.toLocaleTimeString('pl-PL')}
-                      </Text>
-                    </View>
-                  </View>
-
-                  <TouchableOpacity 
-                    onPress={onRefresh} 
-                    activeOpacity={0.8}
-                    accessibilityRole="button"
-                    accessibilityLabel="Refresh data"
-                    style={{ alignSelf: 'center', justifyContent: 'center' }}
-                  >
-                    <View className="px-3 py-2 rounded-md border border-border dark:border-border-dark bg-primary dark:bg-primary-dark flex-row items-center">
-                      {refreshing || realtimeLoading ? (
-                        <>
-                          <ActivityIndicator 
-                            size="small" 
-                            color={isDark ? '#e0e6ff' : '#333333'} 
-                          />
-                          <Text className="ml-2 text-foreground dark:text-foreground-dark">
-                            Refreshing
-                          </Text>
-                        </>
-                      ) : (
-                        <>
-                          <Text 
-                            accessibilityRole="image" 
-                            accessibilityLabel="Refresh icon"
-                            className="mr-2 text-foreground dark:text-foreground-dark"
-                          >
-                            ⟳
-                          </Text>
-                          <Text className="text-foreground dark:text-foreground-dark">
-                            Refresh
-                          </Text>
-                        </>
-                      )}
-                    </View>
-                  </TouchableOpacity>
-                </View>
-
-                {/* Status Badge */}
-                <View className="p-3 items-center">
-                  <Text className="text-xs text-muted dark:text-muted-dark mb-1">
-                    Status
-                  </Text>
-                  <Text className={`text-xl font-bold ${hasApproximation 
-                    ? 'text-warning-medium dark:text-warning-medium-dark' 
-                    : 'text-success dark:text-success-dark'}`}
-                  >
-                    {hasApproximation ? 'APPROX' : 'ONLINE'}
+                  <Text className="text-sm text-muted dark:text-muted-dark text-center">
+                    {now.toLocaleTimeString('pl-PL')}
                   </Text>
                 </View>
               </View>
+
+              <TouchableOpacity 
+                onPress={onRefresh} 
+                activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel="Refresh data"
+                style={{ alignSelf: 'center', justifyContent: 'center' }}
+              >
+                <View className="px-3 py-2 rounded-md border border-border dark:border-border-dark bg-primary dark:bg-primary-dark flex-row items-center">
+                  {refreshing || realtimeLoading ? (
+                    <>
+                      <ActivityIndicator 
+                        size="small" 
+                        color={isDark ? '#e0e6ff' : '#333333'} 
+                      />
+                      <Text className="ml-2 text-foreground dark:text-foreground-dark">
+                        Refreshing
+                      </Text>
+                    </>
+                  ) : (
+                    <>
+                      <Text 
+                        accessibilityRole="image" 
+                        accessibilityLabel="Refresh icon"
+                        className="mr-2 text-foreground dark:text-foreground-dark"
+                      >
+                        ⟳
+                      </Text>
+                      <Text className="text-foreground dark:text-foreground-dark">
+                        Refresh
+                      </Text>
+                    </>
+                  )}
+                </View>
+              </TouchableOpacity>
+            </View>
+
+            {/* Status Badge */}
+            <View
+              className="p-3 items-center"
+              style={isLandscape ? { flex: 1 } : null}
+            >
+              <Text className="text-xs text-muted dark:text-muted-dark mb-1">
+                Status
+              </Text>
+              <Text className={`text-xl font-bold ${hasApproximation 
+                ? 'text-warning-medium dark:text-warning-medium-dark' 
+                : 'text-success dark:text-success-dark'}`}
+              >
+                {hasApproximation ? 'APPROX' : 'ONLINE'}
+              </Text>
             </View>
           </View>
         </ScrollView>
