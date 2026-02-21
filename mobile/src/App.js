@@ -52,7 +52,7 @@ function ParkingTile({ data, now, allOffline, isLandscape }) {
       : null;
     return (
       <View className="flex-1 rounded-lg border border-border dark:border-border-dark bg-secondary dark:bg-secondary-dark" style={{ padding: 8 }}>
-        <Text className="text-sm font-semibold text-foreground dark:text-foreground-dark mb-1" numberOfLines={1}>
+        <Text className="font-semibold text-foreground dark:text-foreground-dark mb-1" numberOfLines={1} style={{ fontSize: 21 }}>
           {displayName}
         </Text>
         <View style={{ flexDirection: 'row', alignItems: 'flex-start', flex: 1 }}>
@@ -287,7 +287,7 @@ function DashboardContent() {
                     source={require('../assets/favicon.png')}
                     style={{ width: 24, height: 24, flexShrink: 0 }}
                   />
-                  <Text className="text-foreground dark:text-foreground-dark text-xs font-semibold" numberOfLines={2} style={{ flexShrink: 1 }}>
+                  <Text className="text-foreground dark:text-foreground-dark font-semibold" numberOfLines={2} style={{ flexShrink: 1, fontSize: 18 }}>
                     {title}
                   </Text>
                 </View>
