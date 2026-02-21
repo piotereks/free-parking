@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/piotereks/free-parking/compare/v1.1.1...v1.2.0) (2026-02-21)
+
+
+### Features
+
+* mode switch working ([6f5e041](https://github.com/piotereks/free-parking/commit/6f5e041a0444dbd304cb817214397d90085f2486))
+* working color change with parameter ([1d0bc9c](https://github.com/piotereks/free-parking/commit/1d0bc9cbd91a438c7fcb27d62f3999be55ec8341))
+
+
+### Bug Fixes
+
+* **hooks:** reinstated work ([231032d](https://github.com/piotereks/free-parking/commit/231032dfa425f3af5414e0caacbc40bd4844e118))
+* spacing of parking tiles. ([5883f4f](https://github.com/piotereks/free-parking/commit/5883f4f523f36cb10cb402f640fc4ff507df14df))
+* working dark mode ([ca4962b](https://github.com/piotereks/free-parking/commit/ca4962b148b5b214bc24571d84cb8898790a4d84))
+
 ## [2.0.0](https://github.com/piotereks/free-parking/compare/v1.1.0...v2.0.0) (2026-02-20)
 
 ## [1.1.0](https://github.com/piotereks/free-parking/compare/v0.1.0-alpha.0...v1.1.0) (2026-02-20)
