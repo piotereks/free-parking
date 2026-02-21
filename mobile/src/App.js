@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Text, View, StatusBar, ScrollView, RefreshControl, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
+import { Text, View, StatusBar, ScrollView, RefreshControl, TouchableOpacity, ActivityIndicator, Image, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import ParkingDataProvider from './context/ParkingDataProvider';
@@ -37,30 +37,31 @@ function ParkingTile({ data, now, allOffline, isLandscape }) {
   if (isLandscape) {
     // Compact row-oriented tile for landscape:
     //   Name
-    //   [≈ value]  |  [(orig: X)]
-    //              |  [age]
+    //   [≈ value (2/3)]  |  [orig: X or blank (1/3)]
+    //                    |  [age                    ]
+    const origValue = data.approximationInfo?.isApproximated
+      ? (data.approximationInfo?.original ?? data.CurrentFreeGroupCounterValue ?? 0)
+      : null;
     return (
       <View className="flex-1 rounded-lg border border-border dark:border-border-dark bg-secondary dark:bg-secondary-dark" style={{ padding: 8 }}>
-        <Text className="text-sm font-semibold text-foreground dark:text-foreground-dark mb-1">
+        <Text className="text-sm font-semibold text-foreground dark:text-foreground-dark mb-1" numberOfLines={1}>
           {displayName}
         </Text>
         <View style={{ flexDirection: 'row', alignItems: 'flex-start', flex: 1 }}>
-          {/* Left: value */}
-          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          {/* Left: value — 2/3 width */}
+          <View style={{ flex: 2, alignItems: 'center', justifyContent: 'center' }}>
             <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
               {data.approximationInfo?.isApproximated && (
                 <Text className="text-2xl text-warning-medium dark:text-warning-medium-dark" style={{ marginRight: 2 }}>≈</Text>
               )}
-              <Text className={`text-4xl font-bold ${ageColorClass}`}>{value}</Text>
+              <Text className={`text-5xl font-bold ${ageColorClass}`}>{value}</Text>
             </View>
           </View>
-          {/* Right: orig + age */}
-          <View style={{ flex: 1, paddingLeft: 8, borderLeftWidth: 1, borderLeftColor: 'rgba(128,128,128,0.3)', justifyContent: 'center' }}>
-            {data.approximationInfo?.isApproximated && (
-              <Text className="text-xs text-muted dark:text-muted-dark">
-                orig: {data.approximationInfo?.original ?? data.CurrentFreeGroupCounterValue ?? 0}
-              </Text>
-            )}
+          {/* Right: orig (or blank placeholder for alignment) + age — 1/3 width */}
+          <View style={{ flex: 1, paddingLeft: 6, borderLeftWidth: 1, borderLeftColor: 'rgba(128,128,128,0.3)', justifyContent: 'center' }}>
+            <Text className="text-xs text-muted dark:text-muted-dark" numberOfLines={1}>
+              {origValue !== null ? `orig: ${origValue}` : ' '}
+            </Text>
             <Text className={`text-xs ${ageColorClass}`}>{display}</Text>
           </View>
         </View>
@@ -104,6 +105,7 @@ function DashboardContent() {
   const { isDark, setTheme } = useTheme();
   const orientation = useOrientation();
   const isLandscape = orientation === 'landscape';
+  const { width: screenWidth } = useWindowDimensions();
   const title = 'Parking Monitor';
   
   // helper to toggle
@@ -257,7 +259,7 @@ function DashboardContent() {
             {/* Header column */}
             <View
               className="rounded-lg bg-secondary dark:bg-secondary-dark border border-border dark:border-border-dark"
-              style={{ width: 90, padding: 8, justifyContent: 'space-between', alignItems: 'center' }}
+              style={{ width: Math.floor(screenWidth * 0.25), padding: 8, justifyContent: 'space-between', alignItems: 'center' }}
             >
               <Image 
                 source={require('../assets/favicon.png')} 
