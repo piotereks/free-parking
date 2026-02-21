@@ -77,9 +77,9 @@ function ParkingTile({ data, now, allOffline, isLandscape }) {
       
       <View className="flex-row items-center justify-center">
         {data.approximationInfo?.isApproximated && (
-          <Text className="text-warning-medium dark:text-warning-medium-dark mr-1" style={{ fontSize: 102 }}>≈</Text>
+          <Text className="text-6xl text-warning-medium dark:text-warning-medium-dark mr-1">≈</Text>
         )}
-        <Text className={`font-bold text-center ${ageColorClass}`} style={{ fontSize: 102 }}>
+        <Text className={`text-6xl font-bold text-center ${ageColorClass}`}>
           {value}
         </Text>
       </View>
