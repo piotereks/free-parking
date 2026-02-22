@@ -15,7 +15,7 @@
 
   /* CSS Custom Properties */
   :root {
-    --accent-glow: #00d9ff;
+    --accent-glow: theme('colors.accent.DEFAULT');
   }
 
   /* Light theme (default) */
@@ -53,7 +53,7 @@
     @apply flex justify-between items-center px-6 z-[100] flex-shrink-0;
     @apply bg-bg-secondary-light border-b border-border-light transition-theme duration-300;
     height: 60px;
-    box-shadow: 0 1px 10px rgba(0, 0, 0, 0.2);
+    @apply shadow-header-light;
     padding-right: 220px; /* reserve space for header actions so they don't wrap */
   }
 
@@ -104,6 +104,10 @@
     @apply text-xs text-text-secondary-light mt-0.5 pl-7;
     font-size: 11px;
     opacity: 0.85;
+  }
+
+  .dark .status-version {
+    @apply text-text-secondary-dark;
   }
 
   .dark .status-info {
@@ -173,28 +177,41 @@
     @apply bg-bg-card-dark;
   }
 
-  /* Donate / BuyCoffee button */
+  /* Donate / BuyCoffee button: similar structure to nav-btn but special yellow backgrounds */
   .donate-btn {
     @apply flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold;
     @apply transition-all duration-200 cursor-pointer;
-    @apply bg-notice-light border border-notice-border-light text-notice-text-dark;
+    @apply bg-donate-light;
+    @apply border border-border-light text-notice-text-dark;
     height: 44px;
     width: auto;
   }
 
   .dark .donate-btn {
-    @apply bg-notice-dark border-notice-border-dark text-notice-text-light;
+    @apply bg-donate-dark;
+    @apply border-border-dark text-notice-text-light;
   }
 
   .donate-badge {
     @apply inline-flex items-center justify-center rounded-md text-lg;
     width: 28px;
     height: 28px;
-    background: rgba(250, 204, 21, 0.12);
+    @apply bg-donate-badge;
   }
 
   .donate-btn:hover {
     @apply -translate-y-px shadow-hover-light;
+  }
+
+  .dark .donate-btn:hover {
+    @apply -translate-y-px shadow-hover-dark;
+  }
+
+  /* custom utility colours for donate button */
+  @layer utilities {
+    .bg-donate-light { background-color: theme('colors.donate.light'); }
+    .bg-donate-dark  { background-color: theme('colors.donate.dark'); }
+    .bg-donate-badge { background-color: theme('colors.donate-badge'); }
   }
 
   .tooltip-wrapper {
@@ -246,6 +263,10 @@
     flex-direction: column;
     align-items: center;
     gap: 2px;
+  }
+
+  .dark .tooltip-sub {
+    @apply text-text-secondary-dark;
   }
 
   .tooltip-line {
@@ -361,28 +382,28 @@
   }
 
   .free-spots {
-    @apply text-spot-number font-bold text-text-success-dark;
+    @apply text-spot-number font-bold text-text-success-light;
     @apply flex items-center justify-center gap-1;
   }
 
-  body:not(.dark) .free-spots {
-    @apply text-text-success-light;
+  .dark .free-spots {
+    @apply text-text-success-dark;
   }
 
   .free-spots.age-old {
-    @apply text-text-warning-dark;
-  }
-
-  body:not(.dark) .free-spots.age-old {
     @apply text-text-warning-light;
   }
 
-  .free-spots.age-medium {
-    @apply text-text-warning-medium-dark;
+  .dark .free-spots.age-old {
+    @apply text-text-warning-dark;
   }
 
-  body:not(.dark) .free-spots.age-medium {
+  .free-spots.age-medium {
     @apply text-text-warning-medium-light;
+  }
+
+  .dark .free-spots.age-medium {
+    @apply text-text-warning-medium-dark;
   }
 
   .status-icon-number {
@@ -457,37 +478,33 @@
   }
 
   .status-value {
-    @apply text-3xl font-bold text-text-success-dark;
+    @apply text-3xl font-bold text-text-success-light;
   }
 
-  body:not(.dark) .status-value {
-    @apply text-text-success-light;
+  .dark .status-value {
+    @apply text-text-success-dark;
   }
 
   .status-value.age-old {
-    @apply text-text-warning-dark;
-  }
-
-  body:not(.dark) .status-value.age-old {
     @apply text-text-warning-light;
   }
 
-  .status-value.age-medium {
-    @apply text-text-warning-medium-dark;
+  .dark .status-value.age-old {
+    @apply text-text-warning-dark;
   }
 
-  body:not(.dark) .status-value.age-medium {
+  .status-value.age-medium {
     @apply text-text-warning-medium-light;
+  }
+
+  .dark .status-value.age-medium {
+    @apply text-text-warning-medium-dark;
   }
 
   .status-description {
     @apply mt-4 mb-8 px-6 text-center font-bold w-full;
-    @apply text-text-success-dark;
-    font-size: 1.125rem; /* 18px for wide screen */
-  }
-
-  body:not(.dark) .status-description {
     @apply text-text-success-light;
+    font-size: 1.125rem; /* 18px for wide screen */
   }
 
   .dark .status-description {
@@ -495,19 +512,19 @@
   }
 
   .status-description.age-old {
-    @apply text-text-warning-dark;
-  }
-
-  body:not(.dark) .status-description.age-old {
     @apply text-text-warning-light;
   }
 
-  .status-description.age-medium {
-    @apply text-text-warning-medium-dark;
+  .dark .status-description.age-old {
+    @apply text-text-warning-dark;
   }
 
-  body:not(.dark) .status-description.age-medium {
+  .status-description.age-medium {
     @apply text-text-warning-medium-light;
+  }
+
+  .dark .status-description.age-medium {
+    @apply text-text-warning-medium-dark;
   }
 
   .big-value {
@@ -528,13 +545,13 @@
 
   /* Error state */
   .error {
-    @apply rounded-lg p-4 mb-4 text-text-warning-dark;
-    background: rgba(239, 68, 68, 0.1);
+    @apply rounded-lg p-4 mb-4 text-text-warning-light;
+    @apply bg-error-bg;
     border: 1px solid currentColor;
   }
 
-  body:not(.dark) .error {
-    @apply text-text-warning-light;
+  .dark .error {
+    @apply text-text-warning-dark;
   }
 
   /* Statistics */
