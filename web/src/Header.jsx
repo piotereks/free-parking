@@ -124,7 +124,7 @@ const Header = ({ title, shortTitle, icon, onRefresh, updateStatus, currentView,
 
         <div className="tooltip-wrapper" onMouseEnter={positionTooltip} onFocus={positionTooltip}>
           <a
-            className="nav-btn donate-btn"
+            className="nav-btn donate-btn bg-donate-light dark:bg-donate-dark"
             href="https://buycoffee.to/piotereks"
             target="_blank"
             rel="noopener noreferrer"

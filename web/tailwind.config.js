@@ -61,6 +61,12 @@ export default {
           light: '#fde047',
           dark: '#854d0e',
         },
+        'donate': {
+          light: 'rgba(250,204,21,0.20)',
+          dark: 'rgba(250,204,21,0.12)',
+        },
+        'donate-badge': 'rgba(250,204,21,0.12)',
+        'error-bg': 'rgba(239,68,68,0.1)',
         // Border colors
         'border': {
           light: '#e2e8f0',
