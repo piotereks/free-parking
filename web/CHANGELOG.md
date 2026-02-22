@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.5](https://github.com/piotereks/free-parking/compare/v2.2.0...v1.1.5) (2026-02-22)
+
+
+### Bug Fixes
+
+* color styling ([f4aa14a](https://github.com/piotereks/free-parking/commit/f4aa14aaf66cfabc3f025a534720fb132496ce63))
+
 ### [1.1.4](https://github.com/piotereks/free-parking/compare/v1.1.2...v1.1.4) (2026-02-22)
 
 ### [1.1.3](https://github.com/piotereks/free-parking/compare/v1.1.2...v1.1.3) (2026-02-22)
