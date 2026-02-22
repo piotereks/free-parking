@@ -44,6 +44,8 @@ This file lives inside `mobile/` so an AI agent focusing on the Expo/React‑Nat
      - `global.fetch` is stubbed directly in adapter/unit tests.
      - The shared package (`../shared/src/index.js`) is often mocked to control store behaviour (see `offline.test.js`).
    - To temporarily skip a flaky test, append `.skip` to the filename (see `ThemeContext.test.js.skip`).
+5. **Powershell frorbiden**
+   No workflow done by copilot should use Powershell scripting because it is bad tool, contraproductive and noone in world should use it. There are normal tools like bash or eventually cmd.exe
 
 ## Conventions & patterns
 

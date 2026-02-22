@@ -7,6 +7,7 @@ import { debugLog } from './config/debug';
 import useParkingStore from './hooks/useParkingStore';
 import useOrientation from './hooks/useOrientation';
 import { applyApproximations, calculateDataAge, formatAgeLabel, formatTime, createRefreshHelper } from 'parking-shared';
+import pkg from '../package.json';
 
 // Top-level app theme constant. Set to 'dark', 'light' or 'system'.
 export const APP_THEME = 'dark';
@@ -115,6 +116,7 @@ function DashboardContent() {
   const isLandscape = orientation === 'landscape';
   const { width: screenWidth } = useWindowDimensions();
   const title = 'Parking Monitor';
+  const version = pkg?.version || '0.0.0';
   
   // helper to toggle
   const toggleTheme = () => setTheme(isDark ? 'light' : 'dark');
@@ -214,46 +216,62 @@ function DashboardContent() {
   const { colorClass: statusColorClass, statusMessage } = getAggregatedStatus();
   const totalColorClass = statusColorClass;
 
+  // Debug logging for orientation and version
+  useEffect(() => {
+    debugLog('DashboardContent: Orientation changed', orientation, 'Version:', version);
+  }, [orientation, version]);
+
   return (
     <SafeAreaView className={`flex-1 bg-primary dark:bg-primary-dark ${isDark ? 'dark' : ''}`}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
       {/* Full-width header — portrait only */}
       {!isLandscape && (
-        <View className="w-full bg-secondary dark:bg-secondary-dark flex-row items-center justify-between py-3 px-4 border-b border-border dark:border-border-dark">
-          <Image 
-            source={require('../assets/favicon.png')} 
-            style={{ width: 36, height: 36, marginRight: 12 }} 
-          />
-          <View className="items-center">
-            <Text className="text-foreground dark:text-foreground-dark text-lg font-semibold">
-              {title}
-            </Text>
-            <Text className="text-muted dark:text-muted-dark text-xs mt-0.5">
-              Real-time • GD-Uni Wrocław
-            </Text>
+        <View className="w-full bg-secondary dark:bg-secondary-dark py-3 px-4 border-b border-border dark:border-border-dark">
+          <View className="flex-row items-center justify-between mb-1">
+            <Image 
+              source={require('../assets/favicon.png')} 
+              style={{ width: 36, height: 36, marginRight: 12 }} 
+            />
+            <View className="flex-1">
+              <Text className="text-foreground dark:text-foreground-dark text-lg font-semibold">
+                {title}
+              </Text>
+            </View>
+            <TouchableOpacity
+              onPress={toggleTheme}
+              accessibilityRole="button"
+              accessibilityLabel={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
+              className="flex items-center justify-center rounded-lg border bg-bg-primary-light border-border dark:bg-bg-primary-dark dark:border-border-dark shadow-custom-light dark:shadow-custom-dark"
+              style={{ width: 44, height: 44 }}
+            >
+              <Text className="text-2xl">
+                {isDark ? '☀️' : '🌙'}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={openDonate}
+              accessibilityRole="link"
+              accessibilityLabel="Buy me a coffee — support development"
+              className="flex-row items-center justify-center rounded-lg border border-border dark:border-border-dark"
+              style={{ height: 44, paddingHorizontal: 10, marginLeft: 8, backgroundColor: isDark ? 'rgba(250,204,21,0.12)' : 'rgba(250,204,21,0.20)' }}
+            >
+              <Text className="text-sm font-semibold text-foreground dark:text-foreground-dark" style={{ marginRight: 4 }}>Buy me</Text>
+              <Text style={{ fontSize: 22 }}>☕</Text>
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity
-            onPress={toggleTheme}
-            accessibilityRole="button"
-            accessibilityLabel={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
-            className="flex items-center justify-center rounded-lg border bg-bg-primary-light border-border dark:bg-bg-primary-dark dark:border-border-dark shadow-custom-light dark:shadow-custom-dark"
-            style={{ width: 44, height: 44 }}
-          >
-            <Text className="text-2xl">
-              {isDark ? '☀️' : '🌙'}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={openDonate}
-            accessibilityRole="link"
-            accessibilityLabel="Buy me a coffee — support development"
-            className="flex-row items-center justify-center rounded-lg border border-border dark:border-border-dark"
-            style={{ height: 44, paddingHorizontal: 10, marginLeft: 8, backgroundColor: isDark ? 'rgba(250,204,21,0.12)' : 'rgba(250,204,21,0.20)' }}
-          >
-            <Text className="text-sm font-semibold text-foreground dark:text-foreground-dark" style={{ marginRight: 4 }}>Buy me</Text>
-            <Text style={{ fontSize: 22 }}>☕</Text>
-          </TouchableOpacity>
+          <Text className="text-muted dark:text-muted-dark text-xs" style={{ marginLeft: 48 }}>
+            Version: {version}
+          </Text>
+        </View>
+      )}
+
+      {/* Floating Real-time label — portrait only */}
+      {!isLandscape && !realtimeLoading && !realtimeError && (
+        <View className="w-full items-center py-1 bg-primary dark:bg-primary-dark">
+          <Text className="text-muted dark:text-muted-dark text-sm">
+            Real-time • GD-Uni Wrocław
+          </Text>
         </View>
       )}
 
@@ -291,6 +309,9 @@ function DashboardContent() {
                     {title}
                   </Text>
                 </View>
+                <Text className="text-muted dark:text-muted-dark" style={{ fontSize: 12 }} numberOfLines={1}>
+                  Version: {version}
+                </Text>
                 <Text className="text-muted dark:text-muted-dark" style={{ fontSize: 14 }} numberOfLines={2}>
                   Real-time • GD-Uni Wrocław
                 </Text>
@@ -414,13 +435,14 @@ function DashboardContent() {
       ) : (
         /* ── PORTRAIT: scrollable layout ── */
         <ScrollView
-          className="flex-1 px-3 py-2"
+          className="flex-1 px-3"
+          style={{ paddingTop: 4, paddingBottom: 8 }}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
         >
           {/* Parking Tiles */}
-          <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12, marginTop: 8 }}>
+          <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12, marginTop: 4 }}>
             {processed.map((d, i) => (
               <ParkingTile 
                 key={d.ParkingGroupName || i} 
