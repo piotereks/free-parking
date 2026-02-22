@@ -83,24 +83,26 @@ const Header = ({ title, shortTitle, icon, onRefresh, updateStatus, currentView,
         {/* Extra actions like Palette Selector */}
         {children}
 
-        {(() => {
-          const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
-          const showClear = params.has('clear_cache');
-          if (showClear) {
-            return (
-              <button className="nav-btn" onClick={() => clearCache()} aria-label="Clear cache">
-                <span className="btn-icon" role="img" aria-label="Broom icon">🧹</span>
-                <span className="btn-text">Clear Cache</span>
+        <div className="header-refresh">
+          {(() => {
+            const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
+            const showClear = params.has('clear_cache');
+            if (showClear) {
+              return (
+                <button className="nav-btn" onClick={() => clearCache()} aria-label="Clear cache">
+                  <span className="btn-icon" role="img" aria-label="Broom icon">🧹</span>
+                  <span className="btn-text">Clear Cache</span>
+                </button>
+              );
+            }
+            return onRefresh ? (
+              <button className="nav-btn" onClick={onRefresh} aria-label="Refresh data">
+                <span className="btn-icon" role="img" aria-label="Refresh icon">⟳</span>
+                <span className="btn-text">Refresh</span>
               </button>
-            );
-          }
-          return onRefresh ? (
-            <button className="nav-btn" onClick={onRefresh} aria-label="Refresh data">
-              <span className="btn-icon" role="img" aria-label="Refresh icon">⟳</span>
-              <span className="btn-text">Refresh</span>
-            </button>
-          ) : null;
-        })()}
+            ) : null;
+          })()}
+        </div>
 
         {currentView === 'stats' && (
           <button className="nav-btn" onClick={() => setView('dashboard')} aria-label="Go to dashboard">

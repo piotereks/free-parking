@@ -163,7 +163,7 @@ const Dashboard = ({ setView }) => {
       />
 
       <main className="container-main" role="main" aria-label="Parking dashboard">
-        <div className="subtitle">Real-time parking availability • GD-Uni Wrocław</div>
+        <div className="subtitle hide-narrow">Real-time parking availability • GD-Uni Wrocław</div>
 
         {realtimeError && (
           <div className="error" role="alert" aria-live="polite">
@@ -203,6 +203,10 @@ const Dashboard = ({ setView }) => {
                 <span className="status-current-inline" aria-label={`Current time ${now.toLocaleTimeString('pl-PL')}`}>
                   {now.toLocaleTimeString('pl-PL')}
                 </span>
+                <button className="panel-refresh-btn" onClick={refreshParkingData} aria-label="Refresh data">
+                  <span role="img" aria-label="Refresh icon">⟳</span>
+                  Refresh
+                </button>
               </div>
             </div>
             <div className="panel-section">

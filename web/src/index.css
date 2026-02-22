@@ -318,6 +318,11 @@
     @apply bg-bg-card-dark text-text-primary-dark;
   }
 
+  /* Panel refresh button (only shown on narrow screens) */
+  .panel-refresh-btn {
+    @apply hidden;
+  }
+
   /* Dashboard */
   .subtitle {
     @apply mb-6 text-base text-text-secondary-light;
@@ -653,6 +658,34 @@
     @apply mb-4;
   }
 
+  /* Hide the subtitle label ("Real-time parking...") on narrow screens */
+  .hide-narrow {
+    @apply hidden;
+  }
+
+  /* Hide the header refresh button on narrow screens (moved into the panel) */
+  .header-refresh {
+    @apply hidden;
+  }
+
+  .panel-refresh-btn {
+    @apply flex items-center gap-1 px-3 py-1 rounded-lg text-sm font-semibold cursor-pointer;
+    @apply bg-bg-primary-light border border-border-light text-text-primary-light;
+    height: 38px; /* match mobile nav-btn height */
+  }
+
+  .dark .panel-refresh-btn {
+    @apply bg-bg-primary-dark border-border-dark text-text-primary-dark;
+  }
+
+  .panel-refresh-btn:hover {
+    @apply bg-bg-card-light -translate-y-px;
+  }
+
+  .dark .panel-refresh-btn:hover {
+    @apply bg-bg-card-dark;
+  }
+
   .status-panel {
     @apply mb-3;
   }
@@ -674,16 +707,9 @@
     @apply p-3;
   }
 
+  /* Hide entire palette/color-picker group on narrow screens (previously only label and toggle-btn
+     were hidden, leaving the 4 circle buttons visible — now the whole group is removed). */
   .palette-group {
-    @apply border-r-0 pr-0;
-  }
-
-  .palette-label,
-  .palette-toggle-btn {
     @apply hidden;
-  }
-
-  .palette-btn {
-    @apply w-[18px] h-[18px];
   }
 }
