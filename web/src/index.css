@@ -606,11 +606,6 @@
     display: none;
   }
 
-  /* Move coffee button to the right of the theme toggle */
-  .tooltip-wrapper {
-    order: 1;
-  }
-
   .btn-icon {
     @apply mr-0;
   }

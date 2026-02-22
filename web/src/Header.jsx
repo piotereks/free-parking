@@ -118,6 +118,10 @@ const Header = ({ title, shortTitle, icon, onRefresh, updateStatus, currentView,
           </button>
         )}
 
+        <button className="theme-toggle" onClick={toggleTheme} aria-label={isLight ? 'Switch to dark theme' : 'Switch to light theme'}>
+          {isLight ? '🌙' : '☀️'}
+        </button>
+
         <div className="tooltip-wrapper" onMouseEnter={positionTooltip} onFocus={positionTooltip}>
           <a
             className="nav-btn donate-btn"
@@ -148,10 +152,6 @@ const Header = ({ title, shortTitle, icon, onRefresh, updateStatus, currentView,
             </div>
           </div>
         </div>
-
-        <button className="theme-toggle" onClick={toggleTheme} aria-label={isLight ? 'Switch to dark theme' : 'Switch to light theme'}>
-          {isLight ? '🌙' : '☀️'}
-        </button>
       </div>
     </header>
   );
