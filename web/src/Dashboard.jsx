@@ -155,6 +155,7 @@ const Dashboard = ({ setView }) => {
     <>
       <Header
         title="Parking Monitor"
+        shortTitle="Parking"
         icon="🅿️"
         onRefresh={refreshParkingData}
         updateStatus={updateStatus}

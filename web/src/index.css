@@ -569,7 +569,7 @@
   .header-controls {
     @apply px-2;
     height: 54px;
-    padding-right: 110px; /* smaller reserve on narrow screens */
+    padding-right: 168px; /* 3 × 44px buttons + 2 × 12px gaps + 12px margin */
   }
 
   .container-main {
@@ -589,29 +589,26 @@
     @apply inline;
   }
 
-  /* keep most buttons icon-only on small screens, but allow donate button text to show when space permits */
+  /* keep most buttons icon-only on small screens */
   .btn-text {
     @apply hidden;
   }
 
-  /* On very small screens show donate text and prevent the donate button from collapsing */
+  /* On narrow screens: donate button shows only the ☕ emoji and moves after the theme toggle */
   .donate-btn {
-    width: auto;
-    min-width: 88px;
-    padding-left: 8px;
-    padding-right: 8px;
+    width: 44px;
+    min-width: unset;
+    padding-left: 0;
+    padding-right: 0;
   }
 
   .donate-btn .btn-text {
-    display: inline-block;
-    max-width: 120px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    display: none;
   }
 
-  .donate-btn.show-text .btn-text {
-    max-width: 160px;
+  /* Move coffee button to the right of the theme toggle */
+  .tooltip-wrapper {
+    order: 1;
   }
 
   .btn-icon {
