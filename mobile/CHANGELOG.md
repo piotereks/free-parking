@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.2.0](https://github.com/piotereks/free-parking/compare/v1.1.2...v2.2.0) (2026-02-22)
+
+
+### Features
+
+* change narrow screen breakpoint from 600px to 700px ([e011b5e](https://github.com/piotereks/free-parking/commit/e011b5eff0e5d5f7286a4a387b677417c1ec0439))
+* **header:** add version marker ([ee9b11b](https://github.com/piotereks/free-parking/commit/ee9b11bb1c9b967de2b6405e53e2440204d31c3d))
+* improve narrow screen header layout for web dashboard and stats view ([c9c971a](https://github.com/piotereks/free-parking/commit/c9c971ae82329fce32abc5f557dc5cfc34fc8002))
+* make coffee button always rightmost by moving it after theme toggle in JSX ([945a519](https://github.com/piotereks/free-parking/commit/945a51991a603c5a8ea587aca007a576dbc8a35f))
+* narrow screen - coffee btn after theme toggle, emoji-only, Parking short title ([dff63b2](https://github.com/piotereks/free-parking/commit/dff63b287c159d5f4961fd03bb2f98e96e014d17))
+
 ## [2.1.0](https://github.com/piotereks/free-parking/compare/v2.0.0...v2.1.0) (2026-02-21)
 
 
