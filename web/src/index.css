@@ -318,6 +318,11 @@
     @apply bg-bg-card-dark text-text-primary-dark;
   }
 
+  /* Panel refresh button (only shown on narrow screens) */
+  .panel-refresh-btn {
+    @apply hidden;
+  }
+
   /* Dashboard */
   .subtitle {
     @apply mb-6 text-base text-text-secondary-light;
@@ -544,7 +549,7 @@
 }
 
 /* Responsive styles */
-@media (max-width: 600px) {
+@media (max-width: 700px) {
   html {
     height: -webkit-fill-available;
   }
@@ -564,7 +569,7 @@
   .header-controls {
     @apply px-2;
     height: 54px;
-    padding-right: 110px; /* smaller reserve on narrow screens */
+    padding-right: 168px; /* 3 × 44px buttons + 2 × 12px gaps + 12px margin */
   }
 
   .container-main {
@@ -584,29 +589,21 @@
     @apply inline;
   }
 
-  /* keep most buttons icon-only on small screens, but allow donate button text to show when space permits */
+  /* keep most buttons icon-only on small screens */
   .btn-text {
     @apply hidden;
   }
 
-  /* On very small screens show donate text and prevent the donate button from collapsing */
+  /* On narrow screens: donate button shows only the ☕ emoji and moves after the theme toggle */
   .donate-btn {
-    width: auto;
-    min-width: 88px;
-    padding-left: 8px;
-    padding-right: 8px;
+    width: 44px;
+    min-width: unset;
+    padding-left: 0;
+    padding-right: 0;
   }
 
   .donate-btn .btn-text {
-    display: inline-block;
-    max-width: 120px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .donate-btn.show-text .btn-text {
-    max-width: 160px;
+    display: none;
   }
 
   .btn-icon {
@@ -653,6 +650,34 @@
     @apply mb-4;
   }
 
+  /* Hide the subtitle label ("Real-time parking...") on narrow screens */
+  .hide-narrow {
+    @apply hidden;
+  }
+
+  /* Hide the header refresh button on narrow screens (moved into the panel) */
+  .header-refresh {
+    @apply hidden;
+  }
+
+  .panel-refresh-btn {
+    @apply flex items-center gap-1 px-3 py-1 rounded-lg text-sm font-semibold cursor-pointer;
+    @apply bg-bg-primary-light border border-border-light text-text-primary-light;
+    height: 38px; /* match mobile nav-btn height */
+  }
+
+  .dark .panel-refresh-btn {
+    @apply bg-bg-primary-dark border-border-dark text-text-primary-dark;
+  }
+
+  .panel-refresh-btn:hover {
+    @apply bg-bg-card-light -translate-y-px;
+  }
+
+  .dark .panel-refresh-btn:hover {
+    @apply bg-bg-card-dark;
+  }
+
   .status-panel {
     @apply mb-3;
   }
@@ -674,16 +699,9 @@
     @apply p-3;
   }
 
+  /* Hide entire palette/color-picker group on narrow screens (previously only label and toggle-btn
+     were hidden, leaving the 4 circle buttons visible — now the whole group is removed). */
   .palette-group {
-    @apply border-r-0 pr-0;
-  }
-
-  .palette-label,
-  .palette-toggle-btn {
     @apply hidden;
-  }
-
-  .palette-btn {
-    @apply w-[18px] h-[18px];
   }
 }
