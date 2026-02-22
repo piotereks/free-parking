@@ -7,6 +7,7 @@ import { debugLog } from './config/debug';
 import useParkingStore from './hooks/useParkingStore';
 import useOrientation from './hooks/useOrientation';
 import { applyApproximations, calculateDataAge, formatAgeLabel, formatTime, createRefreshHelper } from 'parking-shared';
+import pkg from '../package.json';
 
 // Top-level app theme constant. Set to 'dark', 'light' or 'system'.
 export const APP_THEME = 'dark';
@@ -115,6 +116,7 @@ function DashboardContent() {
   const isLandscape = orientation === 'landscape';
   const { width: screenWidth } = useWindowDimensions();
   const title = 'Parking Monitor';
+  const version = pkg?.version || '0.0.0';
   
   // helper to toggle
   const toggleTheme = () => setTheme(isDark ? 'light' : 'dark');
@@ -214,6 +216,11 @@ function DashboardContent() {
   const { colorClass: statusColorClass, statusMessage } = getAggregatedStatus();
   const totalColorClass = statusColorClass;
 
+  // Debug logging for orientation and version
+  useEffect(() => {
+    debugLog('DashboardContent: Orientation changed', orientation, 'Version:', version);
+  }, [orientation, version]);
+
   return (
     <SafeAreaView className={`flex-1 bg-primary dark:bg-primary-dark ${isDark ? 'dark' : ''}`}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
@@ -230,7 +237,7 @@ function DashboardContent() {
               {title}
             </Text>
             <Text className="text-muted dark:text-muted-dark text-xs mt-0.5">
-              Real-time • GD-Uni Wrocław
+              v{version}
             </Text>
           </View>
           <TouchableOpacity
@@ -254,6 +261,15 @@ function DashboardContent() {
             <Text className="text-sm font-semibold text-foreground dark:text-foreground-dark" style={{ marginRight: 4 }}>Buy me</Text>
             <Text style={{ fontSize: 22 }}>☕</Text>
           </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Floating Real-time label — portrait only */}
+      {!isLandscape && !realtimeLoading && !realtimeError && (
+        <View className="w-full items-center py-2 bg-primary dark:bg-primary-dark">
+          <Text className="text-muted dark:text-muted-dark text-sm">
+            Real-time • GD-Uni Wrocław
+          </Text>
         </View>
       )}
 
@@ -291,6 +307,9 @@ function DashboardContent() {
                     {title}
                   </Text>
                 </View>
+                <Text className="text-muted dark:text-muted-dark" style={{ fontSize: 12 }} numberOfLines={1}>
+                  v{version}
+                </Text>
                 <Text className="text-muted dark:text-muted-dark" style={{ fontSize: 14 }} numberOfLines={2}>
                   Real-time • GD-Uni Wrocław
                 </Text>
