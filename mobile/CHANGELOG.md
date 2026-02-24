@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.2.1](https://github.com/piotereks/free-parking/compare/v1.1.5...v2.2.1) (2026-02-24)
+
+
+### Bug Fixes
+
+* deprecated-edge-to-edge-apis ([0dfaeb2](https://github.com/piotereks/free-parking/commit/0dfaeb23b19b7ac4929697f9a2dea1ce5587c669))
+* replace deprecated react-native StatusBar with expo-status-bar for Android 15 compatibility ([3a6f4f9](https://github.com/piotereks/free-parking/commit/3a6f4f9236d8c5d1d65f0f108f98069605b8e7b7))
+
 ## [2.2.0](https://github.com/piotereks/free-parking/compare/v1.1.2...v2.2.0) (2026-02-22)
 
 
