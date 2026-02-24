@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.3.0](https://github.com/piotereks/free-parking/compare/v2.2.1...v2.3.0) (2026-02-24)
+
+
+### Features
+
+* **mobile:** add android:resizeableActivity=true for Android 16+ large-screen support ([25e00db](https://github.com/piotereks/free-parking/commit/25e00db5abfe444be1e4de1dc8c8ad056ca02ced))
+
 ### [2.2.1](https://github.com/piotereks/free-parking/compare/v1.1.5...v2.2.1) (2026-02-24)
 
 
