@@ -115,7 +115,7 @@ function DashboardContent() {
   const { isDark, setTheme } = useTheme();
   const orientation = useOrientation();
   const isLandscape = orientation === 'landscape';
-  const { width: screenWidth } = useWindowDimensions();
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const title = 'Parking Monitor';
   const version = pkg?.version || '0.0.0';
   
@@ -313,7 +313,7 @@ function DashboardContent() {
                 <Text className="text-muted dark:text-muted-dark" style={{ fontSize: 12 }} numberOfLines={1}>
                   Version: {version}
                 </Text>
-                <Text className="text-muted dark:text-muted-dark" style={{ fontSize: 14 }} numberOfLines={2}>
+                <Text className="text-muted dark:text-muted-dark" style={{ fontSize: screenHeight < 400 ? 11 : 14 }} numberOfLines={2}>
                   Real-time • GD-Uni Wrocław
                 </Text>
               </View>
