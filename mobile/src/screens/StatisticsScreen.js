@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import useParkingStore from '../hooks/useParkingStore';
-import { applyApproximations } from 'parking-shared';
 import StatisticsChart from '../components/StatisticsChart';
 
 const PALETTE_LABELS = [
@@ -15,8 +14,8 @@ const PALETTE_LABELS = [
 /**
  * StatisticsScreen
  *
- * Shows a parking-statistics chart identical in data to the web Statistics view
- * but rendered with victory-native (SVG based, works in Expo managed Android/iOS).
+ * Shows a parking free-space history line chart matching the web Statistics view.
+ * Fetches CSV history data via ParkingDataProvider and renders it with StatisticsChart.
  *
  * @param {Function} onBack - Callback to return to the dashboard
  */
@@ -24,12 +23,8 @@ const StatisticsScreen = ({ onBack }) => {
   const { isDark } = useTheme();
   const [palette, setPalette] = useState('neon');
 
-  const realtimeData = useParkingStore((s) => s.realtimeData);
-  const realtimeLoading = useParkingStore((s) => s.realtimeLoading);
-  const realtimeError = useParkingStore((s) => s.realtimeError);
-
-  const now = new Date();
-  const processedData = Array.isArray(realtimeData) ? applyApproximations(realtimeData, now) : [];
+  const historyData = useParkingStore((s) => s.historyData);
+  const historyLoading = useParkingStore((s) => s.historyLoading);
 
   const headerBg = isDark ? '#0f172a' : '#f8fafc';
   const borderColor = isDark ? '#1e2a4a' : '#e2e8f0';
@@ -102,22 +97,14 @@ const StatisticsScreen = ({ onBack }) => {
 
       {/* Content */}
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 12 }}>
-        {realtimeLoading && (
+        {historyLoading && (
           <View style={{ alignItems: 'center', paddingVertical: 32 }}>
-            <Text style={{ color: mutedColor, fontSize: 14 }}>Loading parking data…</Text>
+            <Text style={{ color: mutedColor, fontSize: 14 }}>Loading history data…</Text>
           </View>
         )}
 
-        {realtimeError && !realtimeLoading && (
-          <View style={{ alignItems: 'center', paddingVertical: 32 }}>
-            <Text style={{ color: '#f97316', fontSize: 14, textAlign: 'center' }}>
-              {String(realtimeError)}
-            </Text>
-          </View>
-        )}
-
-        {!realtimeLoading && !realtimeError && (
-          <StatisticsChart data={processedData} palette={palette} />
+        {!historyLoading && (
+          <StatisticsChart historyData={historyData} palette={palette} />
         )}
 
         <Text style={{ color: mutedColor, fontSize: 11, textAlign: 'center', marginTop: 16 }}>
@@ -129,3 +116,4 @@ const StatisticsScreen = ({ onBack }) => {
 };
 
 export default StatisticsScreen;
+

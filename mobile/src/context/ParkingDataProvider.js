@@ -5,6 +5,30 @@ import { debugLog } from '../config/debug';
 import { fetchAndStoreEntry } from './ParkingEntryManager';
 import { readParkingData } from './ParkingDataPersistence';
 
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTwLNDbg8KjlVHsZWj9JUnO_OBIyZaRgZ4gZ8_Gbyly2J3f6rlCW6lDHAihwbuLhxWbBkNMI1wdWRAq/pub?gid=411529798&single=true&output=csv';
+
+function parseCSV(text) {
+  const lines = text.trim().split(/\r?\n/);
+  if (lines.length < 2) return [];
+  const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim());
+  return lines.slice(1)
+    .filter(line => line.trim())
+    .map(line => {
+      const fields = [];
+      let inQuote = false;
+      let current = '';
+      for (const ch of line) {
+        if (ch === '"') { inQuote = !inQuote; }
+        else if (ch === ',' && !inQuote) { fields.push(current); current = ''; }
+        else { current += ch; }
+      }
+      fields.push(current);
+      const row = {};
+      headers.forEach((h, i) => { row[h] = (fields[i] || '').trim(); });
+      return row;
+    });
+}
+
 const FETCH_TIMEOUT = 15000;
 
 // Helper to run a fetch operation with a timeout and detailed logs
@@ -34,19 +58,34 @@ const API_URLS = [
 const fetchAdapter = createMobileFetchAdapter();
 
 /**
- * Minimal data provider for mobile: fetches realtime data and wires refresh callback.
- * History/CSV is skipped on mobile for now; focus on live availability.
+ * Data provider for mobile: fetches realtime data and history CSV, wires refresh callback.
  */
 const ParkingDataProvider = ({ children }) => {
   const setRealtimeData = useParkingStore((s) => s.setRealtimeData);
   const setRealtimeLoading = useParkingStore((s) => s.setRealtimeLoading);
   const setRealtimeError = useParkingStore((s) => s.setRealtimeError);
   const setLastRealtimeUpdate = useParkingStore((s) => s.setLastRealtimeUpdate);
+  const setHistoryData = useParkingStore((s) => s.setHistoryData);
+  const setHistoryLoading = useParkingStore((s) => s.setHistoryLoading);
   const setRefreshCallback = useParkingStore((s) => s.setRefreshCallback);
   const setStopAutoRefresh = useParkingStore((s) => s.setStopAutoRefresh);
   const cacheCleared = useParkingStore((s) => s.cacheCleared);
 
   const fetchInFlight = useRef(false);
+
+  const fetchHistory = useCallback(async () => {
+    setHistoryLoading(true);
+    try {
+      const csvText = await fetchWithTimeout('history-csv', () => fetchAdapter.fetchText(CSV_URL));
+      const rows = parseCSV(csvText);
+      debugLog('fetchHistory: parsed rows', rows.length);
+      setHistoryData(rows);
+    } catch (e) {
+      debugLog('fetchHistory: error', e?.message || e);
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, [setHistoryData, setHistoryLoading]);
 
   const fetchRealtime = useCallback(async () => {
     if (fetchInFlight.current) return;
@@ -140,6 +179,7 @@ const ParkingDataProvider = ({ children }) => {
     }
 
     fetchRealtime();
+    fetchHistory();
     const refreshTimer = global.setInterval(fetchRealtime, 5 * 60 * 1000);
 
     try {
@@ -153,7 +193,7 @@ const ParkingDataProvider = ({ children }) => {
       setRefreshCallback(null);
       setStopAutoRefresh(null);
     };
-  }, [fetchRealtime, setRefreshCallback, setStopAutoRefresh, cacheCleared]);
+  }, [fetchRealtime, fetchHistory, setRefreshCallback, setStopAutoRefresh, cacheCleared]);
 
   return children;
 };

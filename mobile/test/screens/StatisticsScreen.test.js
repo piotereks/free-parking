@@ -19,22 +19,8 @@ jest.mock('parking-shared', () => ({
   createParkingStore: () => {
     const useStore = (selector) => {
       const state = {
-        realtimeData: [
-          {
-            ParkingGroupName: 'GreenDay',
-            CurrentFreeGroupCounterValue: 120,
-            Timestamp: '2024-01-01 12:00:00',
-            approximationInfo: { isApproximated: false },
-          },
-          {
-            ParkingGroupName: 'Bank_1',
-            CurrentFreeGroupCounterValue: 25,
-            Timestamp: '2024-01-01 12:00:00',
-            approximationInfo: { isApproximated: false },
-          },
-        ],
-        realtimeLoading: false,
-        realtimeError: null,
+        historyData: MOCK_HISTORY,
+        historyLoading: false,
       };
       if (typeof selector === 'function') return selector(state);
       return state;
@@ -52,22 +38,8 @@ jest.mock('../../src/context/ThemeContext', () => ({
 jest.mock('../../src/hooks/useParkingStore', () => {
   const useStore = (selector) => {
     const state = {
-      realtimeData: [
-        {
-          ParkingGroupName: 'GreenDay',
-          CurrentFreeGroupCounterValue: 120,
-          Timestamp: '2024-01-01 12:00:00',
-          approximationInfo: { isApproximated: false },
-        },
-        {
-          ParkingGroupName: 'Bank_1',
-          CurrentFreeGroupCounterValue: 25,
-          Timestamp: '2024-01-01 12:00:00',
-          approximationInfo: { isApproximated: false },
-        },
-      ],
-      realtimeLoading: false,
-      realtimeError: null,
+      historyData: MOCK_HISTORY,
+      historyLoading: false,
     };
     if (typeof selector === 'function') return selector(state);
     return state;
@@ -80,62 +52,53 @@ import { render, fireEvent } from '@testing-library/react-native';
 import StatisticsScreen from '../../src/screens/StatisticsScreen';
 import StatisticsChart from '../../src/components/StatisticsChart';
 
-const MOCK_DATA = [
+const MOCK_HISTORY = [
   {
-    ParkingGroupName: 'GreenDay',
-    CurrentFreeGroupCounterValue: 120,
-    Timestamp: '2024-01-01 12:00:00',
-    approximationInfo: { isApproximated: false },
+    'gd_time': '2024-01-01 12:00:00',
+    'greenday free': '120',
+    'uni_time': '2024-01-01 12:00:00',
+    'uni free': '25',
   },
   {
-    ParkingGroupName: 'Bank_1',
-    CurrentFreeGroupCounterValue: 25,
-    Timestamp: '2024-01-01 12:00:00',
-    approximationInfo: { isApproximated: false },
+    'gd_time': '2024-01-01 12:30:00',
+    'greenday free': '110',
+    'uni_time': '2024-01-01 12:30:00',
+    'uni free': '20',
   },
 ];
 
 describe('StatisticsChart', () => {
-  it('renders without crashing with valid data', () => {
-    const { getByTestId } = render(<StatisticsChart data={MOCK_DATA} palette="neon" />);
+  it('renders without crashing with valid history data', () => {
+    const { getByTestId } = render(<StatisticsChart historyData={MOCK_HISTORY} palette="neon" />);
     expect(getByTestId('statistics-chart')).toBeTruthy();
   });
 
   it('renders summary cards for each parking lot', () => {
-    const { getByTestId } = render(<StatisticsChart data={MOCK_DATA} palette="neon" />);
-    // GreenDay stays as-is; Bank_1 is mapped to 'Uni Wroc' by the component
+    const { getByTestId } = render(<StatisticsChart historyData={MOCK_HISTORY} palette="neon" />);
     expect(getByTestId('stats-card-GreenDay')).toBeTruthy();
     expect(getByTestId('stats-card-Uni Wroc')).toBeTruthy();
   });
 
-  it('shows "no data" message when data is empty', () => {
-    const { getByText } = render(<StatisticsChart data={[]} palette="neon" />);
+  it('shows "no data" message when historyData is empty', () => {
+    const { getByText } = render(<StatisticsChart historyData={[]} palette="neon" />);
     expect(getByText('No data available for chart')).toBeTruthy();
   });
 
-  it('shows "no data" message when data prop is missing', () => {
+  it('shows "no data" message when historyData prop is missing', () => {
     const { getByText } = render(<StatisticsChart />);
     expect(getByText('No data available for chart')).toBeTruthy();
   });
 
-  it('uses approximated value when approximationInfo is set', () => {
-    const approxData = [
-      {
-        ParkingGroupName: 'GreenDay',
-        CurrentFreeGroupCounterValue: 100,
-        Timestamp: '2024-01-01 12:00:00',
-        approximationInfo: { isApproximated: true, approximated: 110 },
-      },
-    ];
-    const { getAllByText } = render(<StatisticsChart data={approxData} palette="classic" />);
-    // The approximated value (110) appears in both the bar label and the summary card
+  it('shows latest free-space value in summary card', () => {
+    const { getAllByText } = render(<StatisticsChart historyData={MOCK_HISTORY} palette="neon" />);
+    // Latest GreenDay value is 110 (second row)
     expect(getAllByText('110').length).toBeGreaterThanOrEqual(1);
   });
 
   it('renders with different palettes without crashing', () => {
     const palettes = ['neon', 'classic', 'cyberpunk', 'modern'];
     palettes.forEach((p) => {
-      expect(() => render(<StatisticsChart data={MOCK_DATA} palette={p} />)).not.toThrow();
+      expect(() => render(<StatisticsChart historyData={MOCK_HISTORY} palette={p} />)).not.toThrow();
     });
   });
 });
@@ -167,3 +130,4 @@ describe('StatisticsScreen', () => {
     expect(getByText('Modern')).toBeTruthy();
   });
 });
+
