@@ -49,6 +49,10 @@
       "edgeToEdgeEnabled": true,
       "package": "app.piotereks.freeparking"
     },
+    "androidStatusBar": {
+      "barStyle": "light-content",
+      "translucent": true
+    },
     "web": {
       "favicon": "./assets/favicon.png"
     },
