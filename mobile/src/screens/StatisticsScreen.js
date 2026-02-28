@@ -8,6 +8,13 @@ import useOrientation from '../hooks/useOrientation';
 import pkg from '../../package.json';
 import StatisticsChart from '../components/StatisticsChart';
 
+let AdMobManager = null;
+try {
+  AdMobManager = require('../../AdMobManager').default;
+} catch (e) {
+  console.warn('AdMobManager failed to load:', e && e.message ? e.message : e);
+}
+
 const PALETTE_LABELS = [
   { key: 'neon', label: 'Neon' },
   { key: 'classic', label: 'Classic' },
@@ -136,7 +143,7 @@ const StatisticsScreen = ({ onBack }) => {
             {/* Header column — identical dimensions to DashboardContent landscape header column */}
             <View
               className="rounded-lg bg-secondary dark:bg-secondary-dark border border-border dark:border-border-dark"
-              style={{ width: Math.floor(screenWidth * 0.25), padding: 8, justifyContent: 'space-between', alignItems: 'center' }}
+              style={{ width: Math.floor(screenWidth * 0.25), maxWidth: 200, padding: 8, justifyContent: 'space-between', alignItems: 'center' }}
             >
               {/* Logo + title on same row */}
               <View style={{ alignItems: 'center', gap: 2 }}>
@@ -212,42 +219,46 @@ const StatisticsScreen = ({ onBack }) => {
                   <Text className="text-xs font-semibold text-foreground dark:text-foreground-dark" style={{ marginRight: 2 }}>Buy me</Text>
                   <Text style={{ fontSize: 18 }}>☕</Text>
                 </TouchableOpacity>
-                {/* Palette selector — compact, in the header column */}
-                <View style={{ flexDirection: 'row', gap: 4, flexWrap: 'wrap', justifyContent: 'center' }}>
-                  {PALETTE_LABELS.map(({ key, label }) => (
-                    <TouchableOpacity
-                      key={key}
-                      onPress={() => setPalette(key)}
-                      accessibilityRole="button"
-                      accessibilityLabel={`Select ${label} palette`}
-                      style={{
-                        paddingHorizontal: 6,
-                        paddingVertical: 3,
-                        borderRadius: 4,
-                        borderWidth: 1,
-                        backgroundColor: palette === key ? (isDark ? '#1e2a4a' : '#e0e6ff') : 'transparent',
-                        borderColor: palette === key ? (isDark ? '#3b82f6' : '#6366f1') : (isDark ? '#1e2a4a' : '#e2e8f0'),
-                      }}
-                    >
-                      <Text style={{ fontSize: 10, color: palette === key ? (isDark ? '#e0e6ff' : '#1e293b') : (isDark ? '#6b7280' : '#94a3b8') }}>
-                        {label}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
               </View>
             </View>
 
-            {/* Chart area */}
-            <ScrollView style={{ flex: 1 }}>
-              {historyLoading ? (
-                <View style={{ alignItems: 'center', paddingVertical: 32 }}>
-                  <Text className="text-muted dark:text-muted-dark" style={{ fontSize: 14 }}>Loading history data…</Text>
-                </View>
-              ) : (
-                <StatisticsChart historyData={historyData} palette={palette} />
-              )}
-            </ScrollView>
+            {/* Chart area column: palette strip + chart */}
+            <View style={{ flex: 1, flexDirection: 'column' }}>
+              {/* Palette selector strip — separated from header */}
+              <View style={{ flexDirection: 'row', gap: 4, marginBottom: 4, flexWrap: 'wrap' }}>
+                {PALETTE_LABELS.map(({ key, label }) => (
+                  <TouchableOpacity
+                    key={key}
+                    onPress={() => setPalette(key)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Select ${label} palette`}
+                    style={{
+                      paddingHorizontal: 8,
+                      paddingVertical: 3,
+                      borderRadius: 4,
+                      borderWidth: 1,
+                      backgroundColor: palette === key ? (isDark ? '#1e2a4a' : '#e0e6ff') : 'transparent',
+                      borderColor: palette === key ? (isDark ? '#3b82f6' : '#6366f1') : (isDark ? '#1e2a4a' : '#e2e8f0'),
+                    }}
+                  >
+                    <Text style={{ fontSize: 11, color: palette === key ? (isDark ? '#e0e6ff' : '#1e293b') : (isDark ? '#6b7280' : '#94a3b8') }}>
+                      {label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {/* Chart */}
+              <ScrollView style={{ flex: 1 }}>
+                {historyLoading ? (
+                  <View style={{ alignItems: 'center', paddingVertical: 32 }}>
+                    <Text className="text-muted dark:text-muted-dark" style={{ fontSize: 14 }}>Loading history data…</Text>
+                  </View>
+                ) : (
+                  <StatisticsChart historyData={historyData} palette={palette} showSummary={screenHeight >= 400} />
+                )}
+              </ScrollView>
+            </View>
           </View>
         </View>
       ) : (
@@ -267,6 +278,13 @@ const StatisticsScreen = ({ onBack }) => {
             GD capacity: 187 spaces · Uni Wroc capacity: 41 spaces
           </Text>
         </ScrollView>
+      )}
+
+      {/* Ad Banner — same as dashboard */}
+      {AdMobManager && (
+        <View className="items-center bg-primary dark:bg-primary-dark">
+          <AdMobManager />
+        </View>
       )}
     </SafeAreaView>
   );

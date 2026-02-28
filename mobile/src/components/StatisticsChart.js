@@ -71,8 +71,9 @@ const LineSegment = ({ x1, y1, x2, y2, color, strokeWidth = 2.5 }) => {
  *
  * @param {Array} historyData - Parsed CSV rows from the parking history spreadsheet
  * @param {string} [palette='neon'] - Colour palette key
+ * @param {boolean} [showSummary=true] - Whether to render the latest-value summary cards below the chart
  */
-const StatisticsChart = ({ historyData = [], palette = 'neon' }) => {
+const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = true }) => {
   const { isDark } = useTheme();
   const [chartWidth, setChartWidth] = useState(0);
   const [zoomLevel, setZoomLevel] = useState(1);
@@ -357,7 +358,8 @@ const StatisticsChart = ({ historyData = [], palette = 'neon' }) => {
       </View>
 
       {/* Summary cards showing latest values */}
-      <View style={{ flexDirection: 'row', gap: 8 }}>
+      {showSummary && summaryItems.length > 0 && (
+        <View style={{ flexDirection: 'row', gap: 8 }}>
         {summaryItems.map((item) => {
           const freePercent = item.capacity > 0 ? Math.round((item.value / item.capacity) * 100) : 0;
           return (
@@ -396,6 +398,7 @@ const StatisticsChart = ({ historyData = [], palette = 'neon' }) => {
           );
         })}
       </View>
+      )}
     </ScrollView>
   );
 };

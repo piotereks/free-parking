@@ -335,7 +335,7 @@ function DashboardContent({ setView }) {
             {/* Header column */}
             <View
               className="rounded-lg bg-secondary dark:bg-secondary-dark border border-border dark:border-border-dark"
-              style={{ width: Math.floor(screenWidth * 0.25), padding: 8, justifyContent: 'space-between', alignItems: 'center' }}
+              style={{ width: Math.floor(screenWidth * 0.25), maxWidth: 200, padding: 8, justifyContent: 'space-between', alignItems: 'center' }}
             >
               {/* Logo + title on same row */}
               <View style={{ alignItems: 'center', gap: 2 }}>
