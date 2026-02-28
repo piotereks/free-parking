@@ -15,6 +15,11 @@ const { withAndroidManifest } = require('@expo/config-plugins');
  *    Console for Android 15+. Setting "always" is correct for an app that has
  *    edgeToEdgeEnabled=true, ensuring the content fills the entire screen
  *    including notch regions without letterboxing.
+ *
+ * 3. Removes android:screenOrientation — removes any orientation lock so the
+ *    app supports all orientations on large-screen devices (foldables, tablets)
+ *    as required from Android 16+. The app handles landscape layouts at runtime
+ *    via the useOrientation() hook.
  */
 module.exports = ({ config }) => {
   return withAndroidManifest(config, (appConfig) => {
@@ -26,6 +31,7 @@ module.exports = ({ config }) => {
     for (const activity of activities) {
       activity.$['android:resizeableActivity'] = 'true';
       activity.$['android:windowLayoutInDisplayCutoutMode'] = 'always';
+      delete activity.$['android:screenOrientation'];
     }
 
     return appConfig;
