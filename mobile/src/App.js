@@ -203,10 +203,6 @@ function DashboardContent({ setView }) {
 
   const totalCapacity = processed.reduce((sum, d) => sum + (getMaxCapacity(d.ParkingGroupName) || 0), 0);
   const totalFreePercent = totalCapacity > 0 ? Math.min(100, Math.round((totalSpaces / totalCapacity) * 100)) : null;
-  const summaryBarColor = statusColorClass.includes('warning-medium') ? '#fb923c'
-    : statusColorClass.includes('warning') ? '#f59e0b'
-    : statusColorClass.includes('success') ? '#22c55e'
-    : '#6b7280';
 
   // Determine aggregated status
   const getAggregatedStatus = () => {
@@ -244,6 +240,10 @@ function DashboardContent({ setView }) {
 
   const { colorClass: statusColorClass, statusMessage } = getAggregatedStatus();
   const totalColorClass = statusColorClass;
+  const summaryBarColor = statusColorClass.includes('warning-medium') ? '#fb923c'
+    : statusColorClass.includes('warning') ? '#f59e0b'
+    : statusColorClass.includes('success') ? '#22c55e'
+    : '#6b7280';
 
   // Debug logging for orientation and version
   useEffect(() => {
