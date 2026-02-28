@@ -9,6 +9,7 @@ import useParkingStore from './hooks/useParkingStore';
 import useOrientation from './hooks/useOrientation';
 import { applyApproximations, calculateDataAge, formatAgeLabel, formatTime, createRefreshHelper } from 'parking-shared';
 import pkg from '../package.json';
+import StatisticsScreen from './screens/StatisticsScreen';
 
 // Top-level app theme constant. Set to 'dark', 'light' or 'system'.
 export const APP_THEME = 'dark';
@@ -111,7 +112,7 @@ function ParkingTile({ data, now, allOffline, isLandscape }) {
  * DashboardContent Component
  * Main dashboard displaying parking data
  */
-function DashboardContent() {
+function DashboardContent({ setView }) {
   const { isDark, setTheme } = useTheme();
   const orientation = useOrientation();
   const isLandscape = orientation === 'landscape';
@@ -251,6 +252,16 @@ function DashboardContent() {
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
+              onPress={() => setView('stats')}
+              accessibilityRole="button"
+              accessibilityLabel="View parking statistics"
+              className="flex items-center justify-center rounded-lg border bg-bg-primary-light border-border dark:bg-bg-primary-dark dark:border-border-dark"
+              style={{ width: 44, height: 44, marginLeft: 8 }}
+              testID="open-statistics-button"
+            >
+              <Text className="text-2xl">📈</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
               onPress={openDonate}
               accessibilityRole="link"
               accessibilityLabel="Buy me a coffee — support development"
@@ -350,6 +361,16 @@ function DashboardContent() {
                         ⟳
                       </Text>
                     )}
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => setView('stats')}
+                    accessibilityRole="button"
+                    accessibilityLabel="View parking statistics"
+                    className="flex items-center justify-center rounded-lg border bg-bg-primary-light border-border dark:bg-bg-primary-dark dark:border-border-dark"
+                    style={{ width: 36, height: 36 }}
+                    testID="open-statistics-button-landscape"
+                  >
+                    <Text className="text-xl">📈</Text>
                   </TouchableOpacity>
                 </View>
                 {/* Buy me ☕ on its own row below */}
@@ -567,12 +588,18 @@ function DashboardContent() {
 
 /**
  * AppContent Component
- * Wrapper for dashboard
+ * Wrapper for dashboard and statistics navigation
  */
 const AppContent = () => {
+  const [view, setView] = useState('dashboard');
+
+  if (view === 'stats') {
+    return <StatisticsScreen onBack={() => setView('dashboard')} />;
+  }
+
   return (
     <View style={{ flex: 1 }}>
-      <DashboardContent />
+      <DashboardContent setView={setView} />
     </View>
   );
 };
