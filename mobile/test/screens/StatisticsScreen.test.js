@@ -43,23 +43,6 @@ jest.mock('parking-shared', () => ({
   },
 }));
 
-// Mock victory-native so SVG doesn't need a native renderer
-jest.mock('victory-native', () => ({
-  VictoryBar: () => null,
-  VictoryChart: ({ children }) => children,
-  VictoryTheme: { material: {} },
-  VictoryAxis: () => null,
-  VictoryTooltip: () => null,
-  VictoryLabel: () => null,
-}));
-
-// Mock react-native-svg
-jest.mock('react-native-svg', () => ({
-  Svg: () => null,
-  Rect: () => null,
-  Text: () => null,
-}));
-
 // Mock ThemeContext
 jest.mock('../../src/context/ThemeContext', () => ({
   useTheme: () => ({ isDark: true, setTheme: jest.fn() }),
@@ -144,9 +127,9 @@ describe('StatisticsChart', () => {
         approximationInfo: { isApproximated: true, approximated: 110 },
       },
     ];
-    const { getByText } = render(<StatisticsChart data={approxData} palette="classic" />);
-    // The approximated value (110) should appear as the displayed free count
-    expect(getByText('110')).toBeTruthy();
+    const { getAllByText } = render(<StatisticsChart data={approxData} palette="classic" />);
+    // The approximated value (110) appears in both the bar label and the summary card
+    expect(getAllByText('110').length).toBeGreaterThanOrEqual(1);
   });
 
   it('renders with different palettes without crashing', () => {

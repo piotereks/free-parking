@@ -6,7 +6,7 @@ module.exports = {
   
   // Transform ignore patterns for node_modules
   transformIgnorePatterns: [
-    'node_modules/(?!(react-native|@react-native|@react-native-community|@react-navigation|nativewind|parking-shared|@babel/runtime|victory-native|react-native-svg)/)',
+    'node_modules/(?!(react-native|@react-native|@react-native-community|@react-navigation|nativewind|parking-shared|@babel/runtime)/)',
   ],
   
   // Module name mapper for parking-shared alias
