@@ -19,7 +19,10 @@
     "android:deploy": "cd android && gradlew installRelease",
     "android:deb_build": "cd android && gradlew assembleDebug",
     "android:deb_install": "adb install android/app/build/outputs/apk/debug/app-debug.apk",
-    "android:deb_deploy": "cd android && gradlew installDebug"
+    "android:deb_deploy": "cd android && gradlew installDebug",
+    "sync-app-version": "node ./scripts/update-app-version.js",
+    "release": "standard-version && npm run sync-app-version && git add app.json",
+    "postversion": "npm run sync-app-version && git add app.json"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^2.2.0",
@@ -57,5 +60,8 @@
     "vitest": "^4.0.0",
     "zustand": "^5.0.9"
   },
-  "private": true
+  "private": true,
+  "standard-version": {
+    "bumpFiles": ["package.json"]
+  }
 }
