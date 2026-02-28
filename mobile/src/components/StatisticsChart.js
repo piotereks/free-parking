@@ -155,12 +155,13 @@ const StatisticsChart = ({ historyData = [], palette = 'neon' }) => {
     return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
   };
 
+  // Fit as many labels as the chart width allows (one per ~48 px, minimum 5, maximum 9)
+  const nXLabels = cW > 0 ? Math.max(5, Math.min(9, Math.floor(cW / 48))) : 5;
   const xLabels = allT.length > 0
-    ? [
-        { x: toX(minT), label: fmtTime(minT) },
-        { x: toX(minT + tRange / 2), label: fmtTime(minT + tRange / 2) },
-        { x: toX(maxT), label: fmtTime(maxT) },
-      ]
+    ? Array.from({ length: nXLabels }, (_, i) => {
+        const t = minT + (tRange * i) / (nXLabels - 1);
+        return { x: toX(t), label: fmtTime(t) };
+      })
     : [];
 
   const gdCapY = toY(GD_CAPACITY);
