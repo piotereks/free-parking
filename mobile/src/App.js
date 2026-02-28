@@ -7,7 +7,7 @@ import ParkingDataProvider from './context/ParkingDataProvider';
 import { debugLog } from './config/debug';
 import useParkingStore from './hooks/useParkingStore';
 import useOrientation from './hooks/useOrientation';
-import { applyApproximations, calculateDataAge, formatAgeLabel, formatTime, createRefreshHelper } from 'parking-shared';
+import { applyApproximations, calculateDataAge, formatAgeLabel, formatTime, createRefreshHelper, getMaxCapacity } from 'parking-shared';
 import pkg from '../package.json';
 import StatisticsScreen from './screens/StatisticsScreen';
 
@@ -43,6 +43,10 @@ function ParkingTile({ data, now, allOffline, isLandscape }) {
     ? data.approximationInfo.approximated 
     : (data.CurrentFreeGroupCounterValue || 0);
 
+  const capacity = getMaxCapacity(data.ParkingGroupName) || null;
+  const freePercent = capacity > 0 ? Math.min(100, Math.round((value / capacity) * 100)) : null;
+  const barColor = allOffline ? '#6b7280' : age >= 15 ? '#f59e0b' : age > 5 ? '#fb923c' : '#22c55e';
+
   const displayName = data.ParkingGroupName === 'Bank_1' ? 'Uni Wroc' : data.ParkingGroupName;
 
   if (isLandscape) {
@@ -74,6 +78,14 @@ function ParkingTile({ data, now, allOffline, isLandscape }) {
               {origValue !== null ? `orig: ${origValue}` : ' '}
             </Text>
             <Text className={`text-xs ${ageColorClass}`}>{display}</Text>
+            {freePercent !== null && (
+              <>
+                <View style={{ height: 4, backgroundColor: 'rgba(128,128,128,0.25)', borderRadius: 2, overflow: 'hidden', marginTop: 4 }}>
+                  <View style={{ height: '100%', width: `${freePercent}%`, borderRadius: 2, backgroundColor: barColor }} />
+                </View>
+                <Text className="text-xs text-muted dark:text-muted-dark" style={{ marginTop: 1 }}>{freePercent}% free</Text>
+              </>
+            )}
           </View>
         </View>
       </View>
@@ -104,6 +116,14 @@ function ParkingTile({ data, now, allOffline, isLandscape }) {
       <Text className="text-sm text-muted dark:text-muted-dark text-center mt-2">
         {display}
       </Text>
+      {freePercent !== null && (
+        <>
+          <View style={{ height: 6, backgroundColor: 'rgba(128,128,128,0.25)', borderRadius: 3, overflow: 'hidden', marginTop: 6 }}>
+            <View style={{ height: '100%', width: `${freePercent}%`, borderRadius: 3, backgroundColor: barColor }} />
+          </View>
+          <Text className="text-xs text-muted dark:text-muted-dark text-center" style={{ marginTop: 2 }}>{freePercent}% free</Text>
+        </>
+      )}
     </View>
   );
 }
@@ -180,6 +200,13 @@ function DashboardContent({ setView }) {
   }, 0);
 
   const originalTotal = processed.reduce((sum, d) => sum + (d.CurrentFreeGroupCounterValue || 0), 0);
+
+  const totalCapacity = processed.reduce((sum, d) => sum + (getMaxCapacity(d.ParkingGroupName) || 0), 0);
+  const totalFreePercent = totalCapacity > 0 ? Math.min(100, Math.round((totalSpaces / totalCapacity) * 100)) : null;
+  const summaryBarColor = statusColorClass.includes('warning-medium') ? '#fb923c'
+    : statusColorClass.includes('warning') ? '#f59e0b'
+    : statusColorClass.includes('success') ? '#22c55e'
+    : '#6b7280';
 
   // Determine aggregated status
   const getAggregatedStatus = () => {
@@ -424,6 +451,14 @@ function DashboardContent({ setView }) {
                   <Text className="text-xs text-muted dark:text-muted-dark italic" style={{ marginLeft: 4 }}>(orig: {originalTotal})</Text>
                 )}
               </View>
+              {totalFreePercent !== null && (
+                <View style={{ width: '100%', marginTop: 4 }}>
+                  <View style={{ height: 5, backgroundColor: 'rgba(128,128,128,0.25)', borderRadius: 2, overflow: 'hidden' }}>
+                    <View style={{ height: '100%', width: `${totalFreePercent}%`, borderRadius: 2, backgroundColor: summaryBarColor }} />
+                  </View>
+                  <Text className="text-xs text-muted dark:text-muted-dark text-center" style={{ marginTop: 1 }}>{totalFreePercent}% free</Text>
+                </View>
+              )}
             </View>
 
             {/* Last Update */}
@@ -504,6 +539,14 @@ function DashboardContent({ setView }) {
                   <Text className="text-xs text-muted dark:text-muted-dark italic">
                     (orig: {originalTotal})
                   </Text>
+                )}
+                {totalFreePercent !== null && (
+                  <View style={{ width: '100%', marginTop: 8 }}>
+                    <View style={{ height: 6, backgroundColor: 'rgba(128,128,128,0.25)', borderRadius: 3, overflow: 'hidden' }}>
+                      <View style={{ height: '100%', width: `${totalFreePercent}%`, borderRadius: 3, backgroundColor: summaryBarColor }} />
+                    </View>
+                    <Text className="text-xs text-muted dark:text-muted-dark text-center" style={{ marginTop: 2 }}>{totalFreePercent}% free</Text>
+                  </View>
                 )}
               </View>
             </View>
