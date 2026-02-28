@@ -3,15 +3,40 @@ jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock')
 );
 
-// Mock NativeWind
-jest.mock('nativewind', () => ({
-  styled: (Component) => Component,
-  useColorScheme: () => ({ colorScheme: 'dark', setColorScheme: jest.fn() }),
-  NativeWindStyleSheet: {
-    setColorScheme: jest.fn(),
-    create: (styles) => styles,
-  },
+// Mock NativeWind — must export StyledComponent which is injected by the nativewind/babel plugin
+// for any component that uses className props
+jest.mock('nativewind', () => {
+  const React = require('react');
+  return {
+    styled: (Component) => Component,
+    useColorScheme: () => ({ colorScheme: 'dark', setColorScheme: jest.fn() }),
+    NativeWindStyleSheet: {
+      setColorScheme: jest.fn(),
+      create: (styles) => styles,
+    },
+    // StyledComponent is what nativewind/babel compiles className props into at build time:
+    // <View className="foo"> → <StyledComponent component={View} className="foo">
+    StyledComponent: ({ component: Component, children, className, ...props }) =>
+      React.createElement(Component, props, children),
+  };
+});
+
+// Mock SafeAreaView — pass all props through so testID etc. work
+jest.mock('react-native-safe-area-context', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+  return {
+    SafeAreaView: (props) => React.createElement(View, props),
+  };
+});
+
+// Mock expo-status-bar
+jest.mock('expo-status-bar', () => ({
+  StatusBar: () => null,
 }));
+
+// Mock useOrientation (default portrait)
+jest.mock('../../src/hooks/useOrientation', () => jest.fn(() => 'portrait'));
 
 // Mock parking-shared
 jest.mock('parking-shared', () => ({
@@ -119,7 +144,7 @@ describe('StatisticsScreen', () => {
 
   it('renders the Statistics header title', () => {
     const { getByText } = render(<StatisticsScreen onBack={jest.fn()} />);
-    expect(getByText('📈 Parking Statistics')).toBeTruthy();
+    expect(getByText('Parking Statistics')).toBeTruthy();
   });
 
   it('renders palette selector buttons', () => {
