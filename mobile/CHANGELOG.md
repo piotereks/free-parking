@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.3.1](https://github.com/piotereks/free-parking/compare/v2.3.0...v2.3.1) (2026-02-28)
+
+
+### Bug Fixes
+
+* **mobile:** add manifest-merger overrides for third-party screenOrientation restrictions ([e7359ad](https://github.com/piotereks/free-parking/commit/e7359ad247622d3e25056ac0ab72b8c50d6c4c64))
+* **mobile:** decrease Real-time GD-Uni label font size for small landscape screens ([7cd0559](https://github.com/piotereks/free-parking/commit/7cd05597c7ee6cf826e13676818ea586d6b04b9f))
+* **mobile:** remove screenOrientation restriction for Android 16+ large-screen compliance ([a282a85](https://github.com/piotereks/free-parking/commit/a282a8585e2713221ed39fc8c31b3808650a1f51))
+
 ## [2.3.0](https://github.com/piotereks/free-parking/compare/v2.2.1...v2.3.0) (2026-02-24)
 
 
