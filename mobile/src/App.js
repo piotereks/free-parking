@@ -224,7 +224,7 @@ function DashboardContent() {
 
   return (
     <SafeAreaView className={`flex-1 bg-primary dark:bg-primary-dark ${isDark ? 'dark' : ''}`}>
-      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <StatusBar style={isDark ? 'light' : 'dark'} translucent />
 
       {/* Full-width header — portrait only */}
       {!isLandscape && (
