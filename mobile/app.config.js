@@ -51,6 +51,31 @@ module.exports = ({ config }) => {
       delete activity.$['android:screenOrientation'];
     }
 
+    // Ensure the manifest has the tools namespace so we can use tools:remove and tools:node.
+    manifest.$ = manifest.$ || {};
+    if (!manifest.$['xmlns:tools']) {
+      manifest.$['xmlns:tools'] = 'http://schemas.android.com/tools';
+    }
+
+    // Add an override for the ML Kit barcode scanning delegate activity declared in a library .aar.
+    // This ensures android:screenOrientation is removed during the Gradle manifest merge step.
+    const ML_KIT_BARCODE_ACTIVITY_NAME =
+      'com.google.mlkit.vision.codescanner.GmsBarcodeScanningDelegateActivity';
+
+    const hasMlKitOverride = activities.some(
+      (activity) => activity.$ && activity.$['android:name'] === ML_KIT_BARCODE_ACTIVITY_NAME
+    );
+
+    if (!hasMlKitOverride) {
+      activities.push({
+        $: {
+          'android:name': ML_KIT_BARCODE_ACTIVITY_NAME,
+          'tools:node': 'merge',
+          'tools:remove': 'android:screenOrientation',
+        },
+      });
+      application.activity = activities;
+    }
     // Add manifest-merger override entries for known third-party activities
     // that declare android:screenOrientation in their own .aar manifests.
     for (const activityName of THIRD_PARTY_ORIENTATION_ACTIVITIES) {
