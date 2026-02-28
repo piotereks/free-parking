@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 
 const PALETTES = {
@@ -14,6 +14,8 @@ const PAD = { left: 32, right: 12, top: 12, bottom: 28 };
 const Y_MAX = 200;
 const GD_CAPACITY = 187;
 const UNI_CAPACITY = 41;
+const MIN_WINDOW_SIZE = 2;
+const PAN_STEP_RATIO = 0.25;
 
 /** Horizontal dashed line rendered as a row of small Views */
 const DashedHLine = ({ x, y, width, color }) => {
@@ -73,6 +75,8 @@ const LineSegment = ({ x1, y1, x2, y2, color, strokeWidth = 2.5 }) => {
 const StatisticsChart = ({ historyData = [], palette = 'neon' }) => {
   const { isDark } = useTheme();
   const [chartWidth, setChartWidth] = useState(0);
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [panIndex, setPanIndex] = useState(0);
 
   const colors = PALETTES[palette] || PALETTES.neon;
   const textColor = isDark ? '#8b95c9' : '#1e293b';
@@ -129,6 +133,26 @@ const StatisticsChart = ({ historyData = [], palette = 'neon' }) => {
 
   const isEmpty = gdSeries.length === 0 && uniSeries.length === 0;
 
+  // Zoom / pan: derive the visible window from zoomLevel and panIndex
+  const maxSeriesLen = Math.max(gdSeries.length, uniSeries.length, 1);
+  const windowSize = Math.max(MIN_WINDOW_SIZE, Math.ceil(maxSeriesLen / zoomLevel));
+  const clampedPan = Math.max(0, Math.min(panIndex, maxSeriesLen - windowSize));
+  const panStep = Math.max(1, Math.round(windowSize * PAN_STEP_RATIO));
+  const canPanLeft = clampedPan > 0;
+  const canPanRight = clampedPan < maxSeriesLen - windowSize;
+
+  const visibleGD = gdSeries.slice(clampedPan, clampedPan + windowSize);
+  const visibleUni = uniSeries.slice(clampedPan, clampedPan + windowSize);
+
+  const handleZoom = (level) => {
+    const newWin = Math.max(MIN_WINDOW_SIZE, Math.ceil(maxSeriesLen / level));
+    // Default to showing the latest data when changing zoom
+    setPanIndex(Math.max(0, maxSeriesLen - newWin));
+    setZoomLevel(level);
+  };
+  const panLeft = () => setPanIndex(Math.max(0, clampedPan - panStep));
+  const panRight = () => setPanIndex(Math.min(maxSeriesLen - windowSize, clampedPan + panStep));
+
   if (isEmpty) {
     return (
       <View style={{ alignItems: 'center', justifyContent: 'center', padding: 16 }}>
@@ -142,9 +166,9 @@ const StatisticsChart = ({ historyData = [], palette = 'neon' }) => {
   const cW = Math.max(chartWidth - PAD.left - PAD.right, 0);
   const cH = CHART_HEIGHT - PAD.top - PAD.bottom;
 
-  const allT = [...gdSeries.map(d => d.t), ...uniSeries.map(d => d.t)];
-  const minT = Math.min(...allT);
-  const maxT = Math.max(...allT);
+  const allT = [...visibleGD.map(d => d.t), ...visibleUni.map(d => d.t)];
+  const minT = allT.length > 0 ? Math.min(...allT) : 0;
+  const maxT = allT.length > 0 ? Math.max(...allT) : 1;
   const tRange = maxT - minT || 1;
 
   const toX = (t) => PAD.left + ((t - minT) / tRange) * cW;
@@ -226,9 +250,9 @@ const StatisticsChart = ({ historyData = [], palette = 'neon' }) => {
               <Text style={{ position: 'absolute', left: PAD.left + cW - 16, top: uniCapY + 2, color: colors.uni, fontSize: 8, fontWeight: 'bold' }}>{UNI_CAPACITY}</Text>
 
               {/* GreenDay line segments */}
-              {gdSeries.map((pt, i) => {
+              {visibleGD.map((pt, i) => {
                 if (i === 0) return null;
-                const prev = gdSeries[i - 1];
+                const prev = visibleGD[i - 1];
                 return (
                   <LineSegment
                     key={`gd-${i}`}
@@ -240,9 +264,9 @@ const StatisticsChart = ({ historyData = [], palette = 'neon' }) => {
               })}
 
               {/* Uni Wroc line segments */}
-              {uniSeries.map((pt, i) => {
+              {visibleUni.map((pt, i) => {
                 if (i === 0) return null;
-                const prev = uniSeries[i - 1];
+                const prev = visibleUni[i - 1];
                 return (
                   <LineSegment
                     key={`uni-${i}`}
@@ -279,6 +303,56 @@ const StatisticsChart = ({ historyData = [], palette = 'neon' }) => {
               ))}
             </>
           )}
+        </View>
+
+        {/* Zoom + pan controls */}
+        <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 8, gap: 6 }}>
+          {/* Pan left */}
+          <TouchableOpacity
+            onPress={panLeft}
+            disabled={!canPanLeft}
+            accessibilityRole="button"
+            accessibilityLabel="Pan chart left"
+            style={{
+              width: 36, height: 28, borderRadius: 6,
+              backgroundColor: canPanLeft ? (isDark ? '#2d3b6b' : '#e2e8f0') : (isDark ? '#1a2035' : '#f1f5f9'),
+              alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            <Text style={{ color: canPanLeft ? (isDark ? '#e0e6ff' : '#334155') : (isDark ? '#4b5563' : '#94a3b8'), fontSize: 16, fontWeight: '700' }}>◀</Text>
+          </TouchableOpacity>
+
+          {/* Zoom buttons */}
+          {[1, 2, 4].map((level) => (
+            <TouchableOpacity
+              key={level}
+              onPress={() => handleZoom(level)}
+              accessibilityRole="button"
+              accessibilityLabel={`Zoom ×${level}`}
+              style={{
+                paddingHorizontal: 10, height: 28, borderRadius: 6,
+                backgroundColor: zoomLevel === level ? (isDark ? '#3b82f6' : '#2563eb') : (isDark ? '#2d3b6b' : '#e2e8f0'),
+                alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              <Text style={{ color: zoomLevel === level ? '#ffffff' : (isDark ? '#e0e6ff' : '#334155'), fontSize: 12, fontWeight: '700' }}>×{level}</Text>
+            </TouchableOpacity>
+          ))}
+
+          {/* Pan right */}
+          <TouchableOpacity
+            onPress={panRight}
+            disabled={!canPanRight}
+            accessibilityRole="button"
+            accessibilityLabel="Pan chart right"
+            style={{
+              width: 36, height: 28, borderRadius: 6,
+              backgroundColor: canPanRight ? (isDark ? '#2d3b6b' : '#e2e8f0') : (isDark ? '#1a2035' : '#f1f5f9'),
+              alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            <Text style={{ color: canPanRight ? (isDark ? '#e0e6ff' : '#334155') : (isDark ? '#4b5563' : '#94a3b8'), fontSize: 16, fontWeight: '700' }}>▶</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
