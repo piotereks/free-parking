@@ -76,6 +76,7 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import StatisticsScreen from '../../src/screens/StatisticsScreen';
 import StatisticsChart from '../../src/components/StatisticsChart';
+import { STATUS_MESSAGES } from '../../src/App';
 
 const MOCK_HISTORY = [
   {
@@ -399,6 +400,8 @@ describe('StatisticsScreen', () => {
 });
 
 describe('StatisticsChart – scrollEnabled prop (#138)', () => {
+  const { ScrollView } = require('react-native');
+
   it('renders without crashing with scrollEnabled=false', () => {
     expect(() =>
       render(<StatisticsChart historyData={MOCK_HISTORY} palette="neon" scrollEnabled={false} />)
@@ -415,7 +418,6 @@ describe('StatisticsChart – scrollEnabled prop (#138)', () => {
     const { UNSAFE_getAllByType } = render(
       <StatisticsChart historyData={MOCK_HISTORY} palette="neon" scrollEnabled={false} />
     );
-    const { ScrollView } = require('react-native');
     const scrollViews = UNSAFE_getAllByType(ScrollView);
     // The outermost (root) ScrollView should have scrollEnabled=false
     expect(scrollViews[0].props.scrollEnabled).toBe(false);
@@ -425,9 +427,57 @@ describe('StatisticsChart – scrollEnabled prop (#138)', () => {
     const { UNSAFE_getAllByType } = render(
       <StatisticsChart historyData={MOCK_HISTORY} palette="neon" />
     );
-    const { ScrollView } = require('react-native');
     const scrollViews = UNSAFE_getAllByType(ScrollView);
     expect(scrollViews[0].props.scrollEnabled).not.toBe(false);
+  });
+
+  it('applies flex:1 style to root ScrollView when scrollEnabled=false', () => {
+    const { UNSAFE_getAllByType } = render(
+      <StatisticsChart historyData={MOCK_HISTORY} palette="neon" scrollEnabled={false} />
+    );
+    const scrollViews = UNSAFE_getAllByType(ScrollView);
+    expect(scrollViews[0].props.style).toMatchObject({ flex: 1 });
+  });
+
+  it('uses custom chartHeight for canvas when chartHeight prop is provided', () => {
+    const { getByTestId } = render(
+      <StatisticsChart historyData={MOCK_HISTORY} palette="neon" chartHeight={150} />
+    );
+    const canvas = getByTestId('line-chart-canvas');
+    expect(canvas.props.style).toMatchObject({ height: 150 });
+  });
+
+  it('uses default CHART_HEIGHT when chartHeight prop is omitted', () => {
+    const { getByTestId } = render(
+      <StatisticsChart historyData={MOCK_HISTORY} palette="neon" />
+    );
+    const canvas = getByTestId('line-chart-canvas');
+    // Default CHART_HEIGHT is 220
+    expect(canvas.props.style).toMatchObject({ height: 220 });
+  });
+});
+
+describe('App.js STATUS_MESSAGES – all messages ≤4 words', () => {
+  const wordCount = (msg) => msg.trim().split(/\s+/).length;
+
+  it('noData message has ≤4 words', () => {
+    expect(wordCount(STATUS_MESSAGES.noData)).toBeLessThanOrEqual(4);
+  });
+
+  it('allOffline message has ≤4 words', () => {
+    expect(wordCount(STATUS_MESSAGES.allOffline)).toBeLessThanOrEqual(4);
+  });
+
+  it('outdated message has ≤4 words', () => {
+    expect(wordCount(STATUS_MESSAGES.outdated)).toBeLessThanOrEqual(4);
+  });
+
+  it('slightlyOutdated message has ≤4 words', () => {
+    expect(wordCount(STATUS_MESSAGES.slightlyOutdated)).toBeLessThanOrEqual(4);
+  });
+
+  it('current message has ≤4 words', () => {
+    expect(wordCount(STATUS_MESSAGES.current)).toBeLessThanOrEqual(4);
   });
 });
 

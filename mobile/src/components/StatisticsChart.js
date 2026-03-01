@@ -80,8 +80,10 @@ const LineSegment = ({ x1, y1, x2, y2, color, strokeWidth = 2.5 }) => {
  * @param {string} [palette='neon'] - Colour palette key
  * @param {boolean} [showSummary=true] - Whether to render the latest-value summary cards below the chart
  * @param {boolean} [scrollEnabled=true] - Whether the root ScrollView can be scrolled; pass false to fix the chart within a landscape panel
+ * @param {number} [chartHeight] - Override the canvas height (px); defaults to the built-in CHART_HEIGHT constant
  */
-const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = true, scrollEnabled = true }) => {
+const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = true, scrollEnabled = true, chartHeight: chartHeightProp }) => {
+  const resolvedChartHeight = chartHeightProp != null ? chartHeightProp : CHART_HEIGHT;
   const { isDark } = useTheme();
   const [chartWidth, setChartWidth] = useState(0);
   const [zoomHours, setZoomHours] = useState(48);
@@ -239,7 +241,7 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
   }
 
   const cW = Math.max(chartWidth - PAD.left - PAD.right, 0);
-  const cH = CHART_HEIGHT - PAD.top - PAD.bottom;
+  const cH = resolvedChartHeight - PAD.top - PAD.bottom;
 
   // Use the fixed chart time boundaries so that toX is stable and edge extensions
   // can have non-zero length (minT / maxT must not equal the first / last data-point time).
@@ -356,7 +358,7 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
   ].filter(Boolean);
 
   return (
-    <ScrollView scrollEnabled={scrollEnabled}>
+    <ScrollView scrollEnabled={scrollEnabled} style={scrollEnabled ? undefined : { flex: 1 }}>
       {/* Line chart card */}
       <View
         style={{ borderRadius: 12, backgroundColor: bgCard, marginBottom: 12, padding: 8 }}
@@ -380,7 +382,7 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
 
         {/* Chart canvas — use onLayout to get true width; swipe-enabled */}
         <View
-          style={{ height: CHART_HEIGHT, position: 'relative', overflow: 'hidden' }}
+          style={{ height: resolvedChartHeight, position: 'relative', overflow: 'hidden' }}
           onLayout={(e) => setChartWidth(e.nativeEvent.layout.width)}
           testID="line-chart-canvas"
           {...panResponder.panHandlers}

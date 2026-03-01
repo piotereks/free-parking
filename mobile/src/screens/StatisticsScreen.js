@@ -255,7 +255,13 @@ const StatisticsScreen = ({ onBack }) => {
                     <Text className="text-muted dark:text-muted-dark" style={{ fontSize: 14 }}>Loading history data…</Text>
                   </View>
                 ) : (
-                  <StatisticsChart historyData={historyData} palette={palette} showSummary={screenHeight >= 400} scrollEnabled={false} />
+                  <StatisticsChart
+                    historyData={historyData}
+                    palette={palette}
+                    showSummary={screenHeight >= 400}
+                    scrollEnabled={false}
+                    chartHeight={Math.max(80, screenHeight - 152)}
+                  />
                 )}
               </View>
             </View>

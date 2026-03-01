@@ -14,6 +14,15 @@ import StatisticsScreen from './screens/StatisticsScreen';
 // Top-level app theme constant. Set to 'dark', 'light' or 'system'.
 export const APP_THEME = 'dark';
 
+/** Status messages shown below the parking tiles (≤4 words each). */
+export const STATUS_MESSAGES = {
+  noData: 'No data available',
+  allOffline: 'All feeds offline',
+  outdated: 'Data outdated',
+  slightlyOutdated: 'Slightly outdated',
+  current: 'Data up to date',
+};
+
 // Lazy/guarded require so AdMob load failures don't crash the module.
 let AdMobManager = null;
 try {
@@ -227,7 +236,7 @@ function DashboardContent({ setView }) {
     if (processed.length === 0) {
       return { 
         colorClass: "text-muted dark:text-muted-dark", 
-        statusMessage: 'No data available' 
+        statusMessage: STATUS_MESSAGES.noData 
       };
     }
 
@@ -236,22 +245,22 @@ function DashboardContent({ setView }) {
     if (allOffline) {
       return {
         colorClass: "text-warning dark:text-warning-dark",
-        statusMessage: 'All parking feeds appear offline'
+        statusMessage: STATUS_MESSAGES.allOffline
       };
     } else if (maxAge >= 15) {
       return {
         colorClass: "text-warning dark:text-warning-dark",
-        statusMessage: 'Data outdated - figures may not reflect actual free spaces'
+        statusMessage: STATUS_MESSAGES.outdated
       };
     } else if (maxAge > 5) {
       return {
         colorClass: "text-warning-medium dark:text-warning-medium-dark",
-        statusMessage: 'Data slightly outdated - refresh recommended'
+        statusMessage: STATUS_MESSAGES.slightlyOutdated
       };
     } else {
       return {
         colorClass: "text-success dark:text-success-dark",
-        statusMessage: 'Data is current and reliable'
+        statusMessage: STATUS_MESSAGES.current
       };
     }
   };
