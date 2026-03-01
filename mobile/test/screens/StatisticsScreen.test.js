@@ -176,6 +176,186 @@ describe('StatisticsChart', () => {
     }));
     expect(() => render(<StatisticsChart historyData={gdRows} palette="neon" />)).not.toThrow();
   });
+
+  it('renders without crashing when Uni series is shorter than GD (Uni line should not vanish)', () => {
+    // 20 GD rows but only 10 Uni rows.
+    // With old index-based slice at pan=15, uniSeries.slice(15, ...) was empty → line vanished.
+    const rows = Array.from({ length: 20 }, (_, i) => {
+      const h = String(6 + Math.floor(i / 2)).padStart(2, '0');
+      const m = String((i % 2) * 30).padStart(2, '0');
+      if (i % 2 === 0) {
+        return {
+          'gd_time': `2024-01-01 ${h}:${m}:00`,
+          'greenday free': String(180 - i * 4),
+          'uni_time': `2024-01-01 ${h}:${m}:00`,
+          'uni free': String(40 - i),
+        };
+      }
+      return {
+        'gd_time': `2024-01-01 ${h}:${m}:00`,
+        'greenday free': String(180 - i * 4),
+        'uni_time': '',
+        'uni free': '',
+      };
+    });
+    expect(() => render(<StatisticsChart historyData={rows} palette="neon" />)).not.toThrow();
+  });
+});
+
+// ── Pure logic tests for edge extension (no React rendering required) ────────
+
+describe('StatisticsChart – edge extension logic (time-based windowing)', () => {
+  /**
+   * Simulate the core time-based windowing and edge extension logic extracted
+   * from StatisticsChart so it can be tested without a DOM/layout context.
+   */
+  const simulate = ({
+    series,
+    fullMinT, fullMaxT,
+    maxSeriesLen, zoomHours, clampedPan,
+  }) => {
+    const totalHoursSpan = Math.max(1, (fullMaxT - fullMinT) / 3600000);
+    const effectiveHours = Math.min(zoomHours, totalHoursSpan);
+    const windowSize = Math.max(2, Math.ceil(maxSeriesLen * (effectiveHours / totalHoursSpan)));
+    const windowMs = effectiveHours * 3600000;
+    const panFrac = (maxSeriesLen > windowSize) ? clampedPan / (maxSeriesLen - windowSize) : 1;
+    const timeSpanMs = Math.max(1, fullMaxT - fullMinT);
+    const chartMaxT = fullMinT + Math.min(timeSpanMs, windowMs + panFrac * Math.max(0, timeSpanMs - windowMs));
+    const chartMinT = chartMaxT - windowMs;
+
+    const cW = 300;
+    const PAD_LEFT = 32;
+    const toX = (t) => PAD_LEFT + ((t - chartMinT) / windowMs) * cW;
+    const toY = (v) => 200 - v;
+    const leftEdgeX = PAD_LEFT;
+    const rightEdgeX = PAD_LEFT + cW;
+
+    const projectToEdge = (p0, p1, tEdge) => {
+      const dt = p1.t - p0.t;
+      if (dt === 0) return null;
+      return p0.v + (p1.v - p0.v) * (tEdge - p0.t) / dt;
+    };
+
+    const buildEdgeSeg = (s, side) => {
+      if (side === 'left') {
+        const idx = s.findIndex(p => p.t >= chartMinT && p.t <= chartMaxT);
+        if (idx <= 0) return null;
+        const vEdge = projectToEdge(s[idx - 1], s[idx], chartMinT);
+        if (vEdge === null) return null;
+        return { x1: leftEdgeX, y1: toY(vEdge), x2: toX(s[idx].t), y2: toY(s[idx].v) };
+      }
+      let lastIdx = -1;
+      for (let i = s.length - 1; i >= 0; i--) {
+        if (s[i].t >= chartMinT && s[i].t <= chartMaxT) { lastIdx = i; break; }
+      }
+      if (lastIdx < 0 || lastIdx >= s.length - 1) return null;
+      const vEdge = projectToEdge(s[lastIdx], s[lastIdx + 1], chartMaxT);
+      if (vEdge === null) return null;
+      return { x1: toX(s[lastIdx].t), y1: toY(s[lastIdx].v), x2: rightEdgeX, y2: toY(vEdge) };
+    };
+
+    const buildPassThrough = (s) => {
+      if (s.some(p => p.t >= chartMinT && p.t <= chartMaxT)) return null;
+      const prev = [...s].reverse().find(p => p.t < chartMinT);
+      const next = s.find(p => p.t > chartMaxT);
+      if (!prev || !next) return null;
+      const vLeft = projectToEdge(prev, next, chartMinT);
+      const vRight = projectToEdge(prev, next, chartMaxT);
+      if (vLeft === null || vRight === null) return null;
+      return { x1: leftEdgeX, y1: toY(vLeft), x2: rightEdgeX, y2: toY(vRight) };
+    };
+
+    return {
+      leftExt: buildEdgeSeg(series, 'left'),
+      rightExt: buildEdgeSeg(series, 'right'),
+      passThrough: buildPassThrough(series),
+      chartMinT, chartMaxT,
+      leftEdgeX, rightEdgeX,
+      visibleCount: series.filter(p => p.t >= chartMinT && p.t <= chartMaxT).length,
+    };
+  };
+
+  it('edge extensions have non-zero length with irregular timestamps (typical real-world data)', () => {
+    // Slightly irregular data – window boundary falls BETWEEN data points
+    const series = [
+      { t: 0, v: 180 }, { t: 32 * 60000, v: 165 }, { t: 61 * 60000, v: 155 },
+      { t: 93 * 60000, v: 140 }, { t: 124 * 60000, v: 125 }, { t: 157 * 60000, v: 110 },
+      { t: 188 * 60000, v: 95 },  { t: 221 * 60000, v: 82 }, { t: 252 * 60000, v: 70 },
+      { t: 285 * 60000, v: 55 },
+    ];
+    const result = simulate({
+      series, fullMinT: 0, fullMaxT: 285 * 60000,
+      maxSeriesLen: series.length, zoomHours: 1, clampedPan: 3,
+    });
+
+    expect(result.leftExt).not.toBeNull();
+    expect(result.rightExt).not.toBeNull();
+    expect(Math.abs(result.leftExt.x2 - result.leftExt.x1)).toBeGreaterThan(0);
+    expect(Math.abs(result.rightExt.x2 - result.rightExt.x1)).toBeGreaterThan(0);
+  });
+
+  it('left extension starts exactly at the left chart edge', () => {
+    const series = [0, 30, 60, 90, 120, 150].map(m => ({ t: m * 60000, v: 100 - m }));
+    const result = simulate({
+      series, fullMinT: 0, fullMaxT: 150 * 60000,
+      maxSeriesLen: series.length, zoomHours: 1, clampedPan: 2,
+    });
+    if (result.leftExt) {
+      expect(result.leftExt.x1).toBe(result.leftEdgeX);
+    }
+  });
+
+  it('right extension ends exactly at the right chart edge', () => {
+    const series = [0, 30, 60, 90, 120, 150].map(m => ({ t: m * 60000, v: 100 - m }));
+    const result = simulate({
+      series, fullMinT: 0, fullMaxT: 150 * 60000,
+      maxSeriesLen: series.length, zoomHours: 1, clampedPan: 2,
+    });
+    if (result.rightExt) {
+      expect(result.rightExt.x2).toBe(result.rightEdgeX);
+    }
+  });
+
+  it('pass-through segment spans full chart width when window falls entirely between two data points', () => {
+    // 4 data points: T=0, T=30min, T=150min, T=200min.
+    // With zoomHours=1 and pan in the middle, chartMinT≈70min and chartMaxT≈130min.
+    // No data points lie in the 70–130min window → pass-through connects the gap.
+    const series = [
+      { t: 0, v: 100 }, { t: 30 * 60000, v: 80 },
+      { t: 150 * 60000, v: 40 }, { t: 200 * 60000, v: 20 },
+    ];
+    const result = simulate({
+      series, fullMinT: 0, fullMaxT: 200 * 60000,
+      maxSeriesLen: series.length, zoomHours: 1, clampedPan: 1,
+    });
+    expect(result.visibleCount).toBe(0);
+    expect(result.passThrough).not.toBeNull();
+    expect(result.passThrough.x1).toBe(result.leftEdgeX);
+    expect(result.passThrough.x2).toBe(result.rightEdgeX);
+  });
+
+  it('no extensions when all data fits inside window', () => {
+    const series = [{ t: 0, v: 100 }, { t: 30 * 60000, v: 80 }];
+    const result = simulate({
+      series, fullMinT: 0, fullMaxT: 30 * 60000,
+      maxSeriesLen: series.length, zoomHours: 48, clampedPan: 0,
+    });
+    expect(result.leftExt).toBeNull();
+    expect(result.rightExt).toBeNull();
+    expect(result.passThrough).toBeNull();
+  });
+
+  it('shorter Uni series remains visible when panned far right (was broken with index-based slice)', () => {
+    // GD 100 pts, Uni 50 pts. Old code: uniSeries.slice(91, 100) = [] → Uni invisible.
+    const gdSeries = Array.from({ length: 100 }, (_, i) => ({ t: i * 30 * 60000, v: 180 - i }));
+    const uniSeries = Array.from({ length: 50 }, (_, i) => ({ t: i * 60 * 60000, v: 40 - i * 0.5 }));
+    const fullMaxT = Math.max(gdSeries[99].t, uniSeries[49].t);
+    const result = simulate({
+      series: uniSeries, fullMinT: 0, fullMaxT,
+      maxSeriesLen: 100, zoomHours: 4, clampedPan: 91,
+    });
+    expect(result.visibleCount).toBeGreaterThan(0);
+  });
 });
 
 describe('StatisticsScreen', () => {

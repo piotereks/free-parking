@@ -180,8 +180,22 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
   const canPanLeft = clampedPan > 0;
   const canPanRight = clampedPan < maxSeriesLen - windowSize;
 
-  const visibleGD = gdSeries.slice(clampedPan, clampedPan + windowSize);
-  const visibleUni = uniSeries.slice(clampedPan, clampedPan + windowSize);
+  // Compute time-based chart window boundaries from pan/zoom state.
+  // chartMinT / chartMaxT are the actual time coordinates of the chart edges.
+  // These are independent of where data points happen to land, so edge extension
+  // segments will have non-zero length whenever a data point does not fall exactly
+  // on the window boundary (which is the common case with real-world timestamps).
+  const windowMs = effectiveHours * 3600 * 1000;
+  const panFrac = (maxSeriesLen > windowSize) ? clampedPan / (maxSeriesLen - windowSize) : 1;
+  const timeSpanMs = Math.max(1, fullMaxT - fullMinT);
+  const chartMaxT = fullMinT + Math.min(timeSpanMs, windowMs + panFrac * Math.max(0, timeSpanMs - windowMs));
+  const chartMinT = chartMaxT - windowMs;
+
+  // Filter each series independently by time window (not by shared index slice).
+  // This also fixes the case where series have different numbers of data points:
+  // the shorter series would vanish completely with index-based slicing.
+  const visibleGD = gdSeries.filter(p => p.t >= chartMinT && p.t <= chartMaxT);
+  const visibleUni = uniSeries.filter(p => p.t >= chartMinT && p.t <= chartMaxT);
 
   const handleZoomHours = (hours) => {
     const eff = Math.min(hours, totalHoursSpan);
@@ -226,9 +240,10 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
   const cW = Math.max(chartWidth - PAD.left - PAD.right, 0);
   const cH = CHART_HEIGHT - PAD.top - PAD.bottom;
 
-  const allT = [...visibleGD.map(d => d.t), ...visibleUni.map(d => d.t)];
-  const minT = allT.length > 0 ? Math.min(...allT) : 0;
-  const maxT = allT.length > 0 ? Math.max(...allT) : 1;
+  // Use the fixed chart time boundaries so that toX is stable and edge extensions
+  // can have non-zero length (minT / maxT must not equal the first / last data-point time).
+  const minT = chartMinT;
+  const maxT = chartMaxT;
   const tRange = maxT - minT || 1;
 
   const toX = (t) => PAD.left + ((t - minT) / tRange) * cW;
@@ -241,20 +256,19 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
 
   // Fit as many labels as the chart width allows (one per ~48 px, minimum 5, maximum 9)
   const nXLabels = cW > 0 ? Math.max(5, Math.min(9, Math.floor(cW / 48))) : 5;
-  const xLabels = allT.length > 0
-    ? Array.from({ length: nXLabels }, (_, i) => {
-        const t = minT + (tRange * i) / (nXLabels - 1);
-        return { x: toX(t), label: fmtTime(t) };
-      })
-    : [];
+  const xLabels = Array.from({ length: nXLabels }, (_, i) => {
+    const t = minT + (tRange * i) / (nXLabels - 1);
+    return { x: toX(t), label: fmtTime(t) };
+  });
 
   const gdCapY = toY(GD_CAPACITY);
   const uniCapY = toY(UNI_CAPACITY);
 
   // --- Edge projection: extend lines to chart boundaries when zoomed/panned ---
-  // For each series, if there is a point just outside the visible window on the
-  // left or right, compute where the connecting line crosses the chart edge and
-  // render that extra segment so the line is not abruptly cut off.
+  // chartMinT / chartMaxT are the FIXED chart edges (independent of data points), so
+  // when a data point does not fall exactly on the boundary the interpolated v will
+  // differ from the adjacent data-point value and the extension segment will have a
+  // non-zero length that is visually apparent.
   const leftEdgeX = PAD.left;
   const rightEdgeX = PAD.left + cW;
 
@@ -271,46 +285,69 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
     return vEdge;
   };
 
-  /** Build a left-edge or right-edge extension segment for one series.
+  /**
+   * Build a left-edge or right-edge extension segment for one series.
+   * Uses the fixed chart time boundaries (chartMinT / chartMaxT) so that the
+   * interpolated crossing point is correctly positioned along the x-axis.
+   *
    * @param {Array} series - full data series (gdSeries / uniSeries)
-   * @param {number} startIdx - index of the first visible point in series
-   * @param {number} endIdx - index one past the last visible point in series
-   * @param {'left'|'right'} side - which chart edge to project onto
+   * @param {'left'|'right'} side - which chart edge to extend to
    * @returns {{x1,y1,x2,y2}|null} segment coords, or null if no extension needed
    */
-  const buildEdgeSeg = (series, startIdx, endIdx, side) => {
+  const buildEdgeSeg = (series, side) => {
     if (!chartWidth || !cW) return null;
     if (side === 'left') {
-      if (startIdx <= 0 || !series[startIdx]) return null;
-      const prev = series[startIdx - 1];
-      const first = series[startIdx];
-      if (prev.t < minT) {
-        // prev is before the chart left edge: project line to the edge
-        const vEdge = projectToEdge(prev, first, minT);
-        if (vEdge === null) return null;
-        return { x1: leftEdgeX, y1: toY(vEdge), x2: toX(first.t), y2: toY(first.v) };
-      }
-      // prev is inside the chart area but before the visible window: draw the full segment
-      return { x1: toX(prev.t), y1: toY(prev.v), x2: toX(first.t), y2: toY(first.v) };
+      // Find the first data point inside (or at) the window
+      const firstInsideIdx = series.findIndex(p => p.t >= chartMinT && p.t <= chartMaxT);
+      if (firstInsideIdx <= 0) return null; // no prior point to extend from
+      const prev = series[firstInsideIdx - 1]; // guaranteed: prev.t < chartMinT
+      const first = series[firstInsideIdx];
+      const vEdge = projectToEdge(prev, first, chartMinT);
+      if (vEdge === null) return null;
+      return { x1: leftEdgeX, y1: toY(vEdge), x2: toX(first.t), y2: toY(first.v) };
     }
     // side === 'right'
-    const last = series[endIdx - 1];
-    const next = series[endIdx];
-    if (!last || !next) return null;
-    if (next.t > maxT) {
-      // next is beyond the chart right edge: project line to the edge
-      const vEdge = projectToEdge(last, next, maxT);
-      if (vEdge === null) return null;
-      return { x1: toX(last.t), y1: toY(last.v), x2: rightEdgeX, y2: toY(vEdge) };
+    let lastInsideIdx = -1;
+    for (let i = series.length - 1; i >= 0; i--) {
+      if (series[i].t >= chartMinT && series[i].t <= chartMaxT) { lastInsideIdx = i; break; }
     }
-    // next is inside the chart area but after the visible window: draw the full segment
-    return { x1: toX(last.t), y1: toY(last.v), x2: toX(next.t), y2: toY(next.v) };
+    if (lastInsideIdx < 0 || lastInsideIdx >= series.length - 1) return null;
+    const last = series[lastInsideIdx]; // guaranteed: last.t <= chartMaxT
+    const next = series[lastInsideIdx + 1]; // guaranteed: next.t > chartMaxT
+    const vEdge = projectToEdge(last, next, chartMaxT);
+    if (vEdge === null) return null;
+    return { x1: toX(last.t), y1: toY(last.v), x2: rightEdgeX, y2: toY(vEdge) };
   };
 
-  const gdLeftEdgeSeg = buildEdgeSeg(gdSeries, clampedPan, clampedPan + visibleGD.length, 'left');
-  const gdRightEdgeSeg = buildEdgeSeg(gdSeries, clampedPan, clampedPan + visibleGD.length, 'right');
-  const uniLeftEdgeSeg = buildEdgeSeg(uniSeries, clampedPan, clampedPan + visibleUni.length, 'left');
-  const uniRightEdgeSeg = buildEdgeSeg(uniSeries, clampedPan, clampedPan + visibleUni.length, 'right');
+  /**
+   * Build a full-width pass-through segment when no data points lie inside the
+   * chart window but the line connecting a prior and a next point crosses it.
+   * This handles deep zoom where the window falls entirely between two data points.
+   *
+   * @param {Array} series - full data series
+   * @returns {{x1,y1,x2,y2}|null} segment coords, or null
+   */
+  const buildPassThrough = (series) => {
+    if (!chartWidth || !cW) return null;
+    if (series.some(p => p.t >= chartMinT && p.t <= chartMaxT)) return null;
+    let prev = null;
+    for (let i = series.length - 1; i >= 0; i--) {
+      if (series[i].t < chartMinT) { prev = series[i]; break; }
+    }
+    const next = series.find(p => p.t > chartMaxT);
+    if (!prev || !next) return null;
+    const vLeft = projectToEdge(prev, next, chartMinT);
+    const vRight = projectToEdge(prev, next, chartMaxT);
+    if (vLeft === null || vRight === null) return null;
+    return { x1: leftEdgeX, y1: toY(vLeft), x2: rightEdgeX, y2: toY(vRight) };
+  };
+
+  const gdLeftEdgeSeg = buildEdgeSeg(gdSeries, 'left');
+  const gdRightEdgeSeg = buildEdgeSeg(gdSeries, 'right');
+  const uniLeftEdgeSeg = buildEdgeSeg(uniSeries, 'left');
+  const uniRightEdgeSeg = buildEdgeSeg(uniSeries, 'right');
+  const gdPassThrough = buildPassThrough(gdSeries);
+  const uniPassThrough = buildPassThrough(uniSeries);
 
   const summaryItems = [
     latestGD !== null ? { name: 'GreenDay', value: Math.round(latestGD), capacity: GD_CAPACITY, color: colors.gd } : null,
@@ -404,6 +441,9 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
               {/* Uni Wroc edge extensions */}
               {uniLeftEdgeSeg && <LineSegment key="uni-left-edge" {...uniLeftEdgeSeg} color={colors.uni} />}
               {uniRightEdgeSeg && <LineSegment key="uni-right-edge" {...uniRightEdgeSeg} color={colors.uni} />}
+              {/* Pass-through segments: drawn when the window falls entirely between two data points */}
+              {gdPassThrough && <LineSegment key="gd-pass" {...gdPassThrough} color={colors.gd} />}
+              {uniPassThrough && <LineSegment key="uni-pass" {...uniPassThrough} color={colors.uni} />}
 
               {/* #126: Vertical line at first zero (7–10am weekdays) */}
               {firstZero && firstZero.t >= minT && firstZero.t <= maxT && (
