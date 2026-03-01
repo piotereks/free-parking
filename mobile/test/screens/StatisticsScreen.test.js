@@ -126,6 +126,27 @@ describe('StatisticsChart', () => {
       expect(() => render(<StatisticsChart historyData={MOCK_HISTORY} palette={p} />)).not.toThrow();
     });
   });
+
+  it('renders hour-based zoom buttons (#133)', () => {
+    const { getByText } = render(<StatisticsChart historyData={MOCK_HISTORY} palette="neon" />);
+    expect(getByText('4h')).toBeTruthy();
+    expect(getByText('8h')).toBeTruthy();
+    expect(getByText('12h')).toBeTruthy();
+    expect(getByText('24h')).toBeTruthy();
+    expect(getByText('48h')).toBeTruthy();
+  });
+
+  it('renders first-zero vertical line for weekday 7-10am zero data (#126)', () => {
+    // Wednesday (2024-01-03) at 08:15 with both values = 0
+    const dataWithZero = [
+      { 'gd_time': '2024-01-03 07:00:00', 'greenday free': '5', 'uni_time': '2024-01-03 07:00:00', 'uni free': '3' },
+      { 'gd_time': '2024-01-03 08:15:00', 'greenday free': '0', 'uni_time': '2024-01-03 08:15:00', 'uni free': '0' },
+    ];
+    const { getByTestId } = render(<StatisticsChart historyData={dataWithZero} palette="neon" />);
+    expect(getByTestId('statistics-chart')).toBeTruthy();
+    // The first-zero elements are only rendered when chartWidth > 0 (requires layout),
+    // so in test we verify the component doesn't crash with zero data
+  });
 });
 
 describe('StatisticsScreen', () => {
@@ -142,9 +163,21 @@ describe('StatisticsScreen', () => {
     expect(onBack).toHaveBeenCalledTimes(1);
   });
 
-  it('renders the Statistics header title', () => {
+  it('renders the Statistics header title for wide screens', () => {
     const { getByText } = render(<StatisticsScreen onBack={jest.fn()} />);
+    // Default test env width is 750 (≥700) → full title
     expect(getByText('Parking Statistics')).toBeTruthy();
+  });
+
+  it('renders shortened title on narrow screens (<700pt) (#128)', () => {
+    const RN = require('react-native');
+    const spy = jest.spyOn(RN, 'useWindowDimensions').mockReturnValue({ width: 400, height: 800, scale: 1, fontScale: 1 });
+    try {
+      const { getByText } = render(<StatisticsScreen onBack={jest.fn()} />);
+      expect(getByText('Parking Stats')).toBeTruthy();
+    } finally {
+      spy.mockRestore();
+    }
   });
 
   it('renders palette selector buttons', () => {

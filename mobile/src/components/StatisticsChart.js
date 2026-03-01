@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useMemo, useRef, useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, PanResponder } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 
 const PALETTES = {
@@ -16,6 +16,13 @@ const GD_CAPACITY = 187;
 const UNI_CAPACITY = 41;
 const MIN_WINDOW_SIZE = 2;
 const PAN_STEP_RATIO = 0.25;
+const ZOOM_HOURS = [4, 8, 12, 24, 48];
+const SWIPE_THRESHOLD = 30;
+
+/** Returns a fill-bar colour based on the free-space percentage.
+ *  ≥40% → green, 10–39% → orange, <10% → red, null → grey */
+const getFreeBarColor = (pct) =>
+  pct === null ? '#6b7280' : pct >= 40 ? '#22c55e' : pct >= 10 ? '#f97316' : '#ef4444';
 
 /** Horizontal dashed line rendered as a row of small Views */
 const DashedHLine = ({ x, y, width, color }) => {
@@ -76,7 +83,7 @@ const LineSegment = ({ x1, y1, x2, y2, color, strokeWidth = 2.5 }) => {
 const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = true }) => {
   const { isDark } = useTheme();
   const [chartWidth, setChartWidth] = useState(0);
-  const [zoomLevel, setZoomLevel] = useState(1);
+  const [zoomHours, setZoomHours] = useState(48);
   const [panIndex, setPanIndex] = useState(0);
 
   const colors = PALETTES[palette] || PALETTES.neon;
@@ -86,9 +93,9 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
   const gridColor = isDark ? '#2d3b6b' : '#cbd5e1';
   const axisColor = isDark ? '#3d4b7b' : '#94a3b8';
 
-  const { gdSeries, uniSeries, latestGD, latestUni } = useMemo(() => {
+  const { gdSeries, uniSeries, latestGD, latestUni, firstZero } = useMemo(() => {
     if (!Array.isArray(historyData) || historyData.length === 0) {
-      return { gdSeries: [], uniSeries: [], latestGD: null, latestUni: null };
+      return { gdSeries: [], uniSeries: [], latestGD: null, latestUni: null, firstZero: null };
     }
 
     const gdMap = new Map();
@@ -124,19 +131,49 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
 
     const gd = toSeries(gdMap);
     const uni = toSeries(uniMap);
+
+    // #126: Find first timestamp where GD+Uni total = 0 between 7–10am on weekdays
+    let fz = null;
+    for (const row of historyData) {
+      if (fz) break;
+      const findKey = (name) => Object.keys(row).find(k => k.trim().toLowerCase() === name);
+      const gdTimeKey = findKey('gd_time');
+      const gdFreeKey = findKey('greenday free');
+      const uniFreeKey = findKey('uni free');
+      if (gdTimeKey && gdFreeKey && uniFreeKey && row[gdTimeKey] && row[gdFreeKey] && row[uniFreeKey]) {
+        const gdVal = parseFloat(row[gdFreeKey]);
+        const uniVal = parseFloat(row[uniFreeKey]);
+        const d = new Date(row[gdTimeKey].trim().replace(' ', 'T'));
+        if (!isNaN(d.getTime()) && !isNaN(gdVal) && !isNaN(uniVal)) {
+          const hour = d.getHours();
+          const day = d.getDay(); // 0=Sun, 1=Mon…6=Sat
+          if (day >= 1 && day <= 5 && hour >= 7 && hour < 10 && (gdVal + uniVal) === 0) {
+            fz = { t: d.getTime() };
+          }
+        }
+      }
+    }
+
     return {
       gdSeries: gd.slice(-200),
       uniSeries: uni.slice(-200),
       latestGD: gd.length > 0 ? gd[gd.length - 1].v : null,
       latestUni: uni.length > 0 ? uni[uni.length - 1].v : null,
+      firstZero: fz,
     };
   }, [historyData]);
 
   const isEmpty = gdSeries.length === 0 && uniSeries.length === 0;
 
-  // Zoom / pan: derive the visible window from zoomLevel and panIndex
+  // Zoom / pan: derive visible window from zoomHours and total time span
   const maxSeriesLen = Math.max(gdSeries.length, uniSeries.length, 1);
-  const windowSize = Math.max(MIN_WINDOW_SIZE, Math.ceil(maxSeriesLen / zoomLevel));
+  const allFullT = [...gdSeries.map(d => d.t), ...uniSeries.map(d => d.t)];
+  const fullMinT = allFullT.length > 0 ? Math.min(...allFullT) : 0;
+  const fullMaxT = allFullT.length > 0 ? Math.max(...allFullT) : 1;
+  const totalHoursSpan = Math.max(1, (fullMaxT - fullMinT) / (3600 * 1000));
+  const effectiveHours = Math.min(zoomHours, totalHoursSpan);
+  const windowSize = Math.max(MIN_WINDOW_SIZE, Math.ceil(maxSeriesLen * (effectiveHours / totalHoursSpan)));
+  const isZoomed = windowSize < maxSeriesLen;
   const clampedPan = Math.max(0, Math.min(panIndex, maxSeriesLen - windowSize));
   const panStep = Math.max(1, Math.round(windowSize * PAN_STEP_RATIO));
   const canPanLeft = clampedPan > 0;
@@ -145,14 +182,35 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
   const visibleGD = gdSeries.slice(clampedPan, clampedPan + windowSize);
   const visibleUni = uniSeries.slice(clampedPan, clampedPan + windowSize);
 
-  const handleZoom = (level) => {
-    const newWin = Math.max(MIN_WINDOW_SIZE, Math.ceil(maxSeriesLen / level));
-    // Default to showing the latest data when changing zoom
+  const handleZoomHours = (hours) => {
+    const eff = Math.min(hours, totalHoursSpan);
+    const newWin = Math.max(MIN_WINDOW_SIZE, Math.ceil(maxSeriesLen * (eff / totalHoursSpan)));
     setPanIndex(Math.max(0, maxSeriesLen - newWin));
-    setZoomLevel(level);
+    setZoomHours(hours);
   };
   const panLeft = () => setPanIndex(Math.max(0, clampedPan - panStep));
   const panRight = () => setPanIndex(Math.min(maxSeriesLen - windowSize, clampedPan + panStep));
+
+  // #132: Swipe gesture support via PanResponder (replaces arrow buttons)
+  const swipeRef = useRef({});
+  swipeRef.current = { canPanLeft, canPanRight, panStep, clampedPan, windowSize, maxSeriesLen };
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, gs) => {
+        const { windowSize: ws, maxSeriesLen: msl } = swipeRef.current;
+        return ws < msl && Math.abs(gs.dx) > 10;
+      },
+      onPanResponderRelease: (_, gs) => {
+        const ref = swipeRef.current;
+        if (gs.dx > SWIPE_THRESHOLD && ref.canPanLeft) {
+          setPanIndex(Math.max(0, ref.clampedPan - ref.panStep));
+        } else if (gs.dx < -SWIPE_THRESHOLD && ref.canPanRight) {
+          setPanIndex(Math.min(ref.maxSeriesLen - ref.windowSize, ref.clampedPan + ref.panStep));
+        }
+      },
+    })
+  ).current;
 
   if (isEmpty) {
     return (
@@ -272,11 +330,12 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
           </View>
         </View>
 
-        {/* Chart canvas — use onLayout to get true width */}
+        {/* Chart canvas — use onLayout to get true width; swipe-enabled */}
         <View
           style={{ height: CHART_HEIGHT, position: 'relative', overflow: 'hidden' }}
           onLayout={(e) => setChartWidth(e.nativeEvent.layout.width)}
           testID="line-chart-canvas"
+          {...panResponder.panHandlers}
         >
           {chartWidth > 0 && (
             <>
@@ -336,6 +395,37 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
               {uniLeftEdgeSeg && <LineSegment key="uni-left-edge" {...uniLeftEdgeSeg} color={colors.uni} />}
               {uniRightEdgeSeg && <LineSegment key="uni-right-edge" {...uniRightEdgeSeg} color={colors.uni} />}
 
+              {/* #126: Vertical line at first zero (7–10am weekdays) */}
+              {firstZero && firstZero.t >= minT && firstZero.t <= maxT && (
+                <>
+                  <View
+                    testID="first-zero-line"
+                    style={{
+                      position: 'absolute',
+                      left: toX(firstZero.t),
+                      top: PAD.top,
+                      width: 2,
+                      height: cH,
+                      backgroundColor: '#ef4444',
+                      opacity: 0.85,
+                    }}
+                  />
+                  <Text
+                    testID="first-zero-label"
+                    style={{
+                      position: 'absolute',
+                      left: toX(firstZero.t) - 18,
+                      top: PAD.top - 10,
+                      color: '#ef4444',
+                      fontSize: 8,
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    {fmtTime(firstZero.t)}
+                  </Text>
+                </>
+              )}
+
               {/* Y-axis */}
               <View style={{ position: 'absolute', left: PAD.left, top: PAD.top, height: cH, width: 1, backgroundColor: axisColor }} />
               <Text style={{ position: 'absolute', left: 0, top: PAD.top - 6, color: textColor, fontSize: 8 }}>200</Text>
@@ -364,54 +454,26 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
           )}
         </View>
 
-        {/* Zoom + pan controls */}
-        <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 8, gap: 6 }}>
-          {/* Pan left */}
-          <TouchableOpacity
-            onPress={panLeft}
-            disabled={!canPanLeft}
-            accessibilityRole="button"
-            accessibilityLabel="Pan chart left"
-            style={{
-              width: 36, height: 28, borderRadius: 6,
-              backgroundColor: canPanLeft ? (isDark ? '#2d3b6b' : '#e2e8f0') : (isDark ? '#1a2035' : '#f1f5f9'),
-              alignItems: 'center', justifyContent: 'center',
-            }}
-          >
-            <Text style={{ color: canPanLeft ? (isDark ? '#e0e6ff' : '#334155') : (isDark ? '#4b5563' : '#94a3b8'), fontSize: 16, fontWeight: '700' }}>◀</Text>
-          </TouchableOpacity>
-
-          {/* Zoom buttons */}
-          {[1, 2, 4].map((level) => (
+        {/* Zoom controls — hour-based buttons (#133); swipe handles pan (#132) */}
+        <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 8, gap: 6, flexWrap: 'wrap' }}>
+          {ZOOM_HOURS.map((hours) => (
             <TouchableOpacity
-              key={level}
-              onPress={() => handleZoom(level)}
+              key={hours}
+              onPress={() => handleZoomHours(hours)}
               accessibilityRole="button"
-              accessibilityLabel={`Zoom ×${level}`}
+              accessibilityLabel={`Show ${hours} hours`}
               style={{
                 paddingHorizontal: 10, height: 28, borderRadius: 6,
-                backgroundColor: zoomLevel === level ? (isDark ? '#3b82f6' : '#2563eb') : (isDark ? '#2d3b6b' : '#e2e8f0'),
+                backgroundColor: zoomHours === hours ? (isDark ? '#3b82f6' : '#2563eb') : (isDark ? '#2d3b6b' : '#e2e8f0'),
                 alignItems: 'center', justifyContent: 'center',
               }}
             >
-              <Text style={{ color: zoomLevel === level ? '#ffffff' : (isDark ? '#e0e6ff' : '#334155'), fontSize: 12, fontWeight: '700' }}>×{level}</Text>
+              <Text style={{ color: zoomHours === hours ? '#ffffff' : (isDark ? '#e0e6ff' : '#334155'), fontSize: 12, fontWeight: '700' }}>{hours}h</Text>
             </TouchableOpacity>
           ))}
-
-          {/* Pan right */}
-          <TouchableOpacity
-            onPress={panRight}
-            disabled={!canPanRight}
-            accessibilityRole="button"
-            accessibilityLabel="Pan chart right"
-            style={{
-              width: 36, height: 28, borderRadius: 6,
-              backgroundColor: canPanRight ? (isDark ? '#2d3b6b' : '#e2e8f0') : (isDark ? '#1a2035' : '#f1f5f9'),
-              alignItems: 'center', justifyContent: 'center',
-            }}
-          >
-            <Text style={{ color: canPanRight ? (isDark ? '#e0e6ff' : '#334155') : (isDark ? '#4b5563' : '#94a3b8'), fontSize: 16, fontWeight: '700' }}>▶</Text>
-          </TouchableOpacity>
+          {isZoomed && (
+            <Text style={{ color: isDark ? '#6b7280' : '#94a3b8', fontSize: 10, marginLeft: 4 }}>← swipe to pan →</Text>
+          )}
         </View>
       </View>
 
@@ -447,7 +509,7 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
                   borderRadius: 3, backgroundColor: trackBg, overflow: 'hidden',
                 }}
               >
-                <View style={{ height: '100%', width: `${freePercent}%`, borderRadius: 3, backgroundColor: item.color }} />
+                <View style={{ height: '100%', width: `${freePercent}%`, borderRadius: 3, backgroundColor: getFreeBarColor(freePercent) }} />
               </View>
               <Text style={{ color: isDark ? '#6b7280' : '#94a3b8', fontSize: 11, marginTop: 3 }}>
                 {freePercent}% free

@@ -40,7 +40,7 @@ const StatisticsScreen = ({ onBack }) => {
   const [palette, setPalette] = useState('neon');
 
   const version = pkg?.version || '0.0.0';
-  const title = 'Parking Statistics';
+  const title = screenWidth < 700 ? 'Parking Stats' : 'Parking Statistics';
 
   const toggleTheme = () => setTheme(isDark ? 'light' : 'dark');
   const openDonate = () => Linking.openURL('https://buycoffee.to/piotereks');
