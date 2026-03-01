@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.4.0](https://github.com/piotereks/free-parking/compare/v2.3.1...v2.4.0) (2026-03-01)
+
+
+### Features
+
+* **mobile:** add parking statistics chart screen for Android ([4b34b8d](https://github.com/piotereks/free-parking/commit/4b34b8dc4dde467d99336132d6e57692c635be26))
+* **mobile:** add progress bar and % free to dashboard tiles and summary ([7d41546](https://github.com/piotereks/free-parking/commit/7d41546c6897bb78811835bc7fa50c11bd1cfd2e))
+* **mobile:** add zoom (×1 ×2 ×4) and pan (◀ ▶) controls to StatisticsChart ([e844699](https://github.com/piotereks/free-parking/commit/e8446998a4f759c9a281f7aed2d97ea15cb2d1f4))
+* **mobile:** banner in stats, palette strip separated, header maxWidth, hide summary on short landscape ([d9caf83](https://github.com/piotereks/free-parking/commit/d9caf83c86dfc947dfac9777bca90ba68b4ca578))
+* **mobile:** increase x-axis time markers on statistics chart ([9b734a6](https://github.com/piotereks/free-parking/commit/9b734a66b31feabd16f66f7ec680cc50d90578ff))
+* **mobile:** match StatisticsScreen header to dashboard header dimensions ([ce6bd75](https://github.com/piotereks/free-parking/commit/ce6bd753e0420bff7795542bf352165efc19012f))
+* **mobile:** replace bar chart with line graph matching web Statistics view ([84d78ab](https://github.com/piotereks/free-parking/commit/84d78ab0f79e912da12fb20d3275146f1bcc870b))
+
+
+### Bug Fixes
+
+* **mobile:** bar color by free %, blank-line placeholder, summary bar width ([11be2aa](https://github.com/piotereks/free-parking/commit/11be2aa1513326e3da65b3ac7c1c7cb2d28c0daf))
+* **mobile:** constrain landscape chart to panel, shorten status messages to ≤4 words ([adf2591](https://github.com/piotereks/free-parking/commit/adf25912f4a14edeb4a639e8e0ceb71f4a11d6cf))
+* **mobile:** hide landscape parking tiles when screenHeight < 400 ([88e2d92](https://github.com/piotereks/free-parking/commit/88e2d92051d20c31cc23567c2e56cc4ab0c2c63c))
+* **mobile:** move summaryBarColor after statusColorClass declaration in App.js ([63d0a43](https://github.com/piotereks/free-parking/commit/63d0a43c1f96f742ec421866a8831faa1302e5a9))
+* **mobile:** project chart line segments to viewport edges when zoomed/panned ([1a4cb11](https://github.com/piotereks/free-parking/commit/1a4cb11dee06e3d81cf9e704cace2c385a67fd2c))
+* **mobile:** remove landscape chart vertical scroll; hide subtitle on small height ([de69bda](https://github.com/piotereks/free-parking/commit/de69bda64f932a06b69e0d3b2a126d42b3df996b))
+* **mobile:** replace victory-native with pure-RN bar chart to fix Expo bundler error ([edbaf93](https://github.com/piotereks/free-parking/commit/edbaf938800d42382afd3794e880db52325736bc))
+* **mobile:** UI oversize fixes for issues [#125](https://github.com/piotereks/free-parking/issues/125) and [#138](https://github.com/piotereks/free-parking/issues/138) ([06a4214](https://github.com/piotereks/free-parking/commit/06a4214dbfec2fc5d2d7e46160c623d05048a0f2))
+* remove double-zoom in Statistics.jsx and correct buildEdgeSeg inner-segment case in StatisticsChart ([149dfd4](https://github.com/piotereks/free-parking/commit/149dfd466f3ffd0ffb4559ac05a5116f27ac7fc4))
+* **stats:** chart full visible. ([29238e3](https://github.com/piotereks/free-parking/commit/29238e36cb54d09251c402ef97f6f8ced55019e4))
+* time-based windowing in mobile StatisticsChart prevents line loss at viewport boundaries ([86fc76e](https://github.com/piotereks/free-parking/commit/86fc76e2e1735399d060313282ff959ded194300))
+
 ### [2.3.1](https://github.com/piotereks/free-parking/compare/v2.3.0...v2.3.1) (2026-02-28)
 
 
