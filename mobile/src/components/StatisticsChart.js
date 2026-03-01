@@ -357,11 +357,15 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
     latestUni !== null ? { name: 'Uni Wroc', value: Math.round(latestUni), capacity: UNI_CAPACITY, color: colors.uni } : null,
   ].filter(Boolean);
 
+  const Container = scrollEnabled ? ScrollView : View;
+
   return (
-    <ScrollView scrollEnabled={scrollEnabled} style={scrollEnabled ? undefined : { flex: 1 }}>
+    <Container style={scrollEnabled ? undefined : { flex: 1 }}>
       {/* Line chart card */}
       <View
-        style={{ borderRadius: 12, backgroundColor: bgCard, marginBottom: 12, padding: 8 }}
+        style={scrollEnabled
+          ? { borderRadius: 12, backgroundColor: bgCard, marginBottom: 12, padding: 8 }
+          : { borderRadius: 12, backgroundColor: bgCard, padding: 8, flex: 1, marginBottom: showSummary && summaryItems.length > 0 ? 12 : 0 }}
         testID="statistics-chart"
       >
         <Text style={{ color: textColor, fontWeight: '600', fontSize: 14, marginBottom: 4, textAlign: 'center' }}>
@@ -382,7 +386,9 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
 
         {/* Chart canvas — use onLayout to get true width; swipe-enabled */}
         <View
-          style={{ height: resolvedChartHeight, position: 'relative', overflow: 'hidden' }}
+          style={scrollEnabled
+            ? { height: resolvedChartHeight, position: 'relative', overflow: 'hidden' }
+            : { flex: 1, position: 'relative', overflow: 'hidden' }}
           onLayout={(e) => setChartWidth(e.nativeEvent.layout.width)}
           testID="line-chart-canvas"
           {...panResponder.panHandlers}
@@ -572,7 +578,7 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
         })}
       </View>
       )}
-    </ScrollView>
+    </Container>
   );
 };
 

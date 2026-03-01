@@ -400,7 +400,7 @@ describe('StatisticsScreen', () => {
 });
 
 describe('StatisticsChart – scrollEnabled prop (#138)', () => {
-  const { ScrollView } = require('react-native');
+  const { ScrollView, View } = require('react-native');
 
   it('renders without crashing with scrollEnabled=false', () => {
     expect(() =>
@@ -414,32 +414,42 @@ describe('StatisticsChart – scrollEnabled prop (#138)', () => {
     ).not.toThrow();
   });
 
-  it('passes scrollEnabled=false to root ScrollView', () => {
-    const { UNSAFE_getAllByType } = render(
+  it('root container is a plain View (no scroll) when scrollEnabled=false', () => {
+    const { UNSAFE_queryAllByType } = render(
       <StatisticsChart historyData={MOCK_HISTORY} palette="neon" scrollEnabled={false} />
     );
-    const scrollViews = UNSAFE_getAllByType(ScrollView);
-    // The outermost (root) ScrollView should have scrollEnabled=false
-    expect(scrollViews[0].props.scrollEnabled).toBe(false);
+    // No ScrollView should exist at the root when scrollEnabled=false
+    const scrollViews = UNSAFE_queryAllByType(ScrollView);
+    expect(scrollViews.length).toBe(0);
   });
 
-  it('root ScrollView is scrollable by default', () => {
+  it('root ScrollView is used by default (scrollEnabled=true)', () => {
     const { UNSAFE_getAllByType } = render(
       <StatisticsChart historyData={MOCK_HISTORY} palette="neon" />
     );
     const scrollViews = UNSAFE_getAllByType(ScrollView);
+    expect(scrollViews.length).toBeGreaterThan(0);
     expect(scrollViews[0].props.scrollEnabled).not.toBe(false);
   });
 
-  it('applies flex:1 style to root ScrollView when scrollEnabled=false', () => {
+  it('root View has flex:1 when scrollEnabled=false', () => {
     const { UNSAFE_getAllByType } = render(
       <StatisticsChart historyData={MOCK_HISTORY} palette="neon" scrollEnabled={false} />
     );
-    const scrollViews = UNSAFE_getAllByType(ScrollView);
-    expect(scrollViews[0].props.style).toMatchObject({ flex: 1 });
+    const views = UNSAFE_getAllByType(View);
+    // The outermost View should have flex:1
+    expect(views[0].props.style).toMatchObject({ flex: 1 });
   });
 
-  it('uses custom chartHeight for canvas when chartHeight prop is provided', () => {
+  it('canvas uses flex:1 when scrollEnabled=false', () => {
+    const { getByTestId } = render(
+      <StatisticsChart historyData={MOCK_HISTORY} palette="neon" scrollEnabled={false} />
+    );
+    const canvas = getByTestId('line-chart-canvas');
+    expect(canvas.props.style).toMatchObject({ flex: 1 });
+  });
+
+  it('uses custom chartHeight for canvas when scrollEnabled=true and chartHeight prop is provided', () => {
     const { getByTestId } = render(
       <StatisticsChart historyData={MOCK_HISTORY} palette="neon" chartHeight={150} />
     );
@@ -447,7 +457,7 @@ describe('StatisticsChart – scrollEnabled prop (#138)', () => {
     expect(canvas.props.style).toMatchObject({ height: 150 });
   });
 
-  it('uses default CHART_HEIGHT when chartHeight prop is omitted', () => {
+  it('uses default CHART_HEIGHT when chartHeight prop is omitted (scrollEnabled=true)', () => {
     const { getByTestId } = render(
       <StatisticsChart historyData={MOCK_HISTORY} palette="neon" />
     );

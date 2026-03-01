@@ -159,9 +159,11 @@ const StatisticsScreen = ({ onBack }) => {
                 <Text className="text-muted dark:text-muted-dark" style={{ fontSize: 12 }} numberOfLines={1}>
                   Version: {version}
                 </Text>
-                <Text className="text-muted dark:text-muted-dark" style={{ fontSize: screenHeight < 400 ? 11 : 14 }} numberOfLines={2}>
-                  History • GD-Uni Wrocław
-                </Text>
+                {screenHeight >= 400 && (
+                  <Text className="text-muted dark:text-muted-dark" style={{ fontSize: 14 }} numberOfLines={2}>
+                    History • GD-Uni Wrocław
+                  </Text>
+                )}
               </View>
               <View style={{ gap: 6, alignItems: 'center' }}>
                 {/* Theme toggle + refresh (history) + Dashboard button — same layout as dashboard */}

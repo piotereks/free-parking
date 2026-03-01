@@ -375,9 +375,11 @@ function DashboardContent({ setView }) {
                 <Text className="text-muted dark:text-muted-dark" style={{ fontSize: 12 }} numberOfLines={1}>
                   Version: {version}
                 </Text>
-                <Text className="text-muted dark:text-muted-dark" style={{ fontSize: screenHeight < 400 ? 11 : 14 }} numberOfLines={2}>
-                  Real-time • GD-Uni Wrocław
-                </Text>
+                {screenHeight >= 400 && (
+                  <Text className="text-muted dark:text-muted-dark" style={{ fontSize: 14 }} numberOfLines={2}>
+                    Real-time • GD-Uni Wrocław
+                  </Text>
+                )}
               </View>
               <View style={{ gap: 6, alignItems: 'center' }}>
                 {/* Theme toggle + Reload on the same row */}
