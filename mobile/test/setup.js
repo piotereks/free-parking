@@ -8,6 +8,7 @@ require('react-native');
 // Mock NativeWind before it's loaded by any module
 jest.mock('nativewind', () => ({
   styled: (Component) => Component,
+  NativeWindStyleSheet: { create: () => ({}) },
 }));
 
 // Mock React Native Appearance API

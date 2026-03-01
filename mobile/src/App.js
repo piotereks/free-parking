@@ -9,6 +9,7 @@ import useParkingStore from './hooks/useParkingStore';
 import useOrientation from './hooks/useOrientation';
 import { applyApproximations, calculateDataAge, formatAgeLabel, formatTime, createRefreshHelper } from 'parking-shared';
 import pkg from '../package.json';
+import StatsScreen from './screens/StatsScreen';
 
 // Top-level app theme constant. Set to 'dark', 'light' or 'system'.
 export const APP_THEME = 'dark';
@@ -194,22 +195,22 @@ function DashboardContent() {
     if (allOffline) {
       return {
         colorClass: "text-warning dark:text-warning-dark",
-        statusMessage: 'All parking feeds appear offline'
+        statusMessage: 'All feeds offline'
       };
     } else if (maxAge >= 15) {
       return {
         colorClass: "text-warning dark:text-warning-dark",
-        statusMessage: 'Data outdated - figures may not reflect actual free spaces'
+        statusMessage: 'Data outdated'
       };
     } else if (maxAge > 5) {
       return {
         colorClass: "text-warning-medium dark:text-warning-medium-dark",
-        statusMessage: 'Data slightly outdated - refresh recommended'
+        statusMessage: 'Slightly outdated'
       };
     } else {
       return {
         colorClass: "text-success dark:text-success-dark",
-        statusMessage: 'Data is current and reliable'
+        statusMessage: 'Data current'
       };
     }
   };
@@ -567,12 +568,47 @@ function DashboardContent() {
 
 /**
  * AppContent Component
- * Wrapper for dashboard
+ * Wrapper with bottom tab navigation between Dashboard and Stats
  */
 const AppContent = () => {
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const { isDark } = useTheme();
+
+  const tabBarBg = isDark ? '#1e293b' : '#ffffff';
+  const tabBarBorder = isDark ? '#2d3b6b' : '#e2e8f0';
+  const activeColor = isDark ? '#60a5fa' : '#2563eb';
+  const inactiveColor = isDark ? '#64748b' : '#94a3b8';
+
   return (
     <View style={{ flex: 1 }}>
-      <DashboardContent />
+      <View style={{ flex: 1 }}>
+        {activeTab === 'dashboard' ? <DashboardContent /> : <StatsScreen />}
+      </View>
+      {/* Bottom tab bar */}
+      <View style={{ flexDirection: 'row', backgroundColor: tabBarBg, borderTopWidth: 1, borderTopColor: tabBarBorder, paddingBottom: 4 }}>
+        <TouchableOpacity
+          style={{ flex: 1, alignItems: 'center', paddingVertical: 8 }}
+          onPress={() => setActiveTab('dashboard')}
+          accessibilityRole="tab"
+          accessibilityLabel="Dashboard"
+        >
+          <Text style={{ fontSize: 20 }}>🅿️</Text>
+          <Text style={{ fontSize: 11, color: activeTab === 'dashboard' ? activeColor : inactiveColor, fontWeight: activeTab === 'dashboard' ? '600' : '400' }}>
+            Dashboard
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{ flex: 1, alignItems: 'center', paddingVertical: 8 }}
+          onPress={() => setActiveTab('stats')}
+          accessibilityRole="tab"
+          accessibilityLabel="Parking Stats"
+        >
+          <Text style={{ fontSize: 20 }}>📈</Text>
+          <Text style={{ fontSize: 11, color: activeTab === 'stats' ? activeColor : inactiveColor, fontWeight: activeTab === 'stats' ? '600' : '400' }}>
+            Stats
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };

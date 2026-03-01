@@ -4,6 +4,7 @@ import { createMobileFetchAdapter } from '../adapters/mobileFetchAdapter';
 import { debugLog } from '../config/debug';
 import { fetchAndStoreEntry } from './ParkingEntryManager';
 import { readParkingData } from './ParkingDataPersistence';
+import { addHistoryEntry, readHistory } from '../utils/parkingHistory';
 
 const FETCH_TIMEOUT = 15000;
 
@@ -44,6 +45,7 @@ const ParkingDataProvider = ({ children }) => {
   const setLastRealtimeUpdate = useParkingStore((s) => s.setLastRealtimeUpdate);
   const setRefreshCallback = useParkingStore((s) => s.setRefreshCallback);
   const setStopAutoRefresh = useParkingStore((s) => s.setStopAutoRefresh);
+  const setHistoryData = useParkingStore((s) => s.setHistoryData);
   const cacheCleared = useParkingStore((s) => s.cacheCleared);
 
   const fetchInFlight = useRef(false);
@@ -78,6 +80,12 @@ const ParkingDataProvider = ({ children }) => {
         : [];
       setRealtimeData(cleaned);
       debugLog('fetchRealtime: network data received', cleaned.length, 'items');
+
+      // Record history snapshot for the Stats chart
+      addHistoryEntry(cleaned)
+        .then(() => readHistory())
+        .then((history) => setHistoryData(history))
+        .catch((e) => debugLog('history record error', e?.message || e));
 
       // For each group returned by APIs, call per-entry manager to persist independently
       (async () => {
@@ -124,7 +132,12 @@ const ParkingDataProvider = ({ children }) => {
       fetchInFlight.current = false;
       setRealtimeLoading(false);
     }
-  }, [setLastRealtimeUpdate, setRealtimeData, setRealtimeError, setRealtimeLoading]);
+  }, [setLastRealtimeUpdate, setRealtimeData, setRealtimeError, setRealtimeLoading, setHistoryData]);
+
+  // Load stored history on mount so the chart has data immediately
+  useEffect(() => {
+    readHistory().then((h) => setHistoryData(h)).catch((e) => debugLog('history load error', e?.message || e));
+  }, [setHistoryData]);
 
   useEffect(() => {
     // Register the actual fetchRealtime function so callers invoke it directly
