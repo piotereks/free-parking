@@ -7,8 +7,9 @@ import ParkingDataProvider from './context/ParkingDataProvider';
 import { debugLog } from './config/debug';
 import useParkingStore from './hooks/useParkingStore';
 import useOrientation from './hooks/useOrientation';
-import { applyApproximations, calculateDataAge, formatAgeLabel, formatTime, createRefreshHelper } from 'parking-shared';
+import { applyApproximations, calculateDataAge, formatAgeLabel, formatTime, createRefreshHelper, getMaxCapacity } from 'parking-shared';
 import pkg from '../package.json';
+import StatisticsScreen from './screens/StatisticsScreen';
 
 // Top-level app theme constant. Set to 'dark', 'light' or 'system'.
 export const APP_THEME = 'dark';
@@ -20,6 +21,17 @@ try {
 } catch (e) {
   console.warn('AdMobManager failed to load:', e && e.message ? e.message : e);
 }
+
+/** Returns a fill-bar colour based on the free-space percentage.
+ *  ≥40% → green, 10–39% → orange, <10% → red, null → grey (offline/unknown) */
+const getFreeBarColor = (pct) =>
+  pct === null ? '#6b7280' : pct >= 40 ? '#22c55e' : pct >= 10 ? '#f97316' : '#ef4444';
+
+/** Layout constants for computing tile bar widths */
+const TILE_COLUMNS = 2;
+const CONTAINER_H_PAD = 24; // px-3 = 12px * 2
+const TILE_ROW_GAP = 8;
+const TILE_INNER_PAD = 24; // p-3 = 12px * 2
 
 /**
  * ParkingTile Component
@@ -41,6 +53,10 @@ function ParkingTile({ data, now, allOffline, isLandscape }) {
   const value = data.approximationInfo?.isApproximated 
     ? data.approximationInfo.approximated 
     : (data.CurrentFreeGroupCounterValue || 0);
+
+  const capacity = getMaxCapacity(data.ParkingGroupName) || null;
+  const freePercent = capacity > 0 ? Math.min(100, Math.round((value / capacity) * 100)) : null;
+  const barColor = getFreeBarColor(freePercent);
 
   const displayName = data.ParkingGroupName === 'Bank_1' ? 'Uni Wroc' : data.ParkingGroupName;
 
@@ -73,6 +89,14 @@ function ParkingTile({ data, now, allOffline, isLandscape }) {
               {origValue !== null ? `orig: ${origValue}` : ' '}
             </Text>
             <Text className={`text-xs ${ageColorClass}`}>{display}</Text>
+            {freePercent !== null && (
+              <>
+                <View style={{ height: 4, backgroundColor: 'rgba(128,128,128,0.25)', borderRadius: 2, overflow: 'hidden', marginTop: 4 }}>
+                  <View style={{ height: '100%', width: `${freePercent}%`, borderRadius: 2, backgroundColor: barColor }} />
+                </View>
+                <Text className="text-xs text-muted dark:text-muted-dark" style={{ marginTop: 1 }}>{freePercent}% free</Text>
+              </>
+            )}
           </View>
         </View>
       </View>
@@ -94,15 +118,25 @@ function ParkingTile({ data, now, allOffline, isLandscape }) {
         </Text>
       </View>
       
-      {data.approximationInfo?.isApproximated && (
+      {data.approximationInfo?.isApproximated ? (
         <Text className="text-sm text-muted dark:text-muted-dark text-center mt-1">
           (orig: {data.approximationInfo?.original ?? data.CurrentFreeGroupCounterValue ?? 0})
         </Text>
+      ) : (
+        <Text className="text-sm text-muted dark:text-muted-dark text-center mt-1">{' '}</Text>
       )}
       
       <Text className="text-sm text-muted dark:text-muted-dark text-center mt-2">
         {display}
       </Text>
+      {freePercent !== null && (
+        <>
+          <View style={{ height: 6, backgroundColor: 'rgba(128,128,128,0.25)', borderRadius: 3, overflow: 'hidden', marginTop: 6 }}>
+            <View style={{ height: '100%', width: `${freePercent}%`, borderRadius: 3, backgroundColor: barColor }} />
+          </View>
+          <Text className="text-xs text-muted dark:text-muted-dark text-center" style={{ marginTop: 2 }}>{freePercent}% free</Text>
+        </>
+      )}
     </View>
   );
 }
@@ -111,7 +145,7 @@ function ParkingTile({ data, now, allOffline, isLandscape }) {
  * DashboardContent Component
  * Main dashboard displaying parking data
  */
-function DashboardContent() {
+function DashboardContent({ setView }) {
   const { isDark, setTheme } = useTheme();
   const orientation = useOrientation();
   const isLandscape = orientation === 'landscape';
@@ -180,6 +214,9 @@ function DashboardContent() {
 
   const originalTotal = processed.reduce((sum, d) => sum + (d.CurrentFreeGroupCounterValue || 0), 0);
 
+  const totalCapacity = processed.reduce((sum, d) => sum + (getMaxCapacity(d.ParkingGroupName) || 0), 0);
+  const totalFreePercent = totalCapacity > 0 ? Math.min(100, Math.round((totalSpaces / totalCapacity) * 100)) : null;
+
   // Determine aggregated status
   const getAggregatedStatus = () => {
     if (processed.length === 0) {
@@ -216,6 +253,7 @@ function DashboardContent() {
 
   const { colorClass: statusColorClass, statusMessage } = getAggregatedStatus();
   const totalColorClass = statusColorClass;
+  const summaryBarColor = getFreeBarColor(totalFreePercent);
 
   // Debug logging for orientation and version
   useEffect(() => {
@@ -249,6 +287,16 @@ function DashboardContent() {
               <Text className="text-2xl">
                 {isDark ? '☀️' : '🌙'}
               </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setView('stats')}
+              accessibilityRole="button"
+              accessibilityLabel="View parking statistics"
+              className="flex items-center justify-center rounded-lg border bg-bg-primary-light border-border dark:bg-bg-primary-dark dark:border-border-dark"
+              style={{ width: 44, height: 44, marginLeft: 8 }}
+              testID="open-statistics-button"
+            >
+              <Text className="text-2xl">📈</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={openDonate}
@@ -297,7 +345,7 @@ function DashboardContent() {
             {/* Header column */}
             <View
               className="rounded-lg bg-secondary dark:bg-secondary-dark border border-border dark:border-border-dark"
-              style={{ width: Math.floor(screenWidth * 0.25), padding: 8, justifyContent: 'space-between', alignItems: 'center' }}
+              style={{ width: Math.floor(screenWidth * 0.25), maxWidth: 200, padding: 8, justifyContent: 'space-between', alignItems: 'center' }}
             >
               {/* Logo + title on same row */}
               <View style={{ alignItems: 'center', gap: 2 }}>
@@ -351,6 +399,16 @@ function DashboardContent() {
                       </Text>
                     )}
                   </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => setView('stats')}
+                    accessibilityRole="button"
+                    accessibilityLabel="View parking statistics"
+                    className="flex items-center justify-center rounded-lg border bg-bg-primary-light border-border dark:bg-bg-primary-dark dark:border-border-dark"
+                    style={{ width: 36, height: 36 }}
+                    testID="open-statistics-button-landscape"
+                  >
+                    <Text className="text-xl">📈</Text>
+                  </TouchableOpacity>
                 </View>
                 {/* Buy me ☕ on its own row below */}
                 <TouchableOpacity
@@ -403,6 +461,14 @@ function DashboardContent() {
                   <Text className="text-xs text-muted dark:text-muted-dark italic" style={{ marginLeft: 4 }}>(orig: {originalTotal})</Text>
                 )}
               </View>
+              {totalFreePercent !== null && (
+                <View style={{ width: '100%', marginTop: 4 }}>
+                  <View style={{ height: 5, backgroundColor: 'rgba(128,128,128,0.25)', borderRadius: 2, overflow: 'hidden' }}>
+                    <View style={{ height: '100%', width: `${totalFreePercent}%`, borderRadius: 2, backgroundColor: summaryBarColor }} />
+                  </View>
+                  <Text className="text-xs text-muted dark:text-muted-dark text-center" style={{ marginTop: 1 }}>{totalFreePercent}% free</Text>
+                </View>
+              )}
             </View>
 
             {/* Last Update */}
@@ -483,6 +549,14 @@ function DashboardContent() {
                   <Text className="text-xs text-muted dark:text-muted-dark italic">
                     (orig: {originalTotal})
                   </Text>
+                )}
+                {totalFreePercent !== null && (
+                  <View style={{ width: Math.max(80, Math.floor((screenWidth - CONTAINER_H_PAD - TILE_ROW_GAP) / TILE_COLUMNS) - TILE_INNER_PAD), marginTop: 8, alignSelf: 'center' }}>
+                    <View style={{ height: 6, backgroundColor: 'rgba(128,128,128,0.25)', borderRadius: 3, overflow: 'hidden' }}>
+                      <View style={{ height: '100%', width: `${totalFreePercent}%`, borderRadius: 3, backgroundColor: summaryBarColor }} />
+                    </View>
+                    <Text className="text-xs text-muted dark:text-muted-dark text-center" style={{ marginTop: 2 }}>{totalFreePercent}% free</Text>
+                  </View>
                 )}
               </View>
             </View>
@@ -567,12 +641,18 @@ function DashboardContent() {
 
 /**
  * AppContent Component
- * Wrapper for dashboard
+ * Wrapper for dashboard and statistics navigation
  */
 const AppContent = () => {
+  const [view, setView] = useState('dashboard');
+
+  if (view === 'stats') {
+    return <StatisticsScreen onBack={() => setView('dashboard')} />;
+  }
+
   return (
     <View style={{ flex: 1 }}>
-      <DashboardContent />
+      <DashboardContent setView={setView} />
     </View>
   );
 };
