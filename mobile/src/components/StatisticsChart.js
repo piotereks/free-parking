@@ -19,7 +19,7 @@ const PAN_STEP_RATIO = 0.25;
 const ZOOM_HOURS = [4, 8, 12, 24, 48];
 const SWIPE_THRESHOLD = 30;
 
-/** Returns a fill-bar colour based on the free-space percentage.
+/** Returns a fill-bar color based on the free-space percentage.
  *  ≥40% → green, 10–39% → orange, <10% → red, null → grey */
 const getFreeBarColor = (pct) =>
   pct === null ? '#6b7280' : pct >= 40 ? '#22c55e' : pct >= 10 ? '#f97316' : '#ef4444';
@@ -149,6 +149,7 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
           const day = d.getDay(); // 0=Sun, 1=Mon…6=Sat
           if (day >= 1 && day <= 5 && hour >= 7 && hour < 10 && (gdVal + uniVal) === 0) {
             fz = { t: d.getTime() };
+            break;
           }
         }
       }
