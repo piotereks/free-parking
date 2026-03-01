@@ -152,3 +152,56 @@ export const buildCacheRowFromPayload = (gdPayload, uniPayload) => ({
   [COLUMN_ALIASES.UNI_TIME]: uniPayload?.Timestamp || '',
   [COLUMN_ALIASES.UNI_VALUE]: uniPayload?.CurrentFreeGroupCounterValue ?? ''
 });
+
+/**
+ * Slice a time-sorted array of {t: Date, v, raw} to the visible window
+ * but always include the immediate connector points just outside the window
+ * so line segments that cross the viewport boundaries stay connected.
+ *
+ * - If `startMs`/`endMs` are not provided, returns the original array.
+ * - If there are points inside the window, include those plus one prior and one next if present.
+ * - If there are no points inside the window, include the nearest prior and/or next points if present.
+ *
+ * @param {Array} arr - Sorted array of points {t: Date, v, raw}
+ * @param {number|null} startMs - visible window start (ms)
+ * @param {number|null} endMs - visible window end (ms)
+ * @returns {Array} Subset array preserving ordering
+ */
+export const sliceWithConnectors = (arr = [], startMs, endMs) => {
+  if (!Array.isArray(arr) || arr.length === 0) return [];
+  if (startMs == null || endMs == null) return arr.slice();
+
+  // Find indices for points inside window
+  let firstInside = -1;
+  let lastInside = -1;
+  for (let i = 0; i < arr.length; i++) {
+    const t = arr[i].t.getTime();
+    if (t >= startMs && t <= endMs) {
+      if (firstInside === -1) firstInside = i;
+      lastInside = i;
+    }
+  }
+
+  const result = [];
+  if (firstInside !== -1) {
+    // include one prior connector if available
+    if (firstInside > 0) result.push(arr[firstInside - 1]);
+    for (let i = firstInside; i <= lastInside; i++) result.push(arr[i]);
+    // include one next connector if available
+    if (lastInside < arr.length - 1) result.push(arr[lastInside + 1]);
+    return result;
+  }
+
+  // No points inside window: include nearest prior and/or next
+  let idxBefore = -1;
+  let idxAfter = -1;
+  for (let i = 0; i < arr.length; i++) {
+    const t = arr[i].t.getTime();
+    if (t < startMs) idxBefore = i;
+    if (t > endMs && idxAfter === -1) idxAfter = i;
+  }
+
+  if (idxBefore !== -1) result.push(arr[idxBefore]);
+  if (idxAfter !== -1) result.push(arr[idxAfter]);
+  return result;
+};

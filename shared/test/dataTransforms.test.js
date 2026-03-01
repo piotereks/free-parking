@@ -10,6 +10,7 @@ import {
   parseApiEntry,
   cloneApiResults,
   buildCacheRowFromPayload,
+  sliceWithConnectors,
   COLUMN_ALIASES
 } from '../src/dataTransforms.js';
 
@@ -234,6 +235,29 @@ describe('dataTransforms', () => {
       const row = buildCacheRowFromPayload(null, null);
       expect(row[COLUMN_ALIASES.GD_TIME]).toBe('');
       expect(row[COLUMN_ALIASES.GD_VALUE]).toBe('');
+    });
+  });
+
+  describe('sliceWithConnectors', () => {
+    it('includes prior and next connectors when points inside window', () => {
+      const base = (n) => ({ t: new Date(n * 1000), v: n, raw: `ts${n}` });
+      const arr = [base(0), base(10), base(20), base(30)];
+      const res = sliceWithConnectors(arr, 11000, 25000); // window 11s..25s -> includes 20s inside
+      expect(res.map(r => r.v)).toEqual([10, 20, 30]);
+    });
+
+    it('includes nearest before/after when no points inside', () => {
+      const base = (n) => ({ t: new Date(n * 1000), v: n, raw: `ts${n}` });
+      const arr = [base(0), base(100)];
+      const res = sliceWithConnectors(arr, 40000, 60000); // window 40s..60s -> no inside
+      expect(res.map(r => r.v)).toEqual([0, 100]);
+    });
+
+    it('returns full array when window covers all points', () => {
+      const base = (n) => ({ t: new Date(n * 1000), v: n, raw: `ts${n}` });
+      const arr = [base(1), base(2), base(3)];
+      const res = sliceWithConnectors(arr, 1000, 4000);
+      expect(res.map(r => r.v)).toEqual([1, 2, 3]);
     });
   });
 });

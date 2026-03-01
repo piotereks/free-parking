@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useMemo, useRef, useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, PanResponder } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 
 const PALETTES = {
@@ -16,6 +16,13 @@ const GD_CAPACITY = 187;
 const UNI_CAPACITY = 41;
 const MIN_WINDOW_SIZE = 2;
 const PAN_STEP_RATIO = 0.25;
+const ZOOM_HOURS = [4, 8, 12, 24, 48];
+const SWIPE_THRESHOLD = 30;
+
+/** Returns a fill-bar color based on the free-space percentage.
+ *  ≥40% → green, 10–39% → orange, <10% → red, null → grey */
+const getFreeBarColor = (pct) =>
+  pct === null ? '#6b7280' : pct >= 40 ? '#22c55e' : pct >= 10 ? '#f97316' : '#ef4444';
 
 /** Horizontal dashed line rendered as a row of small Views */
 const DashedHLine = ({ x, y, width, color }) => {
@@ -76,7 +83,7 @@ const LineSegment = ({ x1, y1, x2, y2, color, strokeWidth = 2.5 }) => {
 const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = true }) => {
   const { isDark } = useTheme();
   const [chartWidth, setChartWidth] = useState(0);
-  const [zoomLevel, setZoomLevel] = useState(1);
+  const [zoomHours, setZoomHours] = useState(48);
   const [panIndex, setPanIndex] = useState(0);
 
   const colors = PALETTES[palette] || PALETTES.neon;
@@ -86,9 +93,9 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
   const gridColor = isDark ? '#2d3b6b' : '#cbd5e1';
   const axisColor = isDark ? '#3d4b7b' : '#94a3b8';
 
-  const { gdSeries, uniSeries, latestGD, latestUni } = useMemo(() => {
+  const { gdSeries, uniSeries, latestGD, latestUni, firstZero } = useMemo(() => {
     if (!Array.isArray(historyData) || historyData.length === 0) {
-      return { gdSeries: [], uniSeries: [], latestGD: null, latestUni: null };
+      return { gdSeries: [], uniSeries: [], latestGD: null, latestUni: null, firstZero: null };
     }
 
     const gdMap = new Map();
@@ -124,35 +131,101 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
 
     const gd = toSeries(gdMap);
     const uni = toSeries(uniMap);
+
+    // #126: Find first timestamp where GD+Uni total = 0 between 7–10am on weekdays
+    let fz = null;
+    for (const row of historyData) {
+      if (fz) break;
+      const findKey = (name) => Object.keys(row).find(k => k.trim().toLowerCase() === name);
+      const gdTimeKey = findKey('gd_time');
+      const gdFreeKey = findKey('greenday free');
+      const uniFreeKey = findKey('uni free');
+      if (gdTimeKey && gdFreeKey && uniFreeKey && row[gdTimeKey] && row[gdFreeKey] && row[uniFreeKey]) {
+        const gdVal = parseFloat(row[gdFreeKey]);
+        const uniVal = parseFloat(row[uniFreeKey]);
+        const d = new Date(row[gdTimeKey].trim().replace(' ', 'T'));
+        if (!isNaN(d.getTime()) && !isNaN(gdVal) && !isNaN(uniVal)) {
+          const hour = d.getHours();
+          const day = d.getDay(); // 0=Sun, 1=Mon…6=Sat
+          if (day >= 1 && day <= 5 && hour >= 7 && hour < 10 && (gdVal + uniVal) === 0) {
+            fz = { t: d.getTime() };
+            break;
+          }
+        }
+      }
+    }
+
     return {
       gdSeries: gd.slice(-200),
       uniSeries: uni.slice(-200),
       latestGD: gd.length > 0 ? gd[gd.length - 1].v : null,
       latestUni: uni.length > 0 ? uni[uni.length - 1].v : null,
+      firstZero: fz,
     };
   }, [historyData]);
 
   const isEmpty = gdSeries.length === 0 && uniSeries.length === 0;
 
-  // Zoom / pan: derive the visible window from zoomLevel and panIndex
+  // Zoom / pan: derive visible window from zoomHours and total time span
   const maxSeriesLen = Math.max(gdSeries.length, uniSeries.length, 1);
-  const windowSize = Math.max(MIN_WINDOW_SIZE, Math.ceil(maxSeriesLen / zoomLevel));
+  const allFullT = [...gdSeries.map(d => d.t), ...uniSeries.map(d => d.t)];
+  const fullMinT = allFullT.length > 0 ? Math.min(...allFullT) : 0;
+  const fullMaxT = allFullT.length > 0 ? Math.max(...allFullT) : 1;
+  const totalHoursSpan = Math.max(1, (fullMaxT - fullMinT) / (3600 * 1000));
+  const effectiveHours = Math.min(zoomHours, totalHoursSpan);
+  const windowSize = Math.max(MIN_WINDOW_SIZE, Math.ceil(maxSeriesLen * (effectiveHours / totalHoursSpan)));
+  const isZoomed = windowSize < maxSeriesLen;
   const clampedPan = Math.max(0, Math.min(panIndex, maxSeriesLen - windowSize));
   const panStep = Math.max(1, Math.round(windowSize * PAN_STEP_RATIO));
   const canPanLeft = clampedPan > 0;
   const canPanRight = clampedPan < maxSeriesLen - windowSize;
 
-  const visibleGD = gdSeries.slice(clampedPan, clampedPan + windowSize);
-  const visibleUni = uniSeries.slice(clampedPan, clampedPan + windowSize);
+  // Compute time-based chart window boundaries from pan/zoom state.
+  // chartMinT / chartMaxT are the actual time coordinates of the chart edges.
+  // These are independent of where data points happen to land, so edge extension
+  // segments will have non-zero length whenever a data point does not fall exactly
+  // on the window boundary (which is the common case with real-world timestamps).
+  const windowMs = effectiveHours * 3600 * 1000;
+  const panFrac = (maxSeriesLen > windowSize) ? clampedPan / (maxSeriesLen - windowSize) : 1;
+  const timeSpanMs = Math.max(1, fullMaxT - fullMinT);
+  const chartMaxT = fullMinT + Math.min(timeSpanMs, windowMs + panFrac * Math.max(0, timeSpanMs - windowMs));
+  const chartMinT = chartMaxT - windowMs;
 
-  const handleZoom = (level) => {
-    const newWin = Math.max(MIN_WINDOW_SIZE, Math.ceil(maxSeriesLen / level));
-    // Default to showing the latest data when changing zoom
+  // Filter each series independently by time window (not by shared index slice).
+  // This also fixes the case where series have different numbers of data points:
+  // the shorter series would vanish completely with index-based slicing.
+  const visibleGD = gdSeries.filter(p => p.t >= chartMinT && p.t <= chartMaxT);
+  const visibleUni = uniSeries.filter(p => p.t >= chartMinT && p.t <= chartMaxT);
+
+  const handleZoomHours = (hours) => {
+    const eff = Math.min(hours, totalHoursSpan);
+    const newWin = Math.max(MIN_WINDOW_SIZE, Math.ceil(maxSeriesLen * (eff / totalHoursSpan)));
     setPanIndex(Math.max(0, maxSeriesLen - newWin));
-    setZoomLevel(level);
+    setZoomHours(hours);
   };
   const panLeft = () => setPanIndex(Math.max(0, clampedPan - panStep));
   const panRight = () => setPanIndex(Math.min(maxSeriesLen - windowSize, clampedPan + panStep));
+
+  // #132: Swipe gesture support via PanResponder (replaces arrow buttons)
+  const swipeRef = useRef({});
+  swipeRef.current = { canPanLeft, canPanRight, panStep, clampedPan, windowSize, maxSeriesLen };
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, gs) => {
+        const { windowSize: ws, maxSeriesLen: msl } = swipeRef.current;
+        return ws < msl && Math.abs(gs.dx) > 10;
+      },
+      onPanResponderRelease: (_, gs) => {
+        const ref = swipeRef.current;
+        if (gs.dx > SWIPE_THRESHOLD && ref.canPanLeft) {
+          setPanIndex(Math.max(0, ref.clampedPan - ref.panStep));
+        } else if (gs.dx < -SWIPE_THRESHOLD && ref.canPanRight) {
+          setPanIndex(Math.min(ref.maxSeriesLen - ref.windowSize, ref.clampedPan + ref.panStep));
+        }
+      },
+    })
+  ).current;
 
   if (isEmpty) {
     return (
@@ -167,9 +240,10 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
   const cW = Math.max(chartWidth - PAD.left - PAD.right, 0);
   const cH = CHART_HEIGHT - PAD.top - PAD.bottom;
 
-  const allT = [...visibleGD.map(d => d.t), ...visibleUni.map(d => d.t)];
-  const minT = allT.length > 0 ? Math.min(...allT) : 0;
-  const maxT = allT.length > 0 ? Math.max(...allT) : 1;
+  // Use the fixed chart time boundaries so that toX is stable and edge extensions
+  // can have non-zero length (minT / maxT must not equal the first / last data-point time).
+  const minT = chartMinT;
+  const maxT = chartMaxT;
   const tRange = maxT - minT || 1;
 
   const toX = (t) => PAD.left + ((t - minT) / tRange) * cW;
@@ -182,20 +256,19 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
 
   // Fit as many labels as the chart width allows (one per ~48 px, minimum 5, maximum 9)
   const nXLabels = cW > 0 ? Math.max(5, Math.min(9, Math.floor(cW / 48))) : 5;
-  const xLabels = allT.length > 0
-    ? Array.from({ length: nXLabels }, (_, i) => {
-        const t = minT + (tRange * i) / (nXLabels - 1);
-        return { x: toX(t), label: fmtTime(t) };
-      })
-    : [];
+  const xLabels = Array.from({ length: nXLabels }, (_, i) => {
+    const t = minT + (tRange * i) / (nXLabels - 1);
+    return { x: toX(t), label: fmtTime(t) };
+  });
 
   const gdCapY = toY(GD_CAPACITY);
   const uniCapY = toY(UNI_CAPACITY);
 
   // --- Edge projection: extend lines to chart boundaries when zoomed/panned ---
-  // For each series, if there is a point just outside the visible window on the
-  // left or right, compute where the connecting line crosses the chart edge and
-  // render that extra segment so the line is not abruptly cut off.
+  // chartMinT / chartMaxT are the FIXED chart edges (independent of data points), so
+  // when a data point does not fall exactly on the boundary the interpolated v will
+  // differ from the adjacent data-point value and the extension segment will have a
+  // non-zero length that is visually apparent.
   const leftEdgeX = PAD.left;
   const rightEdgeX = PAD.left + cW;
 
@@ -212,37 +285,69 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
     return vEdge;
   };
 
-  /** Build a left-edge or right-edge extension segment for one series.
+  /**
+   * Build a left-edge or right-edge extension segment for one series.
+   * Uses the fixed chart time boundaries (chartMinT / chartMaxT) so that the
+   * interpolated crossing point is correctly positioned along the x-axis.
+   *
    * @param {Array} series - full data series (gdSeries / uniSeries)
-   * @param {number} startIdx - index of the first visible point in series
-   * @param {number} endIdx - index one past the last visible point in series
-   * @param {'left'|'right'} side - which chart edge to project onto
+   * @param {'left'|'right'} side - which chart edge to extend to
    * @returns {{x1,y1,x2,y2}|null} segment coords, or null if no extension needed
    */
-  const buildEdgeSeg = (series, startIdx, endIdx, side) => {
+  const buildEdgeSeg = (series, side) => {
     if (!chartWidth || !cW) return null;
     if (side === 'left') {
-      if (startIdx <= 0 || !series[startIdx]) return null;
-      const prev = series[startIdx - 1];
-      const first = series[startIdx];
-      if (prev.t >= minT) return null;
-      const vEdge = projectToEdge(prev, first, minT);
+      // Find the first data point inside (or at) the window
+      const firstInsideIdx = series.findIndex(p => p.t >= chartMinT && p.t <= chartMaxT);
+      if (firstInsideIdx <= 0) return null; // no prior point to extend from
+      const prev = series[firstInsideIdx - 1]; // guaranteed: prev.t < chartMinT
+      const first = series[firstInsideIdx];
+      const vEdge = projectToEdge(prev, first, chartMinT);
       if (vEdge === null) return null;
       return { x1: leftEdgeX, y1: toY(vEdge), x2: toX(first.t), y2: toY(first.v) };
     }
     // side === 'right'
-    const last = series[endIdx - 1];
-    const next = series[endIdx];
-    if (!last || !next || next.t <= maxT) return null;
-    const vEdge = projectToEdge(last, next, maxT);
+    let lastInsideIdx = -1;
+    for (let i = series.length - 1; i >= 0; i--) {
+      if (series[i].t >= chartMinT && series[i].t <= chartMaxT) { lastInsideIdx = i; break; }
+    }
+    if (lastInsideIdx < 0 || lastInsideIdx >= series.length - 1) return null;
+    const last = series[lastInsideIdx]; // guaranteed: last.t <= chartMaxT
+    const next = series[lastInsideIdx + 1]; // guaranteed: next.t > chartMaxT
+    const vEdge = projectToEdge(last, next, chartMaxT);
     if (vEdge === null) return null;
     return { x1: toX(last.t), y1: toY(last.v), x2: rightEdgeX, y2: toY(vEdge) };
   };
 
-  const gdLeftEdgeSeg = buildEdgeSeg(gdSeries, clampedPan, clampedPan + visibleGD.length, 'left');
-  const gdRightEdgeSeg = buildEdgeSeg(gdSeries, clampedPan, clampedPan + visibleGD.length, 'right');
-  const uniLeftEdgeSeg = buildEdgeSeg(uniSeries, clampedPan, clampedPan + visibleUni.length, 'left');
-  const uniRightEdgeSeg = buildEdgeSeg(uniSeries, clampedPan, clampedPan + visibleUni.length, 'right');
+  /**
+   * Build a full-width pass-through segment when no data points lie inside the
+   * chart window but the line connecting a prior and a next point crosses it.
+   * This handles deep zoom where the window falls entirely between two data points.
+   *
+   * @param {Array} series - full data series
+   * @returns {{x1,y1,x2,y2}|null} segment coords, or null
+   */
+  const buildPassThrough = (series) => {
+    if (!chartWidth || !cW) return null;
+    if (series.some(p => p.t >= chartMinT && p.t <= chartMaxT)) return null;
+    let prev = null;
+    for (let i = series.length - 1; i >= 0; i--) {
+      if (series[i].t < chartMinT) { prev = series[i]; break; }
+    }
+    const next = series.find(p => p.t > chartMaxT);
+    if (!prev || !next) return null;
+    const vLeft = projectToEdge(prev, next, chartMinT);
+    const vRight = projectToEdge(prev, next, chartMaxT);
+    if (vLeft === null || vRight === null) return null;
+    return { x1: leftEdgeX, y1: toY(vLeft), x2: rightEdgeX, y2: toY(vRight) };
+  };
+
+  const gdLeftEdgeSeg = buildEdgeSeg(gdSeries, 'left');
+  const gdRightEdgeSeg = buildEdgeSeg(gdSeries, 'right');
+  const uniLeftEdgeSeg = buildEdgeSeg(uniSeries, 'left');
+  const uniRightEdgeSeg = buildEdgeSeg(uniSeries, 'right');
+  const gdPassThrough = buildPassThrough(gdSeries);
+  const uniPassThrough = buildPassThrough(uniSeries);
 
   const summaryItems = [
     latestGD !== null ? { name: 'GreenDay', value: Math.round(latestGD), capacity: GD_CAPACITY, color: colors.gd } : null,
@@ -272,11 +377,12 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
           </View>
         </View>
 
-        {/* Chart canvas — use onLayout to get true width */}
+        {/* Chart canvas — use onLayout to get true width; swipe-enabled */}
         <View
           style={{ height: CHART_HEIGHT, position: 'relative', overflow: 'hidden' }}
           onLayout={(e) => setChartWidth(e.nativeEvent.layout.width)}
           testID="line-chart-canvas"
+          {...panResponder.panHandlers}
         >
           {chartWidth > 0 && (
             <>
@@ -335,6 +441,40 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
               {/* Uni Wroc edge extensions */}
               {uniLeftEdgeSeg && <LineSegment key="uni-left-edge" {...uniLeftEdgeSeg} color={colors.uni} />}
               {uniRightEdgeSeg && <LineSegment key="uni-right-edge" {...uniRightEdgeSeg} color={colors.uni} />}
+              {/* Pass-through segments: drawn when the window falls entirely between two data points */}
+              {gdPassThrough && <LineSegment key="gd-pass" {...gdPassThrough} color={colors.gd} />}
+              {uniPassThrough && <LineSegment key="uni-pass" {...uniPassThrough} color={colors.uni} />}
+
+              {/* #126: Vertical line at first zero (7–10am weekdays) */}
+              {firstZero && firstZero.t >= minT && firstZero.t <= maxT && (
+                <>
+                  <View
+                    testID="first-zero-line"
+                    style={{
+                      position: 'absolute',
+                      left: toX(firstZero.t),
+                      top: PAD.top,
+                      width: 2,
+                      height: cH,
+                      backgroundColor: '#ef4444',
+                      opacity: 0.85,
+                    }}
+                  />
+                  <Text
+                    testID="first-zero-label"
+                    style={{
+                      position: 'absolute',
+                      left: toX(firstZero.t) - 18,
+                      top: PAD.top - 10,
+                      color: '#ef4444',
+                      fontSize: 8,
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    {fmtTime(firstZero.t)}
+                  </Text>
+                </>
+              )}
 
               {/* Y-axis */}
               <View style={{ position: 'absolute', left: PAD.left, top: PAD.top, height: cH, width: 1, backgroundColor: axisColor }} />
@@ -364,54 +504,26 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
           )}
         </View>
 
-        {/* Zoom + pan controls */}
-        <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 8, gap: 6 }}>
-          {/* Pan left */}
-          <TouchableOpacity
-            onPress={panLeft}
-            disabled={!canPanLeft}
-            accessibilityRole="button"
-            accessibilityLabel="Pan chart left"
-            style={{
-              width: 36, height: 28, borderRadius: 6,
-              backgroundColor: canPanLeft ? (isDark ? '#2d3b6b' : '#e2e8f0') : (isDark ? '#1a2035' : '#f1f5f9'),
-              alignItems: 'center', justifyContent: 'center',
-            }}
-          >
-            <Text style={{ color: canPanLeft ? (isDark ? '#e0e6ff' : '#334155') : (isDark ? '#4b5563' : '#94a3b8'), fontSize: 16, fontWeight: '700' }}>◀</Text>
-          </TouchableOpacity>
-
-          {/* Zoom buttons */}
-          {[1, 2, 4].map((level) => (
+        {/* Zoom controls — hour-based buttons (#133); swipe handles pan (#132) */}
+        <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 8, gap: 6, flexWrap: 'wrap' }}>
+          {ZOOM_HOURS.map((hours) => (
             <TouchableOpacity
-              key={level}
-              onPress={() => handleZoom(level)}
+              key={hours}
+              onPress={() => handleZoomHours(hours)}
               accessibilityRole="button"
-              accessibilityLabel={`Zoom ×${level}`}
+              accessibilityLabel={`Show ${hours} hours`}
               style={{
                 paddingHorizontal: 10, height: 28, borderRadius: 6,
-                backgroundColor: zoomLevel === level ? (isDark ? '#3b82f6' : '#2563eb') : (isDark ? '#2d3b6b' : '#e2e8f0'),
+                backgroundColor: zoomHours === hours ? (isDark ? '#3b82f6' : '#2563eb') : (isDark ? '#2d3b6b' : '#e2e8f0'),
                 alignItems: 'center', justifyContent: 'center',
               }}
             >
-              <Text style={{ color: zoomLevel === level ? '#ffffff' : (isDark ? '#e0e6ff' : '#334155'), fontSize: 12, fontWeight: '700' }}>×{level}</Text>
+              <Text style={{ color: zoomHours === hours ? '#ffffff' : (isDark ? '#e0e6ff' : '#334155'), fontSize: 12, fontWeight: '700' }}>{hours}h</Text>
             </TouchableOpacity>
           ))}
-
-          {/* Pan right */}
-          <TouchableOpacity
-            onPress={panRight}
-            disabled={!canPanRight}
-            accessibilityRole="button"
-            accessibilityLabel="Pan chart right"
-            style={{
-              width: 36, height: 28, borderRadius: 6,
-              backgroundColor: canPanRight ? (isDark ? '#2d3b6b' : '#e2e8f0') : (isDark ? '#1a2035' : '#f1f5f9'),
-              alignItems: 'center', justifyContent: 'center',
-            }}
-          >
-            <Text style={{ color: canPanRight ? (isDark ? '#e0e6ff' : '#334155') : (isDark ? '#4b5563' : '#94a3b8'), fontSize: 16, fontWeight: '700' }}>▶</Text>
-          </TouchableOpacity>
+          {isZoomed && (
+            <Text style={{ color: isDark ? '#6b7280' : '#94a3b8', fontSize: 10, marginLeft: 4 }}>← swipe to pan →</Text>
+          )}
         </View>
       </View>
 
@@ -447,7 +559,7 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
                   borderRadius: 3, backgroundColor: trackBg, overflow: 'hidden',
                 }}
               >
-                <View style={{ height: '100%', width: `${freePercent}%`, borderRadius: 3, backgroundColor: item.color }} />
+                <View style={{ height: '100%', width: `${freePercent}%`, borderRadius: 3, backgroundColor: getFreeBarColor(freePercent) }} />
               </View>
               <Text style={{ color: isDark ? '#6b7280' : '#94a3b8', fontSize: 11, marginTop: 3 }}>
                 {freePercent}% free
