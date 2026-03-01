@@ -192,6 +192,58 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
   const gdCapY = toY(GD_CAPACITY);
   const uniCapY = toY(UNI_CAPACITY);
 
+  // --- Edge projection: extend lines to chart boundaries when zoomed/panned ---
+  // For each series, if there is a point just outside the visible window on the
+  // left or right, compute where the connecting line crosses the chart edge and
+  // render that extra segment so the line is not abruptly cut off.
+  const leftEdgeX = PAD.left;
+  const rightEdgeX = PAD.left + cW;
+
+  /**
+   * Given two data points p0={t,v} and p1={t,v}, linearly interpolate the v
+   * value at time tEdge (i.e. where the line p0→p1 crosses the chart boundary).
+   * Returns the interpolated v, or null if the two points share the same timestamp.
+   */
+  const projectToEdge = (p0, p1, tEdge) => {
+    const dt = p1.t - p0.t;
+    if (dt === 0) return null;
+    const frac = (tEdge - p0.t) / dt;
+    const vEdge = p0.v + (p1.v - p0.v) * frac;
+    return vEdge;
+  };
+
+  /** Build a left-edge or right-edge extension segment for one series.
+   * @param {Array} series - full data series (gdSeries / uniSeries)
+   * @param {number} startIdx - index of the first visible point in series
+   * @param {number} endIdx - index one past the last visible point in series
+   * @param {'left'|'right'} side - which chart edge to project onto
+   * @returns {{x1,y1,x2,y2}|null} segment coords, or null if no extension needed
+   */
+  const buildEdgeSeg = (series, startIdx, endIdx, side) => {
+    if (!chartWidth || !cW) return null;
+    if (side === 'left') {
+      if (startIdx <= 0 || !series[startIdx]) return null;
+      const prev = series[startIdx - 1];
+      const first = series[startIdx];
+      if (prev.t >= minT) return null;
+      const vEdge = projectToEdge(prev, first, minT);
+      if (vEdge === null) return null;
+      return { x1: leftEdgeX, y1: toY(vEdge), x2: toX(first.t), y2: toY(first.v) };
+    }
+    // side === 'right'
+    const last = series[endIdx - 1];
+    const next = series[endIdx];
+    if (!last || !next || next.t <= maxT) return null;
+    const vEdge = projectToEdge(last, next, maxT);
+    if (vEdge === null) return null;
+    return { x1: toX(last.t), y1: toY(last.v), x2: rightEdgeX, y2: toY(vEdge) };
+  };
+
+  const gdLeftEdgeSeg = buildEdgeSeg(gdSeries, clampedPan, clampedPan + visibleGD.length, 'left');
+  const gdRightEdgeSeg = buildEdgeSeg(gdSeries, clampedPan, clampedPan + visibleGD.length, 'right');
+  const uniLeftEdgeSeg = buildEdgeSeg(uniSeries, clampedPan, clampedPan + visibleUni.length, 'left');
+  const uniRightEdgeSeg = buildEdgeSeg(uniSeries, clampedPan, clampedPan + visibleUni.length, 'right');
+
   const summaryItems = [
     latestGD !== null ? { name: 'GreenDay', value: Math.round(latestGD), capacity: GD_CAPACITY, color: colors.gd } : null,
     latestUni !== null ? { name: 'Uni Wroc', value: Math.round(latestUni), capacity: UNI_CAPACITY, color: colors.uni } : null,
@@ -222,7 +274,7 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
 
         {/* Chart canvas — use onLayout to get true width */}
         <View
-          style={{ height: CHART_HEIGHT, position: 'relative' }}
+          style={{ height: CHART_HEIGHT, position: 'relative', overflow: 'hidden' }}
           onLayout={(e) => setChartWidth(e.nativeEvent.layout.width)}
           testID="line-chart-canvas"
         >
@@ -263,6 +315,9 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
                   />
                 );
               })}
+              {/* GreenDay edge extensions */}
+              {gdLeftEdgeSeg && <LineSegment key="gd-left-edge" {...gdLeftEdgeSeg} color={colors.gd} />}
+              {gdRightEdgeSeg && <LineSegment key="gd-right-edge" {...gdRightEdgeSeg} color={colors.gd} />}
 
               {/* Uni Wroc line segments */}
               {visibleUni.map((pt, i) => {
@@ -277,6 +332,9 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
                   />
                 );
               })}
+              {/* Uni Wroc edge extensions */}
+              {uniLeftEdgeSeg && <LineSegment key="uni-left-edge" {...uniLeftEdgeSeg} color={colors.uni} />}
+              {uniRightEdgeSeg && <LineSegment key="uni-right-edge" {...uniRightEdgeSeg} color={colors.uni} />}
 
               {/* Y-axis */}
               <View style={{ position: 'absolute', left: PAD.left, top: PAD.top, height: cH, width: 1, backgroundColor: axisColor }} />
