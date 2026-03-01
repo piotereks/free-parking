@@ -4,6 +4,7 @@ import ReactECharts from 'echarts-for-react';
 import * as echarts from 'echarts';
 import Header from './Header';
 import { useTheme } from './ThemeContext';
+import { sliceWithConnectors } from '../../shared/src/dataTransforms.js';
 import { useParkingStore, refreshParkingData } from './store/parkingStore';
 
 const PALETTES = {
@@ -99,9 +100,19 @@ const Statistics = ({ setView }) => {
             }
         }
 
-        // Find global max timestamp across all series
+        // Find global min/max timestamp across all series
         const allTimestamps = [...rawGD.map(d => d.t.getTime()), ...rawUni.map(d => d.t.getTime())];
         const maxTime = allTimestamps.length > 0 ? Math.max(...allTimestamps) : null;
+        const minTime = allTimestamps.length > 0 ? Math.min(...allTimestamps) : null;
+
+        // compute visible window in ms based on zoom percentages (0-100)
+        let visibleStartMs = null;
+        let visibleEndMs = null;
+        if (minTime != null && maxTime != null && maxTime > minTime) {
+            const span = maxTime - minTime;
+            visibleStartMs = Math.round(minTime + (zoom.start / 100) * span);
+            visibleEndMs = Math.round(minTime + (zoom.end / 100) * span);
+        }
 
         // Find the raw string associated with this global max
         let globalMaxRaw = null;
@@ -111,7 +122,7 @@ const Statistics = ({ setView }) => {
             globalMaxRaw = (foundGD || foundUni)?.raw;
         }
 
-        const processMapWithProjections = (raw, maxT, maxR) => {
+        const processMapWithProjections = (raw, maxT, maxR, vStartMs, vEndMs) => {
             if (raw.length === 0) return { solid: [], gaps: [], projections: [] };
 
             const solid = [];
@@ -119,11 +130,17 @@ const Statistics = ({ setView }) => {
             const projections = [];
             // const GAP_LIMIT = 40 * 60 * 1000;
 
-            for (let i = 0; i < raw.length; i++) {
-                solid.push([raw[i].raw, raw[i].v]);
-                // if (i < raw.length - 1 && (raw[i + 1].t - raw[i].t) > GAP_LIMIT) {
-                //     solid.push([raw[i + 1].raw, null]);
-                //     gaps.push([raw[i].raw, raw[i].v], [raw[i + 1].raw, raw[i + 1].v], [raw[i + 1].raw, null]);
+            // Optionally slice to visible window but include connector points
+            let toIterate = raw;
+            if (vStartMs != null && vEndMs != null) {
+                toIterate = sliceWithConnectors(raw, vStartMs, vEndMs);
+            }
+
+            for (let i = 0; i < toIterate.length; i++) {
+                solid.push([toIterate[i].raw, toIterate[i].v]);
+                // if (i < toIterate.length - 1 && (toIterate[i + 1].t - toIterate[i].t) > GAP_LIMIT) {
+                //     solid.push([toIterate[i + 1].raw, null]);
+                //     gaps.push([toIterate[i].raw, toIterate[i].v], [toIterate[i + 1].raw, toIterate[i + 1].v], [toIterate[i + 1].raw, null]);
                 // }
             }
 
@@ -138,8 +155,8 @@ const Statistics = ({ setView }) => {
             return { solid, gaps, projections };
         };
 
-        const gd = processMapWithProjections(rawGD, maxTime, globalMaxRaw);
-        const uni = processMapWithProjections(rawUni, maxTime, globalMaxRaw);
+        const gd = processMapWithProjections(rawGD, maxTime, globalMaxRaw, visibleStartMs, visibleEndMs);
+        const uni = processMapWithProjections(rawUni, maxTime, globalMaxRaw, visibleStartMs, visibleEndMs);
         const colors = PALETTES[palette];
 
         // Dynamic legend names
