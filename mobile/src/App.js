@@ -440,8 +440,8 @@ function DashboardContent({ setView }) {
               </View>
             </View>
 
-          {/* Tiles — hidden on very short landscape screens to prevent overflow */}
-          {screenHeight >= 360 && processed.map((d, i) => (
+          {/* Tiles — hidden on small-height landscape screens */}
+          {screenHeight >= 400 && processed.map((d, i) => (
               <ParkingTile
                 key={d.ParkingGroupName || i}
                 data={d}
