@@ -14,6 +14,15 @@ import StatisticsScreen from './screens/StatisticsScreen';
 // Top-level app theme constant. Set to 'dark', 'light' or 'system'.
 export const APP_THEME = 'dark';
 
+/** Status messages shown below the parking tiles (≤4 words each). */
+export const STATUS_MESSAGES = {
+  noData: 'No data available',
+  allOffline: 'All feeds offline',
+  outdated: 'Data outdated',
+  slightlyOutdated: 'Slightly outdated',
+  current: 'Data up to date',
+};
+
 // Lazy/guarded require so AdMob load failures don't crash the module.
 let AdMobManager = null;
 try {
@@ -36,8 +45,10 @@ const TILE_INNER_PAD = 24; // p-3 = 12px * 2
 /**
  * ParkingTile Component
  * Displays individual parking lot information
+ * @param {boolean} [isLandscape=false] - Whether the device is in landscape orientation
+ * @param {number} [tileValueFontSize=60] - Font size for the main free-space number; scaled down on smaller portrait screens
  */
-function ParkingTile({ data, now, allOffline, isLandscape }) {
+function ParkingTile({ data, now, allOffline, isLandscape, tileValueFontSize = 60 }) {
   const age = calculateDataAge(data.Timestamp, now);
   const { display } = formatAgeLabel(age);
   
@@ -111,9 +122,9 @@ function ParkingTile({ data, now, allOffline, isLandscape }) {
       
       <View className="flex-row items-center justify-center">
         {data.approximationInfo?.isApproximated && (
-          <Text className="text-6xl text-warning-medium dark:text-warning-medium-dark mr-1">≈</Text>
+          <Text className="text-warning-medium dark:text-warning-medium-dark mr-1" style={{ fontSize: tileValueFontSize }}>≈</Text>
         )}
-        <Text className={`text-6xl font-bold text-center ${ageColorClass}`}>
+        <Text className={`font-bold text-center ${ageColorClass}`} style={{ fontSize: tileValueFontSize }}>
           {value}
         </Text>
       </View>
@@ -152,6 +163,9 @@ function DashboardContent({ setView }) {
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const title = 'Parking Monitor';
   const version = pkg?.version || '0.0.0';
+
+  // Scale tile value font size for smaller devices to avoid scrolling in portrait
+  const tileValueFontSize = Math.min(60, Math.max(32, Math.round(screenHeight * 0.08)));
   
   // helper to toggle
   const toggleTheme = () => setTheme(isDark ? 'light' : 'dark');
@@ -222,7 +236,7 @@ function DashboardContent({ setView }) {
     if (processed.length === 0) {
       return { 
         colorClass: "text-muted dark:text-muted-dark", 
-        statusMessage: 'No data available' 
+        statusMessage: STATUS_MESSAGES.noData 
       };
     }
 
@@ -231,22 +245,22 @@ function DashboardContent({ setView }) {
     if (allOffline) {
       return {
         colorClass: "text-warning dark:text-warning-dark",
-        statusMessage: 'All parking feeds appear offline'
+        statusMessage: STATUS_MESSAGES.allOffline
       };
     } else if (maxAge >= 15) {
       return {
         colorClass: "text-warning dark:text-warning-dark",
-        statusMessage: 'Data outdated - figures may not reflect actual free spaces'
+        statusMessage: STATUS_MESSAGES.outdated
       };
     } else if (maxAge > 5) {
       return {
         colorClass: "text-warning-medium dark:text-warning-medium-dark",
-        statusMessage: 'Data slightly outdated - refresh recommended'
+        statusMessage: STATUS_MESSAGES.slightlyOutdated
       };
     } else {
       return {
         colorClass: "text-success dark:text-success-dark",
-        statusMessage: 'Data is current and reliable'
+        statusMessage: STATUS_MESSAGES.current
       };
     }
   };
@@ -361,9 +375,11 @@ function DashboardContent({ setView }) {
                 <Text className="text-muted dark:text-muted-dark" style={{ fontSize: 12 }} numberOfLines={1}>
                   Version: {version}
                 </Text>
-                <Text className="text-muted dark:text-muted-dark" style={{ fontSize: screenHeight < 400 ? 11 : 14 }} numberOfLines={2}>
-                  Real-time • GD-Uni Wrocław
-                </Text>
+                {screenHeight >= 400 && (
+                  <Text className="text-muted dark:text-muted-dark" style={{ fontSize: 14 }} numberOfLines={2}>
+                    Real-time • GD-Uni Wrocław
+                  </Text>
+                )}
               </View>
               <View style={{ gap: 6, alignItems: 'center' }}>
                 {/* Theme toggle + Reload on the same row */}
@@ -424,8 +440,8 @@ function DashboardContent({ setView }) {
               </View>
             </View>
 
-            {/* Tiles */}
-            {processed.map((d, i) => (
+          {/* Tiles — hidden on small-height landscape screens */}
+          {screenHeight >= 400 && processed.map((d, i) => (
               <ParkingTile
                 key={d.ParkingGroupName || i}
                 data={d}
@@ -515,7 +531,8 @@ function DashboardContent({ setView }) {
                 key={d.ParkingGroupName || i} 
                 data={d} 
                 now={now} 
-                allOffline={allOffline} 
+                allOffline={allOffline}
+                tileValueFontSize={tileValueFontSize}
               />
             ))}
           </View>

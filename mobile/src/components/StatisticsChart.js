@@ -79,12 +79,22 @@ const LineSegment = ({ x1, y1, x2, y2, color, strokeWidth = 2.5 }) => {
  * @param {Array} historyData - Parsed CSV rows from the parking history spreadsheet
  * @param {string} [palette='neon'] - Colour palette key
  * @param {boolean} [showSummary=true] - Whether to render the latest-value summary cards below the chart
+ * @param {boolean} [scrollEnabled=true] - Whether the root ScrollView can be scrolled; pass false to fix the chart within a landscape panel
+ * @param {number} [chartHeight] - Override the canvas height (px); defaults to the built-in CHART_HEIGHT constant
  */
-const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = true }) => {
+const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = true, scrollEnabled = true, chartHeight: chartHeightProp }) => {
   const { isDark } = useTheme();
   const [chartWidth, setChartWidth] = useState(0);
+  const [measuredHeight, setMeasuredHeight] = useState(null);
   const [zoomHours, setZoomHours] = useState(48);
   const [panIndex, setPanIndex] = useState(0);
+
+  // Prefer the actual measured canvas height when the chart is used as a fixed
+  // panel (scrollEnabled=false). This prevents coordinate calculations from
+  // placing axis labels and controls outside the visible area on short screens.
+  const resolvedChartHeight = (!scrollEnabled && measuredHeight != null)
+    ? measuredHeight
+    : (chartHeightProp != null ? chartHeightProp : CHART_HEIGHT);
 
   const colors = PALETTES[palette] || PALETTES.neon;
   const textColor = isDark ? '#8b95c9' : '#1e293b';
@@ -238,7 +248,7 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
   }
 
   const cW = Math.max(chartWidth - PAD.left - PAD.right, 0);
-  const cH = CHART_HEIGHT - PAD.top - PAD.bottom;
+  const cH = resolvedChartHeight - PAD.top - PAD.bottom;
 
   // Use the fixed chart time boundaries so that toX is stable and edge extensions
   // can have non-zero length (minT / maxT must not equal the first / last data-point time).
@@ -354,11 +364,15 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
     latestUni !== null ? { name: 'Uni Wroc', value: Math.round(latestUni), capacity: UNI_CAPACITY, color: colors.uni } : null,
   ].filter(Boolean);
 
+  const Container = scrollEnabled ? ScrollView : View;
+
   return (
-    <ScrollView>
+    <Container style={scrollEnabled ? undefined : { flex: 1 }}>
       {/* Line chart card */}
       <View
-        style={{ borderRadius: 12, backgroundColor: bgCard, marginBottom: 12, padding: 8 }}
+        style={scrollEnabled
+          ? { borderRadius: 12, backgroundColor: bgCard, marginBottom: 12, padding: 8 }
+          : { borderRadius: 12, backgroundColor: bgCard, padding: 8, flex: 1, marginBottom: showSummary && summaryItems.length > 0 ? 12 : 0 }}
         testID="statistics-chart"
       >
         <Text style={{ color: textColor, fontWeight: '600', fontSize: 14, marginBottom: 4, textAlign: 'center' }}>
@@ -379,8 +393,14 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
 
         {/* Chart canvas — use onLayout to get true width; swipe-enabled */}
         <View
-          style={{ height: CHART_HEIGHT, position: 'relative', overflow: 'hidden' }}
-          onLayout={(e) => setChartWidth(e.nativeEvent.layout.width)}
+          style={scrollEnabled
+            ? { height: resolvedChartHeight, position: 'relative', overflow: 'hidden' }
+            : { flex: 1, position: 'relative', overflow: 'hidden' }}
+          onLayout={(e) => {
+            const { width, height } = e.nativeEvent.layout;
+            setChartWidth(width);
+            if (!scrollEnabled) setMeasuredHeight(height);
+          }}
           testID="line-chart-canvas"
           {...panResponder.panHandlers}
         >
@@ -569,7 +589,7 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
         })}
       </View>
       )}
-    </ScrollView>
+    </Container>
   );
 };
 

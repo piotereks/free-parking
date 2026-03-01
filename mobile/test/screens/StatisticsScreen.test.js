@@ -76,6 +76,7 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import StatisticsScreen from '../../src/screens/StatisticsScreen';
 import StatisticsChart from '../../src/components/StatisticsChart';
+import { STATUS_MESSAGES } from '../../src/App';
 
 const MOCK_HISTORY = [
   {
@@ -395,6 +396,114 @@ describe('StatisticsScreen', () => {
     expect(getByText('Classic')).toBeTruthy();
     expect(getByText('Cyber')).toBeTruthy();
     expect(getByText('Modern')).toBeTruthy();
+  });
+
+  it('in landscape with small height hides summary cards and shows palette strip in header', () => {
+    const useOrientation = require('../../src/hooks/useOrientation');
+    useOrientation.mockReturnValue('landscape');
+    const RN = require('react-native');
+    const spy = jest.spyOn(RN, 'useWindowDimensions').mockReturnValue({ width: 1200, height: 320, scale: 1, fontScale: 1 });
+    try {
+      const { queryByTestId, getByTestId } = render(<StatisticsScreen onBack={jest.fn()} />);
+      expect(getByTestId('palette-strip-landscape')).toBeTruthy();
+      expect(queryByTestId('stats-card-GreenDay')).toBeNull();
+      expect(queryByTestId('stats-card-Uni Wroc')).toBeNull();
+    } finally {
+      spy.mockRestore();
+      useOrientation.mockReturnValue('portrait');
+    }
+  });
+});
+
+describe('StatisticsChart – scrollEnabled prop (#138)', () => {
+  const { ScrollView, View } = require('react-native');
+
+  it('renders without crashing with scrollEnabled=false', () => {
+    expect(() =>
+      render(<StatisticsChart historyData={MOCK_HISTORY} palette="neon" scrollEnabled={false} />)
+    ).not.toThrow();
+  });
+
+  it('renders without crashing with scrollEnabled=true (default)', () => {
+    expect(() =>
+      render(<StatisticsChart historyData={MOCK_HISTORY} palette="neon" />)
+    ).not.toThrow();
+  });
+
+  it('root container is a plain View (no scroll) when scrollEnabled=false', () => {
+    const { UNSAFE_queryAllByType } = render(
+      <StatisticsChart historyData={MOCK_HISTORY} palette="neon" scrollEnabled={false} />
+    );
+    // No ScrollView should exist at the root when scrollEnabled=false
+    const scrollViews = UNSAFE_queryAllByType(ScrollView);
+    expect(scrollViews.length).toBe(0);
+  });
+
+  it('root ScrollView is used by default (scrollEnabled=true)', () => {
+    const { UNSAFE_getAllByType } = render(
+      <StatisticsChart historyData={MOCK_HISTORY} palette="neon" />
+    );
+    const scrollViews = UNSAFE_getAllByType(ScrollView);
+    expect(scrollViews.length).toBeGreaterThan(0);
+    expect(scrollViews[0].props.scrollEnabled).not.toBe(false);
+  });
+
+  it('root View has flex:1 when scrollEnabled=false', () => {
+    const { UNSAFE_getAllByType } = render(
+      <StatisticsChart historyData={MOCK_HISTORY} palette="neon" scrollEnabled={false} />
+    );
+    const views = UNSAFE_getAllByType(View);
+    // The outermost View should have flex:1
+    expect(views[0].props.style).toMatchObject({ flex: 1 });
+  });
+
+  it('canvas uses flex:1 when scrollEnabled=false', () => {
+    const { getByTestId } = render(
+      <StatisticsChart historyData={MOCK_HISTORY} palette="neon" scrollEnabled={false} />
+    );
+    const canvas = getByTestId('line-chart-canvas');
+    expect(canvas.props.style).toMatchObject({ flex: 1 });
+  });
+
+  it('uses custom chartHeight for canvas when scrollEnabled=true and chartHeight prop is provided', () => {
+    const { getByTestId } = render(
+      <StatisticsChart historyData={MOCK_HISTORY} palette="neon" chartHeight={150} />
+    );
+    const canvas = getByTestId('line-chart-canvas');
+    expect(canvas.props.style).toMatchObject({ height: 150 });
+  });
+
+  it('uses default CHART_HEIGHT when chartHeight prop is omitted (scrollEnabled=true)', () => {
+    const { getByTestId } = render(
+      <StatisticsChart historyData={MOCK_HISTORY} palette="neon" />
+    );
+    const canvas = getByTestId('line-chart-canvas');
+    // Default CHART_HEIGHT is 220
+    expect(canvas.props.style).toMatchObject({ height: 220 });
+  });
+});
+
+describe('App.js STATUS_MESSAGES – all messages ≤4 words', () => {
+  const wordCount = (msg) => msg.trim().split(/\s+/).length;
+
+  it('noData message has ≤4 words', () => {
+    expect(wordCount(STATUS_MESSAGES.noData)).toBeLessThanOrEqual(4);
+  });
+
+  it('allOffline message has ≤4 words', () => {
+    expect(wordCount(STATUS_MESSAGES.allOffline)).toBeLessThanOrEqual(4);
+  });
+
+  it('outdated message has ≤4 words', () => {
+    expect(wordCount(STATUS_MESSAGES.outdated)).toBeLessThanOrEqual(4);
+  });
+
+  it('slightlyOutdated message has ≤4 words', () => {
+    expect(wordCount(STATUS_MESSAGES.slightlyOutdated)).toBeLessThanOrEqual(4);
+  });
+
+  it('current message has ≤4 words', () => {
+    expect(wordCount(STATUS_MESSAGES.current)).toBeLessThanOrEqual(4);
   });
 });
 
