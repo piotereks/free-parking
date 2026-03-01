@@ -284,18 +284,27 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
       if (startIdx <= 0 || !series[startIdx]) return null;
       const prev = series[startIdx - 1];
       const first = series[startIdx];
-      if (prev.t >= minT) return null;
-      const vEdge = projectToEdge(prev, first, minT);
-      if (vEdge === null) return null;
-      return { x1: leftEdgeX, y1: toY(vEdge), x2: toX(first.t), y2: toY(first.v) };
+      if (prev.t < minT) {
+        // prev is before the chart left edge: project line to the edge
+        const vEdge = projectToEdge(prev, first, minT);
+        if (vEdge === null) return null;
+        return { x1: leftEdgeX, y1: toY(vEdge), x2: toX(first.t), y2: toY(first.v) };
+      }
+      // prev is inside the chart area but before the visible window: draw the full segment
+      return { x1: toX(prev.t), y1: toY(prev.v), x2: toX(first.t), y2: toY(first.v) };
     }
     // side === 'right'
     const last = series[endIdx - 1];
     const next = series[endIdx];
-    if (!last || !next || next.t <= maxT) return null;
-    const vEdge = projectToEdge(last, next, maxT);
-    if (vEdge === null) return null;
-    return { x1: toX(last.t), y1: toY(last.v), x2: rightEdgeX, y2: toY(vEdge) };
+    if (!last || !next) return null;
+    if (next.t > maxT) {
+      // next is beyond the chart right edge: project line to the edge
+      const vEdge = projectToEdge(last, next, maxT);
+      if (vEdge === null) return null;
+      return { x1: toX(last.t), y1: toY(last.v), x2: rightEdgeX, y2: toY(vEdge) };
+    }
+    // next is inside the chart area but after the visible window: draw the full segment
+    return { x1: toX(last.t), y1: toY(last.v), x2: toX(next.t), y2: toY(next.v) };
   };
 
   const gdLeftEdgeSeg = buildEdgeSeg(gdSeries, clampedPan, clampedPan + visibleGD.length, 'left');

@@ -147,6 +147,35 @@ describe('StatisticsChart', () => {
     // The first-zero elements are only rendered when chartWidth > 0 (requires layout),
     // so in test we verify the component doesn't crash with zero data
   });
+
+  it('renders without crashing when series have many points (edge-extension stress test)', () => {
+    // Provide enough rows to trigger zooming (windowSize < series length)
+    // and ensure edge extensions do not throw when prev.t is inside chart bounds
+    const rows = Array.from({ length: 20 }, (_, i) => {
+      const pad = (n) => String(n).padStart(2, '0');
+      const h = pad(6 + Math.floor(i / 2));
+      const m = pad((i % 2) * 30);
+      return {
+        'gd_time': `2024-01-01 ${h}:${m}:00`,
+        'greenday free': String(180 - i * 5),
+        'uni_time': `2024-01-01 ${h}:${m}:00`,
+        'uni free': String(40 - i),
+      };
+    });
+    expect(() => render(<StatisticsChart historyData={rows} palette="neon" />)).not.toThrow();
+  });
+
+  it('renders without crashing when GD and Uni have different first timestamps (buildEdgeSeg inner-segment case)', () => {
+    // Uni starts one hour before GD; when both are panned to the same index window,
+    // GD's prev point may have t >= combined minT — the inner-segment branch should not throw.
+    const gdRows = Array.from({ length: 10 }, (_, i) => ({
+      'gd_time': `2024-01-01 ${String(10 + i).padStart(2, '0')}:00:00`,
+      'greenday free': String(180 - i * 10),
+      'uni_time': `2024-01-01 ${String(9 + i).padStart(2, '0')}:00:00`,
+      'uni free': String(40 - i * 2),
+    }));
+    expect(() => render(<StatisticsChart historyData={gdRows} palette="neon" />)).not.toThrow();
+  });
 });
 
 describe('StatisticsScreen', () => {
