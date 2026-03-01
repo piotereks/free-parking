@@ -398,3 +398,36 @@ describe('StatisticsScreen', () => {
   });
 });
 
+describe('StatisticsChart – scrollEnabled prop (#138)', () => {
+  it('renders without crashing with scrollEnabled=false', () => {
+    expect(() =>
+      render(<StatisticsChart historyData={MOCK_HISTORY} palette="neon" scrollEnabled={false} />)
+    ).not.toThrow();
+  });
+
+  it('renders without crashing with scrollEnabled=true (default)', () => {
+    expect(() =>
+      render(<StatisticsChart historyData={MOCK_HISTORY} palette="neon" />)
+    ).not.toThrow();
+  });
+
+  it('passes scrollEnabled=false to root ScrollView', () => {
+    const { UNSAFE_getAllByType } = render(
+      <StatisticsChart historyData={MOCK_HISTORY} palette="neon" scrollEnabled={false} />
+    );
+    const { ScrollView } = require('react-native');
+    const scrollViews = UNSAFE_getAllByType(ScrollView);
+    // The outermost (root) ScrollView should have scrollEnabled=false
+    expect(scrollViews[0].props.scrollEnabled).toBe(false);
+  });
+
+  it('root ScrollView is scrollable by default', () => {
+    const { UNSAFE_getAllByType } = render(
+      <StatisticsChart historyData={MOCK_HISTORY} palette="neon" />
+    );
+    const { ScrollView } = require('react-native');
+    const scrollViews = UNSAFE_getAllByType(ScrollView);
+    expect(scrollViews[0].props.scrollEnabled).not.toBe(false);
+  });
+});
+

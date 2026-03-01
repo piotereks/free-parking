@@ -249,15 +249,15 @@ const StatisticsScreen = ({ onBack }) => {
               </View>
 
               {/* Chart */}
-              <ScrollView style={{ flex: 1 }}>
+              <View style={{ flex: 1 }}>
                 {historyLoading ? (
                   <View style={{ alignItems: 'center', paddingVertical: 32 }}>
                     <Text className="text-muted dark:text-muted-dark" style={{ fontSize: 14 }}>Loading history data…</Text>
                   </View>
                 ) : (
-                  <StatisticsChart historyData={historyData} palette={palette} showSummary={screenHeight >= 400} />
+                  <StatisticsChart historyData={historyData} palette={palette} showSummary={screenHeight >= 400} scrollEnabled={false} />
                 )}
-              </ScrollView>
+              </View>
             </View>
           </View>
         </View>

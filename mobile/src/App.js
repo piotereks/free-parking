@@ -36,8 +36,10 @@ const TILE_INNER_PAD = 24; // p-3 = 12px * 2
 /**
  * ParkingTile Component
  * Displays individual parking lot information
+ * @param {boolean} [isLandscape=false] - Whether the device is in landscape orientation
+ * @param {number} [tileValueFontSize=60] - Font size for the main free-space number; scaled down on smaller portrait screens
  */
-function ParkingTile({ data, now, allOffline, isLandscape }) {
+function ParkingTile({ data, now, allOffline, isLandscape, tileValueFontSize = 60 }) {
   const age = calculateDataAge(data.Timestamp, now);
   const { display } = formatAgeLabel(age);
   
@@ -111,9 +113,9 @@ function ParkingTile({ data, now, allOffline, isLandscape }) {
       
       <View className="flex-row items-center justify-center">
         {data.approximationInfo?.isApproximated && (
-          <Text className="text-6xl text-warning-medium dark:text-warning-medium-dark mr-1">≈</Text>
+          <Text className="text-warning-medium dark:text-warning-medium-dark mr-1" style={{ fontSize: tileValueFontSize }}>≈</Text>
         )}
-        <Text className={`text-6xl font-bold text-center ${ageColorClass}`}>
+        <Text className={`font-bold text-center ${ageColorClass}`} style={{ fontSize: tileValueFontSize }}>
           {value}
         </Text>
       </View>
@@ -152,6 +154,9 @@ function DashboardContent({ setView }) {
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const title = 'Parking Monitor';
   const version = pkg?.version || '0.0.0';
+
+  // Scale tile value font size for smaller devices to avoid scrolling in portrait
+  const tileValueFontSize = Math.min(60, Math.max(32, Math.round(screenHeight * 0.08)));
   
   // helper to toggle
   const toggleTheme = () => setTheme(isDark ? 'light' : 'dark');
@@ -424,8 +429,8 @@ function DashboardContent({ setView }) {
               </View>
             </View>
 
-            {/* Tiles */}
-            {processed.map((d, i) => (
+          {/* Tiles — hidden on very short landscape screens to prevent overflow */}
+          {screenHeight >= 360 && processed.map((d, i) => (
               <ParkingTile
                 key={d.ParkingGroupName || i}
                 data={d}
@@ -515,7 +520,8 @@ function DashboardContent({ setView }) {
                 key={d.ParkingGroupName || i} 
                 data={d} 
                 now={now} 
-                allOffline={allOffline} 
+                allOffline={allOffline}
+                tileValueFontSize={tileValueFontSize}
               />
             ))}
           </View>

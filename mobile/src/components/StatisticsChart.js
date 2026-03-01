@@ -79,8 +79,9 @@ const LineSegment = ({ x1, y1, x2, y2, color, strokeWidth = 2.5 }) => {
  * @param {Array} historyData - Parsed CSV rows from the parking history spreadsheet
  * @param {string} [palette='neon'] - Colour palette key
  * @param {boolean} [showSummary=true] - Whether to render the latest-value summary cards below the chart
+ * @param {boolean} [scrollEnabled=true] - Whether the root ScrollView can be scrolled; pass false to fix the chart within a landscape panel
  */
-const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = true }) => {
+const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = true, scrollEnabled = true }) => {
   const { isDark } = useTheme();
   const [chartWidth, setChartWidth] = useState(0);
   const [zoomHours, setZoomHours] = useState(48);
@@ -355,7 +356,7 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
   ].filter(Boolean);
 
   return (
-    <ScrollView>
+    <ScrollView scrollEnabled={scrollEnabled}>
       {/* Line chart card */}
       <View
         style={{ borderRadius: 12, backgroundColor: bgCard, marginBottom: 12, padding: 8 }}
