@@ -41,6 +41,9 @@ const StatisticsScreen = ({ onBack }) => {
 
   const version = pkg?.version || '0.0.0';
   const title = screenWidth < 700 ? 'Parking Stats' : 'Parking Statistics';
+  // Hide summary cards in landscape when vertical space is limited
+  const LANDSCAPE_SUMMARY_MIN_HEIGHT = 420;
+  const showSummary = !isLandscape || screenHeight >= LANDSCAPE_SUMMARY_MIN_HEIGHT;
 
   const toggleTheme = () => setTheme(isDark ? 'light' : 'dark');
   const openDonate = () => Linking.openURL('https://buycoffee.to/piotereks');
@@ -222,12 +225,8 @@ const StatisticsScreen = ({ onBack }) => {
                   <Text style={{ fontSize: 18 }}>☕</Text>
                 </TouchableOpacity>
               </View>
-            </View>
-
-            {/* Chart area column: palette strip + chart */}
-            <View style={{ flex: 1, flexDirection: 'column' }}>
-              {/* Palette selector strip — separated from header */}
-              <View style={{ flexDirection: 'row', gap: 4, marginBottom: 4, flexWrap: 'wrap' }}>
+              {/* Palette selector moved to header for landscape: visually below header */}
+              <View testID="palette-strip-landscape" style={{ marginTop: 8, flexDirection: 'row', gap: 6, flexWrap: 'wrap', justifyContent: 'center' }}>
                 {PALETTE_LABELS.map(({ key, label }) => (
                   <TouchableOpacity
                     key={key}
@@ -236,20 +235,21 @@ const StatisticsScreen = ({ onBack }) => {
                     accessibilityLabel={`Select ${label} palette`}
                     style={{
                       paddingHorizontal: 8,
-                      paddingVertical: 3,
-                      borderRadius: 4,
+                      paddingVertical: 4,
+                      borderRadius: 6,
                       borderWidth: 1,
                       backgroundColor: palette === key ? (isDark ? '#1e2a4a' : '#e0e6ff') : 'transparent',
                       borderColor: palette === key ? (isDark ? '#3b82f6' : '#6366f1') : (isDark ? '#1e2a4a' : '#e2e8f0'),
                     }}
                   >
-                    <Text style={{ fontSize: 11, color: palette === key ? (isDark ? '#e0e6ff' : '#1e293b') : (isDark ? '#6b7280' : '#94a3b8') }}>
-                      {label}
-                    </Text>
+                    <Text style={{ fontSize: 12, color: palette === key ? (isDark ? '#e0e6ff' : '#1e293b') : (isDark ? '#6b7280' : '#94a3b8') }}>{label}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
+            </View>
 
+            {/* Chart area column */}
+            <View style={{ flex: 1, flexDirection: 'column' }}>
               {/* Chart */}
               <View style={{ flex: 1 }}>
                 {historyLoading ? (
@@ -260,7 +260,7 @@ const StatisticsScreen = ({ onBack }) => {
                   <StatisticsChart
                     historyData={historyData}
                     palette={palette}
-                    showSummary={screenHeight >= 400}
+                    showSummary={showSummary}
                     scrollEnabled={false}
                     chartHeight={Math.max(80, screenHeight - 152)}
                   />

@@ -397,6 +397,22 @@ describe('StatisticsScreen', () => {
     expect(getByText('Cyber')).toBeTruthy();
     expect(getByText('Modern')).toBeTruthy();
   });
+
+  it('in landscape with small height hides summary cards and shows palette strip in header', () => {
+    const useOrientation = require('../../src/hooks/useOrientation');
+    useOrientation.mockReturnValue('landscape');
+    const RN = require('react-native');
+    const spy = jest.spyOn(RN, 'useWindowDimensions').mockReturnValue({ width: 1200, height: 320, scale: 1, fontScale: 1 });
+    try {
+      const { queryByTestId, getByTestId } = render(<StatisticsScreen onBack={jest.fn()} />);
+      expect(getByTestId('palette-strip-landscape')).toBeTruthy();
+      expect(queryByTestId('stats-card-GreenDay')).toBeNull();
+      expect(queryByTestId('stats-card-Uni Wroc')).toBeNull();
+    } finally {
+      spy.mockRestore();
+      useOrientation.mockReturnValue('portrait');
+    }
+  });
 });
 
 describe('StatisticsChart – scrollEnabled prop (#138)', () => {

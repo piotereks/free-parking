@@ -83,11 +83,18 @@ const LineSegment = ({ x1, y1, x2, y2, color, strokeWidth = 2.5 }) => {
  * @param {number} [chartHeight] - Override the canvas height (px); defaults to the built-in CHART_HEIGHT constant
  */
 const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = true, scrollEnabled = true, chartHeight: chartHeightProp }) => {
-  const resolvedChartHeight = chartHeightProp != null ? chartHeightProp : CHART_HEIGHT;
   const { isDark } = useTheme();
   const [chartWidth, setChartWidth] = useState(0);
+  const [measuredHeight, setMeasuredHeight] = useState(null);
   const [zoomHours, setZoomHours] = useState(48);
   const [panIndex, setPanIndex] = useState(0);
+
+  // Prefer the actual measured canvas height when the chart is used as a fixed
+  // panel (scrollEnabled=false). This prevents coordinate calculations from
+  // placing axis labels and controls outside the visible area on short screens.
+  const resolvedChartHeight = (!scrollEnabled && measuredHeight != null)
+    ? measuredHeight
+    : (chartHeightProp != null ? chartHeightProp : CHART_HEIGHT);
 
   const colors = PALETTES[palette] || PALETTES.neon;
   const textColor = isDark ? '#8b95c9' : '#1e293b';
@@ -389,7 +396,11 @@ const StatisticsChart = ({ historyData = [], palette = 'neon', showSummary = tru
           style={scrollEnabled
             ? { height: resolvedChartHeight, position: 'relative', overflow: 'hidden' }
             : { flex: 1, position: 'relative', overflow: 'hidden' }}
-          onLayout={(e) => setChartWidth(e.nativeEvent.layout.width)}
+          onLayout={(e) => {
+            const { width, height } = e.nativeEvent.layout;
+            setChartWidth(width);
+            if (!scrollEnabled) setMeasuredHeight(height);
+          }}
           testID="line-chart-canvas"
           {...panResponder.panHandlers}
         >
